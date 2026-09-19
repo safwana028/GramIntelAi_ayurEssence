@@ -1,0 +1,267 @@
+import React from "react";
+import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2 } from "lucide-react";
+import { DoshaRadarChart, DoshaProportionBar } from "./DoshaRadarChart";
+import { DOSHA_PROFILES } from "../../data/samhitaReferences";
+
+export function DoctorReport({
+  patient,
+  assessment,
+  activeRole
+}) {
+  if (!patient || !assessment) return null;
+
+  const { scores, observations, conductedBy, date, supervisorApproved, season } = assessment;
+
+  return (
+    <div className="bg-white rounded-2xl border border-stone-200 shadow-md max-w-4xl mx-auto overflow-hidden print:shadow-none print:border-none print:m-0">
+      {/* Printable Clinical Header */}
+      <div className="bg-[#1E4D3E] text-white p-6 sm:p-8 border-b-4 border-amber-500">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Award className="w-5 h-5 text-amber-400" />
+              <span className="text-xs font-semibold text-amber-300 tracking-wider uppercase">
+                SDM College of Ayurveda & Hospital, Udupi
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold font-serif-heading tracking-tight text-white">
+              Deha Prakriti Pariksha Dossier
+            </h1>
+            <p className="text-xs text-emerald-200 mt-0.5">
+              Comprehensive Constitutional Assessment & Clinical Evidence Report
+            </p>
+          </div>
+
+          <div className="text-right text-xs space-y-1">
+            <div className="bg-[#13352A] px-3 py-1.5 rounded-lg border border-emerald-700/60 inline-block">
+              <span className="text-emerald-300 font-mono">Dossier ID: </span>
+              <strong className="text-white font-mono">{assessment.id || "ASM-2026-UDU"}</strong>
+            </div>
+            <div className="text-emerald-200/80 text-[11px]">
+              Date: <strong className="text-white">{date}</strong> • Season: {season || "Sharad"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Report Body */}
+      <div className="p-6 sm:p-8 space-y-6 text-xs text-stone-800">
+        {/* Patient Demographics Banner */}
+        <div className="bg-[#FAF8F5] p-4 rounded-xl border border-stone-200">
+          <div className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider mb-2">
+            Patient Demographics & Clinical Profile
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <span className="text-stone-400 block text-[11px]">Full Name:</span>
+              <span className="font-bold text-stone-900 text-sm">{patient.name}</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[11px]">Patient ID:</span>
+              <span className="font-mono text-stone-700">{patient.id}</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[11px]">Age & Gender:</span>
+              <span className="font-semibold text-stone-800">{patient.age} yrs • {patient.gender}</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[11px]">Region:</span>
+              <span className="font-semibold text-stone-800">{patient.city || "Udupi, Karnataka"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Primary Constitution Result Card */}
+        <div className="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
+              Evaluated Constitutional State (Prakriti)
+            </span>
+            <h2 className="text-2xl font-extrabold text-stone-900 font-serif-heading mt-0.5">
+              {scores.dominantPrakriti}
+            </h2>
+            <div className="text-xs text-stone-600 mt-1">
+              Constitutional Category: <strong className="text-stone-800">{scores.constitutionType}</strong>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-center px-3 py-1.5 bg-sky-100/80 rounded-xl border border-sky-300">
+              <span className="block text-[10px] font-bold text-sky-800">Vata</span>
+              <span className="text-base font-extrabold text-sky-900">{scores.vata}%</span>
+            </div>
+            <div className="text-center px-3 py-1.5 bg-amber-100/80 rounded-xl border border-amber-300">
+              <span className="block text-[10px] font-bold text-amber-800">Pitta</span>
+              <span className="text-base font-extrabold text-amber-900">{scores.pitta}%</span>
+            </div>
+            <div className="text-center px-3 py-1.5 bg-emerald-100/80 rounded-xl border border-emerald-300">
+              <span className="block text-[10px] font-bold text-emerald-800">Kapha</span>
+              <span className="text-base font-extrabold text-emerald-900">{scores.kapha}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Radar and Dimensional Analysis */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="bg-stone-50/60 p-4 rounded-xl border border-stone-200 flex flex-col items-center">
+            <DoshaRadarChart scores={scores} size={250} />
+            <div className="text-[10px] text-stone-500 mt-2 text-center">
+              Tri-Dosha Radial Coordinate Mapping (Charaka Vimana 8)
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+              Constitutional Dimensions Breakdown
+            </h3>
+
+            {scores.subScores && (
+              <div className="space-y-2.5">
+                <div>
+                  <div className="flex justify-between text-[11px] font-semibold text-stone-700 mb-1">
+                    <span>Physical Traits (Sharirika)</span>
+                    <span>V: {scores.subScores.physical?.vata}% | P: {scores.subScores.physical?.pitta}% | K: {scores.subScores.physical?.kapha}%</span>
+                  </div>
+                  <DoshaProportionBar scores={scores.subScores.physical || scores} className="h-2" />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] font-semibold text-stone-700 mb-1">
+                    <span>Physiological Traits (Kriyatmaka)</span>
+                    <span>V: {scores.subScores.physiological?.vata}% | P: {scores.subScores.physiological?.pitta}% | K: {scores.subScores.physiological?.kapha}%</span>
+                  </div>
+                  <DoshaProportionBar scores={scores.subScores.physiological || scores} className="h-2" />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] font-semibold text-stone-700 mb-1">
+                    <span>Psychological Traits (Manasika)</span>
+                    <span>V: {scores.subScores.psychological?.vata}% | P: {scores.subScores.psychological?.pitta}% | K: {scores.subScores.psychological?.kapha}%</span>
+                  </div>
+                  <DoshaProportionBar scores={scores.subScores.psychological || scores} className="h-2" />
+                </div>
+              </div>
+            )}
+
+            <div className="bg-stone-100 p-3 rounded-lg text-[11px] text-stone-600 leading-relaxed mt-2">
+              <strong className="text-stone-800">Scoring Rationale: </strong>
+              {scores.rationale}
+            </div>
+          </div>
+        </div>
+
+        {/* Practitioner Clinical Observations & Ashtavidha */}
+        {observations && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+              Practitioner Clinical Observations (Darshana & Sparshana)
+            </h3>
+
+            {observations.freeText && (
+              <div className="bg-stone-50 p-4 rounded-xl border border-stone-200">
+                <p className="italic text-stone-700 leading-relaxed text-xs">
+                  "{observations.freeText}"
+                </p>
+
+                {observations.nlpIndicators && observations.nlpIndicators.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-stone-200 flex flex-wrap gap-1.5 items-center">
+                    <span className="text-[10px] font-bold text-stone-500 uppercase">
+                      Detected Cues:
+                    </span>
+                    {observations.nlpIndicators.map((ind, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded text-[10px] font-medium bg-white border border-stone-300 text-stone-700"
+                      >
+                        {ind.matchedPhrase} ({ind.dosha})
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {observations.ashtavidha && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                  <span className="text-stone-400 block text-[10px]">Nadi (Pulse):</span>
+                  <span className="font-semibold text-stone-800">{observations.ashtavidha.nadi}</span>
+                </div>
+                <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                  <span className="text-stone-400 block text-[10px]">Jihva (Tongue):</span>
+                  <span className="font-semibold text-stone-800">{observations.ashtavidha.jihva}</span>
+                </div>
+                <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                  <span className="text-stone-400 block text-[10px]">Sparsha (Touch):</span>
+                  <span className="font-semibold text-stone-800">{observations.ashtavidha.sparsha}</span>
+                </div>
+                <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                  <span className="text-stone-400 block text-[10px]">Drik (Gaze):</span>
+                  <span className="font-semibold text-stone-800">{observations.ashtavidha.drik}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Classical Samhita References Box */}
+        <div className="bg-[#FAF8F5] p-4 rounded-xl border border-stone-200 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+            <BookOpen className="w-4 h-4 text-emerald-700" />
+            <span>Classical Ayurvedic Citations & Methodological Basis</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-stone-600">
+            <div>
+              <strong className="text-stone-800 block">Charaka Samhita</strong>
+              <span>Vimanasthana Ch. 8, Verses 95-100 (Physical & mental attributes of Vata, Pitta, Kapha).</span>
+            </div>
+            <div>
+              <strong className="text-stone-800 block">Sushruta Samhita</strong>
+              <span>Sharirasthana Ch. 4, Verses 62-76 (Congenital determination of Janma Prakriti).</span>
+            </div>
+            <div>
+              <strong className="text-stone-800 block">Ashtanga Hridaya</strong>
+              <span>Sharirasthana Ch. 3, Verses 83-104 (Dwandwaja bi-constitutional predominance).</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Clinician Sign-off & Verification Seal */}
+        <div className="pt-6 border-t border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="text-[11px] text-stone-500">Conducted By:</div>
+            <div className="font-bold text-stone-900 text-xs">{conductedBy?.name}</div>
+            <div className="text-[10px] text-stone-400 capitalize">
+              Role: {conductedBy?.role} • SDM College of Ayurveda, Udupi
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {supervisorApproved ? (
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900">
+                <ShieldCheck className="w-5 h-5 text-emerald-700" />
+                <div className="text-left">
+                  <div className="text-[11px] font-bold">Approved by Supervising Vaidya</div>
+                  <div className="text-[10px] text-emerald-700">Official Clinical Confirmation</div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-900">
+                <AlertCircle className="w-5 h-5 text-amber-700" />
+                <div className="text-left">
+                  <div className="text-[11px] font-bold">Pending Supervisor Review</div>
+                  <div className="text-[10px] text-amber-700">Academic Student Workflow</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Ethical Non-Diagnostic Disclaimer */}
+        <div className="p-3 bg-stone-100 rounded-lg text-[10px] text-stone-500 text-center leading-relaxed">
+          <strong>Official Ayurvedic Disclaimer:</strong> This clinical dossier documents physiological constitution (Prakriti) for health promotion and constitutional equilibrium. It does NOT diagnose pathological conditions (Vikriti) or prescribe therapeutic pharmaceutical medicines.
+        </div>
+      </div>
+    </div>
+  );
+}
