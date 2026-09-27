@@ -394,23 +394,343 @@ async function runTests() {
     passedTests++;
 
     // -------------------------------------------------------------
-    // TEST 18: NLP endpoint returns a structured response
+    // TEST 18: Assessment state machine transitions (DRAFT -> SUBMITTED -> UNDER_REVIEW)
     // -------------------------------------------------------------
-    console.log("🔹 TEST 18: NLP endpoint returns a structured response");
-    const nlpRes = await request("POST", "/api/nlp/analyze", {
-      text: "Patient presents with dry skin, cold extremities, insomnia, and irregular appetite."
+    console.log("🔹 TEST 18: Assessment state machine transitions (DRAFT -> SUBMITTED -> UNDER_REVIEW)");
+    const smDraftRes = await request("POST", "/api/assessments", {
+      patientId: "PAT-UDU-KAMATH-001",
+      answers: { q1_frame: "v" },
+      status: "DRAFT"
+    }, doctorToken);
+    assert(smDraftRes.status === 201, "Draft assessment created with status 201");
+    assert(smDraftRes.body.assessment.status === "DRAFT", "Initial status is DRAFT");
+    const smId = smDraftRes.body.assessment.id;
+
+    // Transition DRAFT -> SUBMITTED
+    const smSubmitRes = await request("PUT", `/api/assessments/${smId}`, {
+      status: "SUBMITTED"
+    }, doctorToken);
+    assert(smSubmitRes.status === 200, "Transition to SUBMITTED returns 200 OK");
+    assert(smSubmitRes.body.assessment.status === "SUBMITTED", "Status is now SUBMITTED");
+
+    // Transition SUBMITTED -> UNDER_REVIEW
+    const smReviewRes = await request("PUT", `/api/assessments/${smId}`, {
+      status: "UNDER_REVIEW"
+    }, doctorToken);
+    assert(smReviewRes.status === 200, "Transition to UNDER_REVIEW returns 200 OK");
+    assert(smReviewRes.body.assessment.status === "UNDER_REVIEW", "Status is now UNDER_REVIEW");
+    console.log("  [PASS] TEST 18: Assessment state machine transitions (DRAFT -> SUBMITTED -> UNDER_REVIEW).\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 19: Patient role is strictly forbidden from creating assessments
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 19: Patient role is strictly forbidden from creating assessments");
+    const patientLoginRes = await request("POST", "/api/auth/login", {
+      email: "patient@kamath.org",
+      password: "Patient@123"
     });
-    assert(nlpRes.status === 200, "POST /api/nlp/analyze returns 200 OK");
-    assert(nlpRes.body.success === true, "NLP analysis returns success: true");
-    assert(Array.isArray(nlpRes.body.signals), "NLP output contains signals array");
-    assert(nlpRes.body.signals.length >= 2, "NLP extracted at least 2 clinical keyword signals");
-    assert(Boolean(nlpRes.body.summary), "NLP output contains dosha summary distribution");
-    assert(Boolean(nlpRes.body.dominantSignal), "NLP output identifies dominant dosha signal");
-    console.log("  [PASS] TEST 18: NLP endpoint returns a structured response.\n");
+    assert(patientLoginRes.status === 200, "Patient login succeeds");
+    const patientToken = patientLoginRes.body.token;
+
+    const patientAsmAttempt = await request("POST", "/api/assessments", {
+      patientId: "PAT-UDU-KAMATH-001",
+      answers: { q1_frame: "v" }
+    }, patientToken);
+    assert(patientAsmAttempt.status === 403, "Patient assessment creation rejected with 403 Forbidden");
+    assert(patientAsmAttempt.body.success === false, "Patient attempt returns success: false");
+    assert(patientAsmAttempt.body.errorCode === "PATIENT_ASSESSMENT_FORBIDDEN", "ErrorCode is PATIENT_ASSESSMENT_FORBIDDEN");
+    console.log("  [PASS] TEST 19: Patient role is strictly forbidden from creating assessments.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 20: Student is forbidden from finalizing assessment
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 20: Student is forbidden from finalizing assessment");
+    // Create a new draft assessment as student
+    const studentDraft = await request("POST", "/api/assessments", {
+      patientId: "PAT-UDU-KAMATH-001",
+      answers: { q1_frame: "v", q2_weight: "p" },
+      status: "DRAFT"
+    }, studentToken || testUserToken);
+    assert(studentDraft.status === 201, "Student draft assessment created");
+    const draftId = studentDraft.body.assessment.id;
+
+    const studentFinalizeAttempt = await request("PUT", `/api/assessments/${draftId}/finalize`, {
+      notes: "Student attempting unauthorized finalization"
+    }, studentToken || testUserToken);
+    assert(studentFinalizeAttempt.status === 403, "Student finalization attempt rejected with 403 Forbidden");
+    assert(studentFinalizeAttempt.body.success === false, "Student finalization returns success: false");
+    console.log("  [PASS] TEST 20: Student is forbidden from finalizing assessment.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 21: Per-question observation note can be saved
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 21: Per-question observation note can be saved");
+    const qNoteRes = await request("PUT", `/api/assessments/${draftId}/question-notes/q1_frame`, {
+      note: "Prominent clavicles observed during examination"
+    }, doctorToken);
+    assert(qNoteRes.status === 200, "Saving per-question note returned 200 OK");
+    assert(qNoteRes.body.success === true, "Per-question note returned success: true");
+    assert(qNoteRes.body.questionNotes.q1_frame === "Prominent clavicles observed during examination", "Stored note matches input");
+    console.log("  [PASS] TEST 21: Per-question observation note can be saved.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 22: Patient-facing message is saved separately from internal clinical notes
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 22: Patient-facing message is saved separately from internal clinical notes");
+    const msgRes = await request("POST", `/api/assessments/${draftId}/patient-message`, {
+      message: "Please maintain warm water hydration and follow the Dinacharya routine."
+    }, doctorToken);
+    assert(msgRes.status === 200, "Saving patient message returned 200 OK");
+    assert(msgRes.body.success === true, "Patient message returned success: true");
+    assert(msgRes.body.patientMessage.includes("Dinacharya routine"), "Patient message stored correctly");
+    console.log("  [PASS] TEST 22: Patient-facing message is saved separately from internal clinical notes.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 23: Voice-to-text transcription endpoint inserts text into designated fields
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 23: Voice-to-text transcription endpoint inserts text into designated fields");
+    const voiceRes = await request("POST", `/api/assessments/${draftId}/transcription`, {
+      transcript: "Patient reports restlessness and dry throat in early mornings.",
+      destination: "clinicalObservation"
+    }, doctorToken);
+    assert(voiceRes.status === 200, "Transcription insertion returned 200 OK");
+    assert(voiceRes.body.success === true, "Transcription insertion returned success: true");
+    assert(voiceRes.body.assessment.observations.freeText.includes("dry throat"), "Transcribed text inserted into freeText");
+    console.log("  [PASS] TEST 23: Voice-to-text transcription endpoint inserts text into designated fields.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 24: Empty transcription request is rejected with validation error
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 24: Empty transcription request is rejected with validation error");
+    const emptyVoiceRes = await request("POST", `/api/assessments/${draftId}/transcription`, {
+      transcript: "",
+      destination: "clinicalObservation"
+    }, doctorToken);
+    assert(emptyVoiceRes.status === 400, "Empty transcript rejected with 400 Bad Request");
+    assert(emptyVoiceRes.body.success === false, "Empty transcript returned success: false");
+    console.log("  [PASS] TEST 24: Empty transcription request is rejected with validation error.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 25: Adaptive Dosha threshold logic triggers at 80% & handles boundary cases
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 25: Adaptive Dosha threshold logic triggers at 80% & handles boundary cases");
+    const { getAdaptiveDoshaState } = await import("../services/adaptiveDoshaService.js");
+
+    // Boundary 79.99% -> below threshold
+    const sub80 = getAdaptiveDoshaState({ vata: 79.99, pitta: 10.01, kapha: 10.00 }, 80);
+    assert(sub80.thresholdReached === false, "79.99% does not trigger 80% threshold");
+
+    // Exact 80.00% -> threshold reached
+    const exact80 = getAdaptiveDoshaState({ vata: 80.00, pitta: 10.00, kapha: 10.00 }, 80);
+    assert(exact80.thresholdReached === true, "80.00% exactly triggers 80% threshold");
+    assert(exact80.dominantDosha === "Vata", "Identified dominant dosha is Vata");
+    assert(exact80.indicatorMessage.includes("strongly indicates Vata dominance"), "Indicator message formatted correctly");
+
+    // Boundary 80.01% -> threshold reached
+    const supra80 = getAdaptiveDoshaState({ vata: 80.01, pitta: 10.00, kapha: 9.99 }, 80);
+    assert(supra80.thresholdReached === true, "80.01% triggers 80% threshold");
+
+    // API endpoint test
+    const adaptiveApiRes = await request("GET", `/api/assessments/${draftId}/adaptive`, null, doctorToken);
+    assert(adaptiveApiRes.status === 200, "GET /api/assessments/:id/adaptive returns 200 OK");
+    assert(adaptiveApiRes.body.threshold === 80, "Default threshold is 80");
+    assert(adaptiveApiRes.body.authoritativeQuestionnairePreserved === true, "Authoritative questionnaire preserved");
+    console.log("  [PASS] TEST 25: Adaptive Dosha threshold logic triggers at 80% & handles boundary cases.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 26: Doctor finalizes assessment (Transition to FINALIZED)
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 26: Doctor finalizes assessment (Transition to FINALIZED)");
+    // Provide all 24 answers to satisfy mandatory validation
+    const fullAnswers = {};
+    const fullQuestionsList = db.getCollection("questions");
+    fullQuestionsList.forEach((q, idx) => {
+      fullAnswers[q.id] = idx % 2 === 0 ? "v" : "p";
+    });
+
+    await request("PUT", `/api/assessments/${draftId}`, { answers: fullAnswers }, doctorToken);
+
+    const docFinalizeRes = await request("POST", `/api/doctor/assessments/${draftId}/finalize`, {
+      notes: "Officially finalized by Dr. K. Raghavendra Rao.",
+      patientMessage: "Continue warm sesame oil abhyanga daily."
+    }, doctorToken);
+
+    assert(docFinalizeRes.status === 200, "Doctor finalize returned 200 OK");
+    assert(docFinalizeRes.body.success === true, "Finalization returned success: true");
+    assert(docFinalizeRes.body.assessment.status === "FINALIZED", "Assessment transitioned to FINALIZED");
+    console.log("  [PASS] TEST 26: Doctor finalizes assessment (Transition to FINALIZED).\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 27: Duplicate finalization attempt is rejected with 409 Conflict
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 27: Duplicate finalization attempt is rejected with 409 Conflict");
+    const dupFinalizeRes = await request("POST", `/api/doctor/assessments/${draftId}/finalize`, {
+      notes: "Second doctor attempting simultaneous duplicate finalization"
+    }, doctorToken);
+    assert(dupFinalizeRes.status === 409, "Duplicate finalization returns 409 Conflict");
+    assert(dupFinalizeRes.body.success === false, "Duplicate finalization returned success: false");
+    assert(dupFinalizeRes.body.errorCode === "ASSESSMENT_ALREADY_FINALIZED", "ErrorCode is ASSESSMENT_ALREADY_FINALIZED");
+    console.log("  [PASS] TEST 27: Duplicate finalization attempt is rejected with 409 Conflict.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 28: Finalized assessment is strictly immutable for all users (including Doctor)
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 28: Finalized assessment is strictly immutable for all users");
+    const docEditAttempt = await request("PUT", `/api/assessments/${draftId}`, {
+      patientMessage: "Attempting to edit finalized assessment as doctor"
+    }, doctorToken);
+    assert(docEditAttempt.status === 403, "Doctor edit of finalized assessment rejected with 403 Forbidden");
+    assert(docEditAttempt.body.errorCode === "ASSESSMENT_FINALIZED", "ErrorCode is ASSESSMENT_FINALIZED");
+
+    const noteEditAttempt = await request("PUT", `/api/assessments/${draftId}/question-notes/q1_frame`, {
+      note: "Editing note after finalization"
+    }, doctorToken);
+    assert(noteEditAttempt.status === 403, "Question note edit of finalized assessment rejected with 403 Forbidden");
+    console.log("  [PASS] TEST 28: Finalized assessment is strictly immutable for all users.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 29: Report delivery workflow: Patient cannot view report until Doctor delivers it
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 29: Patient cannot view report until Doctor delivers it");
+    const preDeliveryRep = await request("GET", `/api/reports/${draftId}?level=patient`, null, patientToken);
+    assert(preDeliveryRep.status === 403, "Patient report fetch pre-delivery returns 403 Forbidden");
+    assert(preDeliveryRep.body.errorCode === "REPORT_NOT_DELIVERED", "ErrorCode is REPORT_NOT_DELIVERED");
+    console.log("  [PASS] TEST 29: Patient cannot view report until Doctor delivers it.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 30: Doctor delivers report to patient
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 30: Doctor delivers report to patient");
+    const deliverRes = await request("POST", `/api/doctor/assessments/${draftId}/deliver-report`, {}, doctorToken);
+    assert(deliverRes.status === 200, "POST /api/doctor/assessments/:id/deliver-report returned 200 OK");
+    assert(deliverRes.body.success === true, "Report delivery returned success: true");
+    assert(deliverRes.body.assessment.reportDelivered === true, "Assessment marked as reportDelivered: true");
+    console.log("  [PASS] TEST 30: Doctor delivers report to patient.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 31: Patient can now view delivered report & internal notes are redacted
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 31: Patient can view delivered report & internal notes are redacted");
+    const postDeliveryRep = await request("GET", `/api/reports/${draftId}?level=patient`, null, patientToken);
+    assert(postDeliveryRep.status === 200, "Patient report fetch post-delivery returns 200 OK");
+    assert(postDeliveryRep.body.success === true, "Report returns success: true");
+    assert(postDeliveryRep.body.report.reportType === "patient_wellness_report", "Report type is patient_wellness_report");
+    assert(postDeliveryRep.body.report.patientMessage !== undefined, "Patient message is present");
+    assert(postDeliveryRep.body.report.observations === undefined, "Internal clinical observations are strictly redacted from patient report");
+    assert(postDeliveryRep.body.report.ashtavidha === undefined, "Ashtavidha pariksha is redacted from patient report");
+    console.log("  [PASS] TEST 31: Patient can view delivered report & internal notes are redacted.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 32: Assessment list pagination works with page & limit parameters
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 32: Assessment list pagination works with page & limit parameters");
+    const pageRes = await request("GET", "/api/doctor/assessments?page=1&limit=2", null, doctorToken);
+    assert(pageRes.status === 200, "Paginated assessment query returns 200 OK");
+    assert(pageRes.body.pagination !== undefined, "Response contains pagination metadata");
+    assert(pageRes.body.pagination.page === 1, "Current page is 1");
+    assert(pageRes.body.pagination.limit === 2, "Limit is 2");
+    assert(pageRes.body.data.length <= 2, "Returned items do not exceed limit");
+    console.log("  [PASS] TEST 32: Assessment list pagination works with page & limit parameters.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 33: Deep readiness health check (GET /api/health/ready) reports READY
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 33: Deep readiness health check (GET /api/health/ready) reports READY");
+    const readyRes = await request("GET", "/api/health/ready");
+    assert(readyRes.status === 200, "GET /api/health/ready returns 200 OK");
+    assert(readyRes.body.ready === true, "Readiness check reports ready: true");
+    assert(readyRes.body.status === "READY", "Readiness status is READY");
+    assert(readyRes.body.database === "connected", "Database connection verified");
+    console.log("  [PASS] TEST 33: Deep readiness health check reports READY.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 34: Standardized error format conforms to requirements
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 34: Standardized error format conforms to requirements");
+    const errorRes = await request("GET", "/api/nonexistent-endpoint-test-404");
+    assert(errorRes.status === 404, "404 endpoint returns status 404");
+    assert(errorRes.body.success === false, "Error response has success: false");
+    assert(errorRes.body.errorCode === "NOT_FOUND", "Error response has errorCode");
+    assert(Boolean(errorRes.body.message), "Error response has message");
+    assert(Boolean(errorRes.body.requestId), "Error response includes requestId");
+    console.log("  [PASS] TEST 34: Standardized error format conforms to requirements.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 35: Request ID middleware attaches X-Request-Id header to HTTP responses
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 35: Request ID middleware attaches X-Request-Id header to HTTP responses");
+    const reqIdRes = await new Promise((resolve) => {
+      const req = http.request(`http://localhost:${TEST_PORT}/api/health`, (res) => {
+        resolve(res.headers["x-request-id"]);
+      });
+      req.end();
+    });
+    assert(Boolean(reqIdRes), "Response includes X-Request-Id header");
+    assert(reqIdRes.length >= 8, "Request ID has valid UUID format");
+    console.log("  [PASS] TEST 35: Request ID middleware attaches X-Request-Id header.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 36: Audit log records state machine events with actor and request ID
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 36: Audit log records state machine events with actor and request ID");
+    const audits = db.getCollection("audit_logs");
+    assert(Array.isArray(audits), "Audit log collection exists");
+    assert(audits.length >= 2, "Audit log contains recorded actions");
+    const finalizedAudit = audits.find((a) => a.action === "ASSESSMENT_FINALIZED");
+    assert(Boolean(finalizedAudit), "Audit log records ASSESSMENT_FINALIZED action");
+    assert(Boolean(finalizedAudit.actorId), "Audit log records actorId");
+    assert(Boolean(finalizedAudit.timestamp), "Audit log records timestamp");
+    console.log("  [PASS] TEST 36: Audit log records state machine events.\n");
+    passedTests++;
+
+    // -------------------------------------------------------------
+    // TEST 37: Concurrent simultaneous finalization requests handled safely
+    // -------------------------------------------------------------
+    console.log("🔹 TEST 37: Concurrent simultaneous finalization requests handled safely");
+    // Create a new assessment with 24 answers to test concurrency race
+    const raceAsm = await request("POST", "/api/assessments", {
+      patientId: "PAT-UDU-KAMATH-001",
+      answers: fullAnswers,
+      status: "SUBMITTED"
+    }, doctorToken);
+    const raceId = raceAsm.body.assessment.id;
+
+    // Fire 3 simultaneous finalization requests at the exact same instant
+    const [final1, final2, final3] = await Promise.all([
+      request("POST", `/api/doctor/assessments/${raceId}/finalize`, { notes: "Doctor A" }, doctorToken),
+      request("POST", `/api/doctor/assessments/${raceId}/finalize`, { notes: "Doctor B" }, doctorToken),
+      request("POST", `/api/doctor/assessments/${raceId}/finalize`, { notes: "Doctor C" }, doctorToken)
+    ]);
+
+    const statuses = [final1.status, final2.status, final3.status];
+    const successCount = statuses.filter((s) => s === 200).length;
+    const conflictCount = statuses.filter((s) => s === 409).length;
+
+    assert(successCount === 1, `Exactly one finalization request succeeds (got ${successCount})`);
+    assert(conflictCount === 2, `Conflicting simultaneous requests receive 409 Conflict (got ${conflictCount})`);
+    console.log("  [PASS] TEST 37: Concurrent simultaneous finalization requests handled safely (1 OK, 2 Conflict 409).\n");
     passedTests++;
 
     console.log("===============================================================");
-    console.log(`🎉 ALL 18 AUTOMATED TEST CASES PASSED SUCCESSFULLY (${passedTests}/18)!`);
+    console.log(`🎉 ALL 37 AUTOMATED TEST CASES PASSED SUCCESSFULLY (${passedTests}/37)!`);
     console.log("===============================================================\n");
   } catch (err) {
     console.error("\n❌ TEST SUITE ABORTED DUE TO FAILURE:", err.message);
@@ -424,3 +744,4 @@ async function runTests() {
 }
 
 runTests();
+

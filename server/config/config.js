@@ -14,9 +14,18 @@ export const CONFIG = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "24h",
   DATA_FILE_PATH: path.join(__dirname, "..", "data", "db.json"),
   APP_NAME: "AyurEssence API",
-  VERSION: "1.0.0",
+  VERSION: "2.4.0",
   INSTITUTIONS: [
     "SDM College of Ayurveda & Hospital, Udupi",
     "Shri Madhwa Vadiraja Institute of Technology & Management (SMVITM), Bantakal"
-  ]
+  ],
+  DATABASE_URL: process.env.DATABASE_URL || "",
+  DB_POOL_MIN: Number(process.env.DB_POOL_MIN) || 2,
+  DB_POOL_MAX: Number(process.env.DB_POOL_MAX) || 20,
+  DB_CONNECTION_TIMEOUT_MS: Number(process.env.DB_CONNECTION_TIMEOUT_MS) || 5000,
+  DB_IDLE_TIMEOUT_MS: Number(process.env.DB_IDLE_TIMEOUT_MS) || 30000,
+  RATE_LIMIT_WINDOW_MS: Number(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
+  RATE_LIMIT_MAX: Number(process.env.RATE_LIMIT_MAX) || 100,
+  ADAPTIVE_DOSHA_THRESHOLD: Number(process.env.ADAPTIVE_DOSHA_THRESHOLD) || 80,
+  CACHE_ENABLED: process.env.CACHE_ENABLED !== "false"
 };

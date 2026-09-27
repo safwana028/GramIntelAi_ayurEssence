@@ -13,16 +13,20 @@ export function authenticateToken(req, res, next) {
     return res.status(401).json({
       success: false,
       message: "Authentication required. Please provide a valid Bearer token in the Authorization header.",
-      error: "Authentication required. Please provide a valid Bearer token in the Authorization header."
+      error: "Authentication required. Please provide a valid Bearer token in the Authorization header.",
+      errorCode: "UNAUTHORIZED",
+      requestId: req.id || req.requestId || "unknown"
     });
   }
 
   jwt.verify(token, CONFIG.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid or expired token. Please log in again.",
-        error: "Invalid or expired token. Please log in again."
+        error: "Invalid or expired token. Please log in again.",
+        errorCode: "INVALID_TOKEN",
+        requestId: req.id || req.requestId || "unknown"
       });
     }
 
@@ -31,7 +35,9 @@ export function authenticateToken(req, res, next) {
       return res.status(401).json({
         success: false,
         message: "User corresponding to this token no longer exists.",
-        error: "User corresponding to this token no longer exists."
+        error: "User corresponding to this token no longer exists.",
+        errorCode: "USER_NOT_FOUND",
+        requestId: req.id || req.requestId || "unknown"
       });
     }
 
@@ -39,7 +45,8 @@ export function authenticateToken(req, res, next) {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      role: String(user.role).toLowerCase(),
+      displayRole: user.role,
       institution: user.institution,
       qualification: user.qualification
     };
@@ -61,7 +68,9 @@ export function requireRole(allowedRoles) {
       return res.status(401).json({
         success: false,
         message: "Authentication required before checking permissions.",
-        error: "Authentication required before checking permissions."
+        error: "Authentication required before checking permissions.",
+        errorCode: "UNAUTHORIZED",
+        requestId: req.id || req.requestId || "unknown"
       });
     }
 
@@ -71,6 +80,8 @@ export function requireRole(allowedRoles) {
         success: false,
         message: `Access denied. Role '${req.user.role}' is not authorized. Allowed roles: [${roles.join(", ")}].`,
         error: `Access denied. Role '${req.user.role}' is not authorized. Allowed roles: [${roles.join(", ")}].`,
+        errorCode: "FORBIDDEN_ROLE",
+        requestId: req.id || req.requestId || "unknown",
         requiredRoles: roles,
         userRole: req.user.role
       });
@@ -78,6 +89,32 @@ export function requireRole(allowedRoles) {
 
     next();
   };
+}
+
+/**
+ * Convenience Middleware: Requires Doctor Role
+ */
+export const requireDoctor = requireRole("doctor");
+
+/**
+ * Convenience Middleware: Requires Clinician/Practitioner Role (Doctor or Student)
+ */
+export const requirePractitioner = requireRole(["doctor", "student"]);
+
+/**
+ * Middleware: Strictly blocks patients from taking or modifying assessments
+ */
+export function forbidPatient(req, res, next) {
+  if (req.user && String(req.user.role).toLowerCase() === "patient") {
+    return res.status(403).json({
+      success: false,
+      message: "Patients are not permitted to access assessment workflows or clinical evaluation tools.",
+      error: "Patients are not permitted to access assessment workflows or clinical evaluation tools.",
+      errorCode: "PATIENT_ASSESSMENT_FORBIDDEN",
+      requestId: req.id || req.requestId || "unknown"
+    });
+  }
+  next();
 }
 
 /**

@@ -1,5 +1,7 @@
 import express from "express";
 import { db } from "../data/database.js";
+import jwt from "jsonwebtoken";
+import { CONFIG } from "../config/config.js";
 
 export const reportRouter = express.Router();
 
@@ -23,22 +25,77 @@ function buildInterpretation(scores) {
 }
 
 /**
- * GET /api/reports/:assessmentId
- * Fetch structured report for assessment
+ * Optional token extractor so GET /api/reports/:id can inspect role if token provided
  */
-reportRouter.get("/:assessmentId", (req, res) => {
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
+      const user = db.findById("users", decoded.id);
+      if (user) {
+        req.user = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: String(user.role).toLowerCase()
+        };
+      }
+    } catch {
+      // Ignore token decode error in optional auth
+    }
+  }
+  next();
+}
+
+/**
+ * GET /api/reports/:assessmentId
+ * Fetch structured report for assessment (Doctor clinical dossier vs Patient simplified Swastha report)
+ */
+reportRouter.get("/:assessmentId", optionalAuth, (req, res) => {
   try {
     const assessment = db.findById("assessments", req.params.assessmentId);
     if (!assessment) {
       return res.status(404).json({
         success: false,
         message: "Assessment not found.",
-        error: "Assessment not found."
+        error: "Assessment not found.",
+        errorCode: "NOT_FOUND",
+        requestId: req.id
       });
     }
 
     const patient = db.findById("patients", assessment.patientId);
     const user = assessment.userId ? db.findById("users", assessment.userId) : null;
+
+    // Check patient access restriction
+    if (req.user && req.user.role === "patient") {
+      const isOwner =
+        patient?.email?.toLowerCase() === req.user.email?.toLowerCase() ||
+        assessment.userId === req.user.id ||
+        assessment.patientEmail?.toLowerCase() === req.user.email?.toLowerCase();
+
+      if (!isOwner) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied to this report.",
+          error: "Access denied to this report.",
+          errorCode: "FORBIDDEN",
+          requestId: req.id
+        });
+      }
+
+      if (assessment.status?.toUpperCase() !== "FINALIZED" || !assessment.reportDelivered) {
+        return res.status(403).json({
+          success: false,
+          message: "Your assessment is currently under clinical review. The patient report will be available once finalized and delivered by your doctor.",
+          error: "Report not yet delivered by doctor.",
+          errorCode: "REPORT_NOT_DELIVERED",
+          requestId: req.id
+        });
+      }
+    }
 
     const prakriti = {
       vata: assessment.scores?.vata ?? assessment.prakriti?.vata ?? 34,
@@ -52,23 +109,63 @@ reportRouter.get("/:assessmentId", (req, res) => {
     };
 
     const interpretation = buildInterpretation(prakriti);
+    const isPatientView = req.user?.role === "patient" || req.query.level === "patient";
 
-    const report = {
-      assessmentId: assessment.id,
-      assessmentDate: assessment.date || assessment.createdAt?.slice(0, 10),
-      status: assessment.status || "SUBMITTED",
-      user: {
-        id: user?.id || patient?.id || assessment.userId || assessment.patientId,
-        name: user?.name || patient?.name || "Patient",
-        email: user?.email || patient?.email || ""
-      },
-      prakriti,
-      scores: assessment.scores,
-      interpretation,
-      basicInterpretation: interpretation,
-      ethicalDisclaimer:
-        "This report evaluates constitutional Prakriti for wellness guidance. It does not diagnose diseases or prescribe medicines."
-    };
+    let report;
+
+    if (isPatientView) {
+      // PATIENT REPORT: Strictly NO internal clinical notes or Ashtavidha
+      report = {
+        assessmentId: assessment.id,
+        assessmentDate: assessment.date || assessment.createdAt?.slice(0, 10),
+        status: assessment.status || "SUBMITTED",
+        reportType: "patient_wellness_report",
+        patient: {
+          name: patient?.name || user?.name || "Patient",
+          age: patient?.age,
+          gender: patient?.gender,
+          city: patient?.city
+        },
+        prakriti,
+        scores: {
+          vata: prakriti.vata,
+          pitta: prakriti.pitta,
+          kapha: prakriti.kapha,
+          dominantPrakriti: prakriti.dominant
+        },
+        interpretation,
+        basicInterpretation: interpretation,
+        patientMessage: assessment.patientMessage || "Follow the constitutional wellness routine recommended by your Vaidya.",
+        ethicalDisclaimer:
+          "This report evaluates constitutional Prakriti for wellness guidance. It does not diagnose diseases or prescribe medicines."
+      };
+    } else {
+      // DOCTOR / SCHOLAR CLINICAL DOSSIER
+      report = {
+        assessmentId: assessment.id,
+        assessmentDate: assessment.date || assessment.createdAt?.slice(0, 10),
+        status: assessment.status || "SUBMITTED",
+        reportType: "doctor_clinical_dossier",
+        reportDelivered: assessment.reportDelivered || false,
+        user: {
+          id: user?.id || patient?.id || assessment.userId || assessment.patientId,
+          name: user?.name || patient?.name || "Patient",
+          email: user?.email || patient?.email || ""
+        },
+        patient: patient || null,
+        prakriti,
+        scores: assessment.scores,
+        answers: assessment.answers,
+        questionNotes: assessment.questionNotes || {},
+        patientMessage: assessment.patientMessage || "",
+        observations: assessment.observations || {},
+        interpretation,
+        basicInterpretation: interpretation,
+        finalizedBy: assessment.finalizedBy || null,
+        ethicalDisclaimer:
+          "This report evaluates constitutional Prakriti for wellness guidance. It does not diagnose diseases or prescribe medicines."
+      };
+    }
 
     return res.json({
       success: true,
@@ -76,6 +173,6 @@ reportRouter.get("/:assessmentId", (req, res) => {
       data: report
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message, error: err.message });
+    return res.status(500).json({ success: false, message: err.message, error: err.message, requestId: req.id });
   }
 });

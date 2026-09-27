@@ -278,13 +278,16 @@ function getInitialSeedData() {
         },
         answers: { q1_frame: "v", q2_weight: "k", q3_skin: "v", q7_agni: "v", q14_bala: "k" }
       }
-    ]
+    ],
+    reports: [],
+    audit_logs: []
   };
 }
 
 class Database {
   constructor(filePath) {
     this.filePath = filePath;
+    this.locks = new Map();
     this.init();
   }
 
@@ -292,6 +295,21 @@ class Database {
     if (!fs.existsSync(this.filePath)) {
       const initialData = getInitialSeedData();
       this.write(initialData);
+    } else {
+      // Ensure new collections exist in db.json if migrated
+      const current = this.read();
+      let changed = false;
+      if (!current.audit_logs) {
+        current.audit_logs = [];
+        changed = true;
+      }
+      if (!current.reports) {
+        current.reports = [];
+        changed = true;
+      }
+      if (changed) {
+        this.write(current);
+      }
     }
   }
 
@@ -362,6 +380,72 @@ class Database {
     return items.filter(predicate);
   }
 
+  paginate(collectionName, { page = 1, limit = 20, filterFn = null, sortFn = null } = {}) {
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    let items = this.getCollection(collectionName);
+
+    if (filterFn && typeof filterFn === "function") {
+      items = items.filter(filterFn);
+    }
+
+    if (sortFn && typeof sortFn === "function") {
+      items = [...items].sort(sortFn);
+    } else {
+      // Default newest first if createdAt or date exists
+      items = [...items].sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.date || 0);
+        const dateB = new Date(b.createdAt || b.date || 0);
+        return dateB - dateA;
+      });
+    }
+
+    const total = items.length;
+    const totalPages = Math.ceil(total / limitNum) || 1;
+    const offset = (pageNum - 1) * limitNum;
+    const data = items.slice(offset, offset + limitNum);
+
+    return {
+      data,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    };
+  }
+
+  /**
+   * Atomic operation for assessment finalization with row-locking concurrency guard
+   */
+  async atomicFinalize(assessmentId, finalizerFn) {
+    // Acquire lock for this assessment ID
+    while (this.locks.get(assessmentId)) {
+      await new Promise((resolve) => setTimeout(resolve, 15));
+    }
+    this.locks.set(assessmentId, true);
+
+    try {
+      const current = this.findById("assessments", assessmentId);
+      if (!current) {
+        return { notFound: true };
+      }
+
+      if (current.status?.toUpperCase() === "FINALIZED") {
+        return { conflict: true, assessment: current };
+      }
+
+      // Execute finalizer transaction function
+      const updatedAssessment = await finalizerFn(current);
+      return { success: true, assessment: updatedAssessment };
+    } finally {
+      this.locks.delete(assessmentId);
+    }
+  }
+
   isConnected() {
     try {
       const data = this.read();
@@ -379,3 +463,22 @@ class Database {
 }
 
 export const db = new Database(CONFIG.DATA_FILE_PATH);
+
+/**
+ * Global audit logger helper
+ */
+export function recordAuditLog({ actorId, actorRole, action, assessmentId = null, requestId = null, metadata = {} }) {
+  const audit = {
+    id: `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    actorId: actorId || "SYSTEM",
+    actorRole: actorRole || "SYSTEM",
+    action,
+    assessmentId,
+    requestId,
+    metadata,
+    timestamp: new Date().toISOString()
+  };
+  db.insert("audit_logs", audit);
+  return audit;
+}
+

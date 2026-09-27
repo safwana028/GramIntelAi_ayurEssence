@@ -1,6 +1,7 @@
 import express from "express";
 import { db } from "../data/database.js";
 import { authenticateToken, requireRole } from "../middleware/auth.js";
+import { cacheService } from "../services/cacheService.js";
 
 export const questionnaireRouter = express.Router();
 
@@ -28,6 +29,11 @@ function formatQuestion(q) {
  */
 questionnaireRouter.get("/", (req, res) => {
   try {
+    const cached = cacheService.get("questionnaires_all");
+    if (cached) {
+      return res.json(cached);
+    }
+
     const questionnaires = db.getCollection("questionnaires");
     const rawQuestions = db.getCollection("questions");
     const formattedQuestions = rawQuestions.map(formatQuestion);
@@ -37,12 +43,15 @@ questionnaireRouter.get("/", (req, res) => {
       questions: formattedQuestions
     }));
 
-    return res.json({
+    const response = {
       success: true,
       data: enriched,
       questionnaires: enriched,
       questions: formattedQuestions
-    });
+    };
+
+    cacheService.set("questionnaires_all", response, 600);
+    return res.json(response);
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message, error: err.message });
   }
@@ -54,12 +63,17 @@ questionnaireRouter.get("/", (req, res) => {
  */
 questionnaireRouter.get("/standard", (req, res) => {
   try {
+    const cached = cacheService.get("questionnaires_standard");
+    if (cached) {
+      return res.json(cached);
+    }
+
     const questionnaires = db.getCollection("questionnaires");
     const standard = questionnaires.find((q) => q.isDefault) || questionnaires[0];
     const questions = db.getCollection("questions");
     const formattedQuestions = questions.map(formatQuestion);
 
-    return res.json({
+    const response = {
       success: true,
       data: {
         metadata: standard,
@@ -67,7 +81,10 @@ questionnaireRouter.get("/standard", (req, res) => {
         questions: formattedQuestions
       },
       questions: formattedQuestions
-    });
+    };
+
+    cacheService.set("questionnaires_standard", response, 600);
+    return res.json(response);
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message, error: err.message });
   }
@@ -84,6 +101,12 @@ questionnaireRouter.get("/:id", (req, res, next) => {
   }
 
   try {
+    const cacheKey = `questionnaires_${req.params.id}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const questionnaires = db.getCollection("questionnaires");
     const target =
       req.params.id === "standard"
@@ -97,7 +120,7 @@ questionnaireRouter.get("/:id", (req, res, next) => {
     const rawQuestions = db.getCollection("questions");
     const formattedQuestions = rawQuestions.map(formatQuestion);
 
-    return res.json({
+    const response = {
       success: true,
       data: {
         ...target,
@@ -107,11 +130,15 @@ questionnaireRouter.get("/:id", (req, res, next) => {
         ...target,
         questions: formattedQuestions
       }
-    });
+    };
+
+    cacheService.set(cacheKey, response, 600);
+    return res.json(response);
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message, error: err.message });
   }
 });
+
 
 /**
  * POST /api/questionnaires
@@ -241,6 +268,7 @@ questionnaireRouter.post("/questions", authenticateToken, requireRole("doctor"),
     };
 
     db.insert("questions", newQuestion);
+    cacheService.invalidate("questionnaires*");
 
     return res.status(201).json({
       success: true,
@@ -264,6 +292,8 @@ questionnaireRouter.put("/questions/:id", authenticateToken, requireRole("doctor
     }
 
     const updated = db.updateById("questions", req.params.id, req.body);
+    cacheService.invalidate("questionnaires*");
+
     return res.json({
       success: true,
       message: "Question updated successfully.",
@@ -286,6 +316,8 @@ questionnaireRouter.delete("/questions/:id", authenticateToken, requireRole("doc
     }
 
     db.deleteById("questions", req.params.id);
+    cacheService.invalidate("questionnaires*");
+
     return res.json({
       success: true,
       message: `Question '${req.params.id}' deleted successfully.`
@@ -329,6 +361,8 @@ questionnaireRouter.post("/import", authenticateToken, requireRole("doctor"), (r
       }
     });
 
+    cacheService.invalidate("questionnaires*");
+
     return res.status(201).json({
       success: true,
       message: `Questionnaire '${newQ.title}' with ${questions.length} questions imported.`,
@@ -338,3 +372,4 @@ questionnaireRouter.post("/import", authenticateToken, requireRole("doctor"), (r
     return res.status(500).json({ success: false, error: err.message });
   }
 });
+
