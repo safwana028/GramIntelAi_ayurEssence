@@ -58,8 +58,8 @@ export function App() {
   });
   const [activeLang, setActiveLang] = useState(getStoredLanguage);
 
-  // Initial tab
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // Initial tab: Defaults to public landing page so anyone visiting tridoshalab.com sees the homepage
+  const [activeTab, setActiveTab] = useState("landing");
 
   // Selected contexts
   const [activePatientForAssessment, setActivePatientForAssessment] = useState(null);

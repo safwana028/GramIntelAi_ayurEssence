@@ -97,11 +97,20 @@ export function LandingPage({
             <Button
               variant="gold"
               size="lg"
+              onClick={() => onSelectRoleAndNavigate("student", "assessment")}
+              icon={Sparkles}
+              className="min-h-[44px] shadow-lg shadow-amber-950/20"
+            >
+              Start Prakriti Pariksha
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
               onClick={() => onSelectRoleAndNavigate("doctor", "dashboard")}
               icon={Stethoscope}
-              className="min-h-[44px]"
+              className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
             >
-              Enter Doctor Portal
+              Doctor Portal
             </Button>
             <Button
               variant="outline"
