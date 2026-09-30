@@ -1,6 +1,7 @@
 import React from "react";
 import { UserCheck, GraduationCap, User, Globe, Stethoscope, Sparkles, BookOpen, Layers, History, Activity } from "lucide-react";
 import { TRANSLATIONS } from "../../data/translations";
+import { AyurEssenceLogo } from "../brand/AyurEssenceLogo";
 
 export function Header({
   activeRole,
@@ -9,7 +10,9 @@ export function Header({
   onLangChange,
   activeTab,
   onTabChange,
-  onOpenMethodology
+  onOpenMethodology,
+  currentUser,
+  onOpenAuthModal
 }) {
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
 
@@ -33,22 +36,7 @@ export function Header({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         {/* Brand & Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => onTabChange("patients")}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-900 shadow-md ring-2 ring-amber-300/40">
-            <Sparkles className="w-6 h-6 text-emerald-950" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-amber-100 font-serif-heading">
-                {t.appTitle}
-              </h1>
-              <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-800/80 text-emerald-200 border border-emerald-700/60 rounded-full">
-                v2.4 Clinician Pro
-              </span>
-            </div>
-            <p className="text-xs text-emerald-200/90 font-medium">
-              {t.appSubtitle}
-            </p>
-          </div>
+          <AyurEssenceLogo variant="horizontal" size="md" light={true} />
         </div>
 
         {/* Action Controls: Role Switcher, Language Switcher, Reference Modal */}
@@ -137,71 +125,99 @@ export function Header({
               हिंदी
             </button>
           </div>
+
+          {/* Clinician / User Session Bar */}
+          <button
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#122A22] hover:bg-[#0e211b] text-emerald-100 border border-emerald-800/80 shadow-sm transition-all"
+            title="Switch Clinician / Sign In to AyurEssence"
+          >
+            <div className="w-5 h-5 rounded-full bg-amber-400 text-stone-950 font-bold text-[10px] flex items-center justify-center shrink-0">
+              {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "U"}
+            </div>
+            <div className="text-left hidden sm:block">
+              <div className="font-bold text-[11px] text-amber-200 leading-tight truncate max-w-[120px]">
+                {currentUser?.name || "Clinician"}
+              </div>
+              <div className="text-[9px] text-emerald-300/80 capitalize leading-none">
+                {currentUser?.role || activeRole}
+              </div>
+            </div>
+          </button>
         </div>
       </div>
 
       {/* Navigation Tabs Bar */}
       <div className="bg-[#183E32] border-t border-emerald-800/60 px-4">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-1">
-          <button
-            onClick={() => onTabChange("patients")}
-            className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "patients"
-                ? "bg-[#FAF8F5] text-emerald-950 shadow"
-                : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-            }`}
-          >
-            <UserCheck className="w-3.5 h-3.5" />
-            <span>{t.navPatients}</span>
-          </button>
+          {/* Patient Role: Restricted to My Reports only */}
+          {activeRole === "patient" ? (
+            <button
+              onClick={() => onTabChange("patientReports")}
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === "patientReports" || activeTab === "patients"
+                  ? "bg-[#FAF8F5] text-emerald-950 shadow"
+                  : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+              }`}
+            >
+              <User className="w-3.5 h-3.5 text-amber-400" />
+              <span>My Swastha Reports</span>
+            </button>
+          ) : (
+            <>
+              {/* Doctor & Student Navigation */}
+              <button
+                onClick={() => onTabChange("patients")}
+                className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  activeTab === "patients"
+                    ? "bg-[#FAF8F5] text-emerald-950 shadow"
+                    : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>{t.navPatients}</span>
+              </button>
 
-          <button
-            onClick={() => onTabChange("assessment")}
-            className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "assessment"
-                ? "bg-[#FAF8F5] text-emerald-950 shadow"
-                : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t.navNewAssessment}</span>
-          </button>
+              <button
+                onClick={() => onTabChange("assessment")}
+                className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  activeTab === "assessment"
+                    ? "bg-[#FAF8F5] text-emerald-950 shadow"
+                    : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>{t.navNewAssessment}</span>
+              </button>
 
-          <button
-            onClick={() => onTabChange("scanner")}
-            className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "scanner"
-                ? "bg-[#FAF8F5] text-emerald-950 shadow"
-                : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t.navScanner || "AI Body Scanner"}</span>
-          </button>
+              <button
+                onClick={() => onTabChange("history")}
+                className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  activeTab === "history"
+                    ? "bg-[#FAF8F5] text-emerald-950 shadow"
+                    : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+                }`}
+              >
+                <History className="w-3.5 h-3.5" />
+                <span>{t.navHistory}</span>
+              </button>
 
-          <button
-            onClick={() => onTabChange("history")}
-            className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "history"
-                ? "bg-[#FAF8F5] text-emerald-950 shadow"
-                : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-            }`}
-          >
-            <History className="w-3.5 h-3.5" />
-            <span>{t.navHistory}</span>
-          </button>
-
-          <button
-            onClick={() => onTabChange("builder")}
-            className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "builder"
-                ? "bg-[#FAF8F5] text-emerald-950 shadow"
-                : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>{t.navBuilder}</span>
-          </button>
+              {/* Questionnaire Builder: Doctor Only */}
+              {activeRole === "doctor" && (
+                <button
+                  onClick={() => onTabChange("builder")}
+                  className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === "builder"
+                      ? "bg-[#FAF8F5] text-emerald-950 shadow"
+                      : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>{t.navBuilder}</span>
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

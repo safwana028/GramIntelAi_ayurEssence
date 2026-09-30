@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { X, UserPlus, Save } from "lucide-react";
+import { X, Save } from "lucide-react";
+import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
+import { Button } from "../ui/Button";
 
 export function PatientModal({ isOpen, onClose, onSave, patientToEdit = null }) {
   const [formData, setFormData] = useState(
@@ -39,19 +41,21 @@ export function PatientModal({ isOpen, onClose, onSave, patientToEdit = null }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#FAF8F5] w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-[#FAF8F5] w-full max-w-lg rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8 animate-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="bg-[#1E4D3E] text-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-amber-400" />
-            <h3 className="text-lg font-bold font-serif-heading tracking-wide">
+        <div className="bg-gradient-to-r from-[#1B4D3E] via-[#245D4B] to-[#12382B] text-white px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <TridoshaLabLogo variant="icon" size="xs" light={true} />
+            <h3 className="text-base sm:text-lg font-bold font-serif-heading tracking-wide">
               {patientToEdit ? "Edit Patient Profile" : "Register New Patient"}
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-stone-300 hover:text-white p-1 rounded-lg hover:bg-emerald-900/50 transition-colors"
+            className="text-emerald-200 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
@@ -194,20 +198,22 @@ export function PatientModal({ isOpen, onClose, onSave, patientToEdit = null }) 
           </div>
 
           <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 font-medium transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold flex items-center gap-1.5 shadow transition-colors"
+              variant="primary"
+              size="sm"
+              icon={Save}
             >
-              <Save className="w-4 h-4" />
-              <span>Save Patient Record</span>
-            </button>
+              Save Patient Record
+            </Button>
           </div>
         </form>
       </div>

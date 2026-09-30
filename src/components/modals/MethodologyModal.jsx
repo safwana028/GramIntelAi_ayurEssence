@@ -1,27 +1,57 @@
-import React from "react";
-import { X, BookOpen, Award, CheckCircle, ShieldAlert, Sparkles, Scale } from "lucide-react";
+import React, { useEffect } from "react";
+import { X, BookOpen, Award, CheckCircle, Scale } from "lucide-react";
 import { SAMHITA_REFERENCES } from "../../data/samhitaReferences";
+import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 
 export function MethodologyModal({ isOpen, onClose }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#FAF8F5] w-full max-w-3xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="methodology-modal-title"
+      className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-[#FAF8F5] w-full max-w-3xl rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8 max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="bg-[#1E4D3E] text-white px-6 py-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-amber-400" />
+        <div className="bg-gradient-to-r from-[#1B4D3E] via-[#245D4B] to-[#12382B] text-white px-6 py-5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <TridoshaLabLogo variant="icon" size="sm" light={true} />
             <div>
-              <h3 className="text-base font-bold font-serif-heading">
+              <h3 id="methodology-modal-title" className="text-base font-bold font-serif-heading">
                 Classical Ayurvedic Methodology & Treatises
               </h3>
-              <p className="text-[11px] text-emerald-200">
+              <p className="text-[11px] text-emerald-200/90">
                 SDM College of Ayurveda, Udupi Clinical Guidelines (Charaka, Sushruta, Ashtanga Hridaya)
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-stone-300 hover:text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-emerald-200 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            aria-label="Close dialog"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -95,8 +125,8 @@ export function MethodologyModal({ isOpen, onClose }) {
             </p>
             <ul className="list-disc pl-5 space-y-1 text-stone-600 text-[11px]">
               <li><strong>Prashna Pariksha (Structured Inquest):</strong> 24 standardized questions covering morphological, physiological, and emotional parameters.</li>
-              <li><strong>Pratyaksha Pariksha (Direct Clinical Observation):</strong> Free-form practitioner observation notes with AI/NLP Guna extraction assistance.</li>
-              <li><strong>Anumana (Clinical Inference):</strong> Mathematical synthesis of weighted points into normalized percentage distribution and bi-doshic / mono-doshic classification.</li>
+              <li><strong>Pratyaksha Pariksha (Direct Clinical Observation):</strong> Free-form practitioner observation notes with speech-to-text dictation and NLP Guna extraction.</li>
+              <li><strong>Anumana (Clinical Inference):</strong> Mathematical synthesis of weighted points into normalized 100% distribution and bi-doshic / mono-doshic classification.</li>
             </ul>
           </div>
         </div>
@@ -104,8 +134,9 @@ export function MethodologyModal({ isOpen, onClose }) {
         {/* Footer */}
         <div className="bg-stone-100 px-6 py-3 border-t border-stone-200 flex justify-end shrink-0">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs rounded-xl shadow transition-colors"
+            className="px-5 py-2.5 min-h-[40px] bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
           >
             Close Reference
           </button>
@@ -114,3 +145,5 @@ export function MethodologyModal({ isOpen, onClose }) {
     </div>
   );
 }
+
+export default MethodologyModal;

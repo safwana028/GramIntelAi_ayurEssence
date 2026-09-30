@@ -21,9 +21,26 @@ authRouter.post("/register", async (req, res) => {
       });
     }
 
-    const validRoles = ["doctor", "student", "patient"];
-    const inputRole = role ? String(role).toLowerCase() : "patient";
-    const userRole = validRoles.includes(inputRole) ? inputRole : "patient";
+    const inputRole = role ? String(role).toLowerCase() : "";
+    if (inputRole === "patient") {
+      return res.status(400).json({
+        success: false,
+        message: "Patient accounts cannot be registered. Patients exist only as clinical assessment subjects.",
+        error: "Patient accounts cannot be registered. Patients exist only as clinical assessment subjects.",
+        errorCode: "PATIENT_REGISTRATION_DISABLED"
+      });
+    }
+
+    const validRoles = ["doctor", "student"];
+    if (!validRoles.includes(inputRole)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role specified. Only 'doctor' and 'student' are permitted application user roles.",
+        error: "Invalid role specified. Only 'doctor' and 'student' are permitted application user roles.",
+        errorCode: "INVALID_ROLE"
+      });
+    }
+    const userRole = inputRole;
     const formattedRole = userRole.charAt(0).toUpperCase() + userRole.slice(1);
 
     // Check if email already registered
@@ -43,8 +60,8 @@ authRouter.post("/register", async (req, res) => {
       email: email.toLowerCase(),
       passwordHash,
       role: formattedRole,
-      qualification: qualification || (userRole === "doctor" ? "BAMS, MD" : userRole === "student" ? "BAMS Scholar" : "Citizen"),
-      institution: institution || (userRole !== "patient" ? "SDM College of Ayurveda, Udupi" : "Self"),
+      qualification: qualification || (userRole === "doctor" ? "BAMS, MD" : "BAMS Scholar"),
+      institution: institution || "SDM College of Ayurveda, Udupi",
       phone: phone || "",
       createdAt: new Date().toISOString()
     };
@@ -73,7 +90,7 @@ authRouter.post("/register", async (req, res) => {
 
 /**
  * POST /api/auth/login
- * Authenticate doctor, student, or patient and return JWT
+ * Authenticate doctor or student and return JWT. Patients receive 403 PATIENT_ACCESS_DISABLED.
  */
 authRouter.post("/login", async (req, res) => {
   try {
@@ -97,6 +114,17 @@ authRouter.post("/login", async (req, res) => {
     }
 
     const user = users[0];
+
+    // Check if user is a Patient account — patient login is strictly forbidden
+    if (String(user.role).toLowerCase() === "patient") {
+      return res.status(403).json({
+        success: false,
+        message: "Patient portal access is disabled. Assessments and reports are accessible only via supervising Doctor or Student clinician.",
+        error: "Patient portal access is disabled. Assessments and reports are accessible only via supervising Doctor or Student clinician.",
+        errorCode: "PATIENT_ACCESS_DISABLED"
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({
@@ -140,14 +168,14 @@ authRouter.get("/me", authenticateToken, (req, res) => {
 
 /**
  * GET /api/auth/roles
- * RBAC permission matrix for documentation and client configuration
+ * RBAC permission matrix for documentation and client configuration (Doctor and Student only)
  */
 authRouter.get("/roles", (req, res) => {
   return res.json({
     success: true,
     roles: {
       doctor: {
-        description: "Senior practitioner / Ayurvedic physician",
+        description: "Senior practitioner / Ayurvedic physician (Vaidya)",
         permissions: [
           "create_patient", "update_patient", "delete_patient",
           "create_assessment", "edit_assessment", "finalize_assessment",
@@ -162,13 +190,6 @@ authRouter.get("/roles", (req, res) => {
           "record_observations", "view_methodology", "view_doctor_report", "view_patient_report"
         ],
         restrictions: ["cannot_finalize_assessment", "cannot_approve_student_report", "cannot_modify_questionnaire"]
-      },
-      patient: {
-        description: "Individual assessed for constitutional Prakriti",
-        permissions: [
-          "view_own_profile", "view_patient_report", "view_dinacharya_guidance"
-        ],
-        restrictions: ["no_clinical_editing", "no_student_supervision"]
       }
     }
   });

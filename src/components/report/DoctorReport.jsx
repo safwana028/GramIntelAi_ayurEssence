@@ -1,7 +1,8 @@
 import React from "react";
-import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2, Eye } from "lucide-react";
 import { DoshaRadarChart, DoshaProportionBar } from "./DoshaRadarChart";
 import { DOSHA_PROFILES } from "../../data/samhitaReferences";
+import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 
 export function DoctorReport({
   patient,
@@ -13,23 +14,27 @@ export function DoctorReport({
   const { scores, observations, conductedBy, date, supervisorApproved, season } = assessment;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 shadow-md max-w-4xl mx-auto overflow-hidden print:shadow-none print:border-none print:m-0">
+    <div className="bg-white rounded-3xl border border-stone-200 shadow-md max-w-4xl mx-auto overflow-hidden print:shadow-none print:border-none print:m-0">
       {/* Printable Clinical Header */}
       <div className="bg-[#1E4D3E] text-white p-6 sm:p-8 border-b-4 border-amber-500">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Award className="w-5 h-5 text-amber-400" />
-              <span className="text-xs font-semibold text-amber-300 tracking-wider uppercase">
-                SDM College of Ayurveda & Hospital, Udupi
-              </span>
+          <div className="flex items-start gap-4">
+            <TridoshaLabLogo variant="icon" size="lg" light={true} className="shrink-0 mt-1" />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-semibold text-amber-300 tracking-wider uppercase">
+                  SDM College of Ayurveda & Hospital, Udupi
+                </span>
+                <span className="text-emerald-400">•</span>
+                <span className="text-[10px] text-emerald-200 font-mono">TridoshaLab Clinical Dossier</span>
+              </div>
+              <h1 className="text-2xl font-bold font-serif-heading tracking-tight text-white">
+                Deha Prakriti Pariksha Dossier
+              </h1>
+              <p className="text-xs text-emerald-200 mt-0.5">
+                Comprehensive Constitutional Assessment & Clinical Evidence Report
+              </p>
             </div>
-            <h1 className="text-2xl font-bold font-serif-heading tracking-tight text-white">
-              Deha Prakriti Pariksha Dossier
-            </h1>
-            <p className="text-xs text-emerald-200 mt-0.5">
-              Comprehensive Constitutional Assessment & Clinical Evidence Report
-            </p>
           </div>
 
           <div className="text-right text-xs space-y-1">
@@ -201,6 +206,41 @@ export function DoctorReport({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+
+        {/* Per-Question Clinical Observation Notes (if recorded) */}
+        {assessment.questionNotes && Object.keys(assessment.questionNotes).length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+              Per-Question Clinical Notes ({Object.keys(assessment.questionNotes).length} Recorded)
+            </h3>
+            <div className="bg-stone-50 p-3.5 rounded-xl border border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              {Object.entries(assessment.questionNotes).map(([qId, note]) => (
+                <div key={qId} className="bg-white p-2.5 rounded-lg border border-stone-200">
+                  <span className="font-mono text-[10px] text-emerald-800 font-bold block">{qId}:</span>
+                  <span className="text-stone-700 italic">"{note}"</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Separate Patient-Facing Message (Delivered to Swastha Portal) */}
+        {assessment.patientMessage && (
+          <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-300 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-950 uppercase tracking-wider">
+                Delivered Patient-Facing Instructions
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-800 bg-white px-2 py-0.5 rounded-full border border-emerald-200">
+                Visible in Patient Swastha Portal
+              </span>
+            </div>
+            <p className="text-xs text-stone-800 italic bg-white p-3 rounded-lg border border-emerald-200">
+              "{assessment.patientMessage}"
+            </p>
           </div>
         )}
 

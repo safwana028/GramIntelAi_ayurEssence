@@ -67,10 +67,10 @@ export function CalculationInspector({ isOpen, onClose, calculationResult }) {
                 <thead className="bg-stone-50 border-b border-stone-200 text-stone-600">
                   <tr>
                     <th className="p-2.5 font-bold">Dosha</th>
-                    <th className="p-2.5 font-bold">Questionnaire Pts</th>
-                    <th className="p-2.5 font-bold">Observation Pts</th>
-                    <th className="p-2.5 font-bold">Aggregated Pts</th>
-                    <th className="p-2.5 font-bold text-right">Normalized %</th>
+                    <th className="p-2.5 font-bold">24-Question Pts</th>
+                    <th className="p-2.5 font-bold">Observation Cues Pts</th>
+                    <th className="p-2.5 font-bold">Aggregated Raw Pts</th>
+                    <th className="p-2.5 font-bold text-right">Normalized Integer %</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -110,21 +110,21 @@ export function CalculationInspector({ isOpen, onClose, calculationResult }) {
               <div className="p-3 rounded-lg border border-stone-200 bg-white">
                 <div className="font-bold text-stone-800 mb-1">1. Eka-Doshaja</div>
                 <p className="text-stone-500 leading-relaxed">
-                  Single Dosha ≥ 48% with a lead ≥ 15% over secondary. (Charaka Vimana 8:95).
+                  Single Dosha ≥ 45% with a distinct lead ≥ 12% over secondary. (Charaka Samhita Vimana 8:95).
                 </p>
               </div>
 
               <div className="p-3 rounded-lg border border-emerald-300 bg-emerald-50/50">
                 <div className="font-bold text-emerald-900 mb-1">2. Dwandwaja (Dual)</div>
                 <p className="text-stone-600 leading-relaxed">
-                  Top two doshas within 12% margin; third dosha is recessive. ~85% human incidence. (Ashtanga Hridaya Sharira 3:84).
+                  Combined predominance of top two doshas; tertiary dosha is recessive. ~85% clinical occurrence. (Ashtanga Hridaya Sharira 3:84).
                 </p>
               </div>
 
               <div className="p-3 rounded-lg border border-stone-200 bg-white">
                 <div className="font-bold text-stone-800 mb-1">3. Sama-Doshaja</div>
                 <p className="text-stone-500 leading-relaxed">
-                  All 3 doshas in equilibrium within ±4% (~33% each). Ideal constitutional balance.
+                  All 3 doshas in equilibrium within ±4% (~33-34% each). Ideal constitutional balance.
                 </p>
               </div>
             </div>

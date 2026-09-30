@@ -1,0 +1,6 @@
+# Robots.txt for TridoshaLab (https://tridoshalab.com)
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://tridoshalab.com/sitemap.xml

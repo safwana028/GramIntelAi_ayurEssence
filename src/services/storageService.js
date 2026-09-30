@@ -84,7 +84,7 @@ export function saveStoredLanguage(lang) {
 export function exportFullDataBackup() {
   const data = {
     exportedAt: new Date().toISOString(),
-    source: "AyurEssence - SDM College of Ayurveda, Udupi & SMVITM",
+    source: "TridoshaLab - SDM College of Ayurveda, Udupi & SMVITM",
     patients: getStoredPatients(),
     questionnaires: getStoredQuestionnaires()
   };
@@ -92,7 +92,7 @@ export function exportFullDataBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `ayuressence-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `tridoshalab-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

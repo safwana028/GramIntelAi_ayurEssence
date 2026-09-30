@@ -35,6 +35,14 @@ function optionalAuth(req, res, next) {
       const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
       const user = db.findById("users", decoded.id);
       if (user) {
+        if (String(user.role).toLowerCase() === "patient") {
+          return res.status(403).json({
+            success: false,
+            message: "Patient accounts cannot log in to the clinical assessment application. Patients exist only as clinical records. Only Doctors and Students may access this system.",
+            errorCode: "PATIENT_ACCESS_DISABLED",
+            requestId: req.id
+          });
+        }
         req.user = {
           id: user.id,
           name: user.name,
@@ -69,32 +77,15 @@ reportRouter.get("/:assessmentId", optionalAuth, (req, res) => {
     const patient = db.findById("patients", assessment.patientId);
     const user = assessment.userId ? db.findById("users", assessment.userId) : null;
 
-    // Check patient access restriction
-    if (req.user && req.user.role === "patient") {
-      const isOwner =
-        patient?.email?.toLowerCase() === req.user.email?.toLowerCase() ||
-        assessment.userId === req.user.id ||
-        assessment.patientEmail?.toLowerCase() === req.user.email?.toLowerCase();
-
-      if (!isOwner) {
-        return res.status(403).json({
-          success: false,
-          message: "Access denied to this report.",
-          error: "Access denied to this report.",
-          errorCode: "FORBIDDEN",
-          requestId: req.id
-        });
-      }
-
-      if (assessment.status?.toUpperCase() !== "FINALIZED" || !assessment.reportDelivered) {
-        return res.status(403).json({
-          success: false,
-          message: "Your assessment is currently under clinical review. The patient report will be available once finalized and delivered by your doctor.",
-          error: "Report not yet delivered by doctor.",
-          errorCode: "REPORT_NOT_DELIVERED",
-          requestId: req.id
-        });
-      }
+    // Patient-facing report delivery check: must be finalized and delivered by clinician
+    if (req.query.level === "patient" && (assessment.status?.toUpperCase() !== "FINALIZED" || !assessment.reportDelivered)) {
+      return res.status(403).json({
+        success: false,
+        message: "Your assessment is currently under clinical review. The patient report will be available once finalized and delivered by your doctor.",
+        error: "Report not yet delivered by doctor.",
+        errorCode: "REPORT_NOT_DELIVERED",
+        requestId: req.id
+      });
     }
 
     const prakriti = {

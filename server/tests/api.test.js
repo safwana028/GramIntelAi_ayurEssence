@@ -6,14 +6,17 @@
 process.env.NODE_ENV = "test";
 
 import http from "http";
+import jwt from "jsonwebtoken";
 import app from "../index.js";
 import { db } from "../data/database.js";
+import { CONFIG } from "../config/config.js";
 
 const TEST_PORT = 5055;
 let server;
 let testUserToken = "";
 let doctorToken = "";
 let studentToken = "";
+let legacyPatientToken = "";
 let registeredUserEmail = "";
 let createdAssessmentId = "";
 
@@ -423,24 +426,34 @@ async function runTests() {
     passedTests++;
 
     // -------------------------------------------------------------
-    // TEST 19: Patient role is strictly forbidden from creating assessments
+    // TEST 19: Patient role is strictly forbidden from application login & registration
     // -------------------------------------------------------------
-    console.log("🔹 TEST 19: Patient role is strictly forbidden from creating assessments");
+    console.log("🔹 TEST 19: Patient role is strictly forbidden from application login & registration");
     const patientLoginRes = await request("POST", "/api/auth/login", {
       email: "patient@kamath.org",
       password: "Patient@123"
     });
-    assert(patientLoginRes.status === 200, "Patient login succeeds");
-    const patientToken = patientLoginRes.body.token;
+    assert(patientLoginRes.status === 403, "Patient login returns 403 Forbidden");
+    assert(patientLoginRes.body.success === false, "Patient login returns success: false");
+    assert(patientLoginRes.body.errorCode === "PATIENT_ACCESS_DISABLED", "ErrorCode is PATIENT_ACCESS_DISABLED");
 
+    const patientRegRes = await request("POST", "/api/auth/register", {
+      name: "Patient Rogi",
+      email: "patient.attempt@domain.com",
+      password: "Password@123",
+      role: "patient"
+    });
+    assert(patientRegRes.status === 400, "Patient registration returns 400 Bad Request");
+    assert(patientRegRes.body.errorCode === "PATIENT_REGISTRATION_DISABLED", "ErrorCode is PATIENT_REGISTRATION_DISABLED");
+
+    legacyPatientToken = jwt.sign({ id: "USR-PAT-001" }, CONFIG.JWT_SECRET);
     const patientAsmAttempt = await request("POST", "/api/assessments", {
       patientId: "PAT-UDU-KAMATH-001",
       answers: { q1_frame: "v" }
-    }, patientToken);
-    assert(patientAsmAttempt.status === 403, "Patient assessment creation rejected with 403 Forbidden");
-    assert(patientAsmAttempt.body.success === false, "Patient attempt returns success: false");
-    assert(patientAsmAttempt.body.errorCode === "PATIENT_ASSESSMENT_FORBIDDEN", "ErrorCode is PATIENT_ASSESSMENT_FORBIDDEN");
-    console.log("  [PASS] TEST 19: Patient role is strictly forbidden from creating assessments.\n");
+    }, legacyPatientToken);
+    assert(patientAsmAttempt.status === 403, "Legacy patient token rejected with 403 Forbidden");
+    assert(patientAsmAttempt.body.errorCode === "PATIENT_ACCESS_DISABLED", "ErrorCode is PATIENT_ACCESS_DISABLED");
+    console.log("  [PASS] TEST 19: Patient role is strictly forbidden from application login & registration.\n");
     passedTests++;
 
     // -------------------------------------------------------------
@@ -600,13 +613,26 @@ async function runTests() {
     passedTests++;
 
     // -------------------------------------------------------------
-    // TEST 29: Report delivery workflow: Patient cannot view report until Doctor delivers it
+    // TEST 29: Patient-level report delivery workflow & patient token rejection
     // -------------------------------------------------------------
-    console.log("🔹 TEST 29: Patient cannot view report until Doctor delivers it");
-    const preDeliveryRep = await request("GET", `/api/reports/${draftId}?level=patient`, null, patientToken);
+    console.log("🔹 TEST 29: Patient-level report delivery workflow & patient token rejection");
+    // 1. Legacy patient token is rejected across report endpoints
+    const patientTokenRep = await request("GET", `/api/reports/${draftId}`, null, legacyPatientToken);
+    assert(patientTokenRep.status === 403, "Patient token rejected with 403 Forbidden");
+    assert(patientTokenRep.body.errorCode === "PATIENT_ACCESS_DISABLED", "ErrorCode is PATIENT_ACCESS_DISABLED");
+
+    // 2. Fetching patient-facing report pre-delivery is protected
+    const undeliveredDraft = await request("POST", "/api/assessments", {
+      patientId: "PAT-UDU-KAMATH-001",
+      answers: { q1_frame: "v" },
+      status: "DRAFT"
+    }, doctorToken);
+    const undeliveredId = undeliveredDraft.body.assessment.id;
+
+    const preDeliveryRep = await request("GET", `/api/reports/${undeliveredId}?level=patient`);
     assert(preDeliveryRep.status === 403, "Patient report fetch pre-delivery returns 403 Forbidden");
     assert(preDeliveryRep.body.errorCode === "REPORT_NOT_DELIVERED", "ErrorCode is REPORT_NOT_DELIVERED");
-    console.log("  [PASS] TEST 29: Patient cannot view report until Doctor delivers it.\n");
+    console.log("  [PASS] TEST 29: Patient-level report delivery workflow & patient token rejection.\n");
     passedTests++;
 
     // -------------------------------------------------------------
@@ -621,17 +647,17 @@ async function runTests() {
     passedTests++;
 
     // -------------------------------------------------------------
-    // TEST 31: Patient can now view delivered report & internal notes are redacted
+    // TEST 31: Patient-facing wellness report generated with internal notes redacted
     // -------------------------------------------------------------
-    console.log("🔹 TEST 31: Patient can view delivered report & internal notes are redacted");
-    const postDeliveryRep = await request("GET", `/api/reports/${draftId}?level=patient`, null, patientToken);
+    console.log("🔹 TEST 31: Patient-facing wellness report generated with internal notes redacted");
+    const postDeliveryRep = await request("GET", `/api/reports/${draftId}?level=patient`, null, doctorToken);
     assert(postDeliveryRep.status === 200, "Patient report fetch post-delivery returns 200 OK");
     assert(postDeliveryRep.body.success === true, "Report returns success: true");
     assert(postDeliveryRep.body.report.reportType === "patient_wellness_report", "Report type is patient_wellness_report");
     assert(postDeliveryRep.body.report.patientMessage !== undefined, "Patient message is present");
     assert(postDeliveryRep.body.report.observations === undefined, "Internal clinical observations are strictly redacted from patient report");
     assert(postDeliveryRep.body.report.ashtavidha === undefined, "Ashtavidha pariksha is redacted from patient report");
-    console.log("  [PASS] TEST 31: Patient can view delivered report & internal notes are redacted.\n");
+    console.log("  [PASS] TEST 31: Patient-facing wellness report generated with internal notes redacted.\n");
     passedTests++;
 
     // -------------------------------------------------------------

@@ -1,6 +1,13 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 import { CONFIG } from "./config/config.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, "../dist");
 import { db } from "./data/database.js";
 import { dbConnection } from "./data/dbConnection.js";
 import { requestIdMiddleware } from "./middleware/requestId.js";
@@ -25,7 +32,26 @@ import { doctorRouter } from "./routes/doctorRoutes.js";
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (CONFIG.ALLOWED_ORIGINS.includes("*") || CONFIG.ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+      if (/^https?:\/\/([a-z0-9-]+\.)?tridoshalab\.com(:[0-9]+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      if (/^http:\/\/localhost(:[0-9]+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"]
+  })
+);
 app.use(express.json({ limit: "2mb" }));
 
 // 1. Request ID Middleware (attaches req.id and sets X-Request-Id header)
@@ -42,7 +68,7 @@ app.get("/api/health", async (req, res) => {
   const health = await dbConnection.healthCheck();
   res.json({
     success: true,
-    message: "GramIntel AI AyurEssence backend is running",
+    message: "TridoshaLab API backend is running",
     status: "healthy",
     service: CONFIG.APP_NAME,
     version: CONFIG.VERSION,
@@ -89,7 +115,7 @@ app.get("/api/health/ready", async (req, res) => {
 // API Documentation Directory Endpoint
 app.get("/api/docs", (req, res) => {
   res.json({
-    title: "AyurEssence API Documentation - Production Hardened v2.4",
+    title: "TridoshaLab API Documentation - Production Hardened v3.0",
     sponsor: "SDM College of Ayurveda, Udupi & SMVITM Bantakal",
     endpoints: [
       {
@@ -183,7 +209,34 @@ app.use("/api/assessments", assessmentRateLimiter, assessmentRouter);
 app.use("/api/reports", reportRouter);
 app.use("/api/doctor", doctorRouter);
 
-// 404 handler
+// Serve static frontend assets from dist if built
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
+
+// 404 handler for unmatched API routes
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Endpoint '${req.method} ${req.originalUrl}' not found. Check /api/docs for available routes.`,
+    error: `Endpoint '${req.method} ${req.originalUrl}' not found. Check /api/docs for available routes.`,
+    errorCode: "NOT_FOUND",
+    requestId: req.id
+  });
+});
+
+// Single Page Application (SPA) client-side routing fallback for non-API GET requests
+app.use((req, res, next) => {
+  if (req.method === "GET") {
+    const indexPath = path.join(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+  }
+  next();
+});
+
+// Generic 404 handler for any other unmatched requests
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -203,7 +256,7 @@ let serverInstance = null;
 
 if (!isRunningTests) {
   serverInstance = app.listen(CONFIG.PORT, () => {
-    console.log(`🌿 AyurEssence Backend running on http://localhost:${CONFIG.PORT}`);
+    console.log(`🌿 TridoshaLab Backend running on http://localhost:${CONFIG.PORT}`);
     console.log(`📚 API Documentation available at http://localhost:${CONFIG.PORT}/api/docs`);
     console.log(`🩺 Health check at http://localhost:${CONFIG.PORT}/api/health`);
     console.log(`🩺 Readiness check at http://localhost:${CONFIG.PORT}/api/health/ready`);
@@ -211,7 +264,7 @@ if (!isRunningTests) {
 
   // Graceful shutdown
   const gracefulShutdown = async (signal) => {
-    console.log(`\nReceived ${signal}. Shutting down AyurEssence gracefully...`);
+    console.log(`\nReceived ${signal}. Shutting down TridoshaLab gracefully...`);
     if (serverInstance) {
       serverInstance.close(async () => {
         console.log("HTTP server closed.");

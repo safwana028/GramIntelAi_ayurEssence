@@ -2,16 +2,65 @@
  * Classical Ayurvedic Prakriti Calculation Engine
  * Designed according to SDM College of Ayurveda, Udupi clinical methodology
  * References: Charaka Vimana 8, Sushruta Sharira 4, Ashtanga Hridaya Sharira 3
+ *
+ * Guaranteed Properties:
+ * 1. Deterministic & Authoritative (Vata + Pitta + Kapha === 100)
+ * 2. Pure 24-Question Structured Assessment + Clinical Observation Modifiers
+ * 3. NO AI camera / facial weighting
  */
 
 /**
- * Calculates raw points, percentages, subdimensional scores, and constitutional classification.
+ * Normalizes 3 dosha values so that their integer percentages sum exactly to 100%.
+ * Uses largest-remainder algorithm to eliminate floating-point rounding errors.
+ */
+export function normalizePercentages(v, p, k) {
+  const total = v + p + k;
+  if (total <= 0) {
+    return { vata: 34, pitta: 33, kapha: 33 };
+  }
+
+  const items = [
+    { key: "vata", raw: (v / total) * 100 },
+    { key: "pitta", raw: (p / total) * 100 },
+    { key: "kapha", raw: (k / total) * 100 }
+  ];
+
+  const floored = items.map((item) => ({
+    key: item.key,
+    floor: Math.floor(item.raw),
+    diff: item.raw - Math.floor(item.raw)
+  }));
+
+  const currentSum = floored.reduce((acc, item) => acc + item.floor, 0);
+  const remainder = 100 - currentSum;
+
+  floored.sort((a, b) => b.diff - a.diff);
+
+  for (let i = 0; i < remainder; i++) {
+    floored[i % floored.length].floor += 1;
+  }
+
+  const result = {};
+  floored.forEach((item) => {
+    result[item.key] = item.floor;
+  });
+
+  return result;
+}
+
+/**
+ * Calculates raw points, normalized percentages, subdimensional scores, and constitutional classification.
  * @param {Object} answers - Map of questionId -> optionId ('v', 'p', 'k')
- * @param {Array} questions - Active questions array
+ * @param {Array} questions - Active questions array (e.g. 24 standard questions)
  * @param {Array} observationIndicators - Array of { term, dosha, weight } from practitioner notes
  * @param {boolean} includeObservations - Whether observation indicators adjust scores
  */
-export function calculatePrakriti(answers, questions, observationIndicators = [], includeObservations = true) {
+export function calculatePrakriti(
+  answers = {},
+  questions = [],
+  observationIndicators = [],
+  includeObservations = true
+) {
   let vataPoints = 0;
   let pittaPoints = 0;
   let kaphaPoints = 0;
@@ -29,7 +78,7 @@ export function calculatePrakriti(answers, questions, observationIndicators = []
     const selectedOptionId = answers[q.id];
     if (!selectedOptionId) return;
 
-    const opt = q.options.find((o) => o.id === selectedOptionId);
+    const opt = q.options?.find((o) => o.id === selectedOptionId);
     if (!opt) return;
 
     answeredCount++;
@@ -74,40 +123,56 @@ export function calculatePrakriti(answers, questions, observationIndicators = []
   // Prevent division by zero if empty
   if (totalPoints === 0) {
     return {
-      vata: 33.3,
-      pitta: 33.3,
-      kapha: 33.3,
+      vata: 34,
+      pitta: 33,
+      kapha: 33,
       totalPoints: 0,
       answeredCount: 0,
+      dominant: "Balanced",
       dominantPrakriti: "Incomplete Assessment",
       constitutionType: "Undetermined",
+      classicalTerm: "अनिर्णित (Undetermined)",
       explanation: "No responses recorded yet.",
+      rationale: "Insufficient responses to establish a constitutional baseline.",
+      points: {
+        vata: 0,
+        pitta: 0,
+        kapha: 0,
+        questionnaireVata: 0,
+        questionnairePitta: 0,
+        questionnaireKapha: 0,
+        observationVata: 0,
+        observationPitta: 0,
+        observationKapha: 0
+      },
       subScores: {
-        physical: { vata: 33.3, pitta: 33.3, kapha: 33.3 },
-        physiological: { vata: 33.3, pitta: 33.3, kapha: 33.3 },
-        psychological: { vata: 33.3, pitta: 33.3, kapha: 33.3 }
+        physical: { vata: 34, pitta: 33, kapha: 33 },
+        physiological: { vata: 34, pitta: 33, kapha: 33 },
+        psychological: { vata: 34, pitta: 33, kapha: 33 }
       }
     };
   }
 
-  // Calculate percentage distribution
-  const vataPct = Number(((finalVata / totalPoints) * 100).toFixed(1));
-  const pittaPct = Number(((finalPitta / totalPoints) * 100).toFixed(1));
-  const kaphaPct = Number(((finalKapha / totalPoints) * 100).toFixed(1));
+  // Exact 100% Normalized Percentages (Guaranteed vata + pitta + kapha === 100)
+  const normalized = normalizePercentages(finalVata, finalPitta, finalKapha);
+  const vataPct = normalized.vata;
+  const pittaPct = normalized.pitta;
+  const kaphaPct = normalized.kapha;
 
   // Compute sub-dimensional percentages
   const subScores = {};
   ["Physical", "Physiological", "Psychological"].forEach((dim) => {
     const d = dimensionPoints[dim];
     const key = dim.toLowerCase();
-    if (d.total > 0) {
+    if (d && d.total > 0) {
+      const dimNorm = normalizePercentages(d.vata, d.pitta, d.kapha);
       subScores[key] = {
-        vata: Number(((d.vata / d.total) * 100).toFixed(1)),
-        pitta: Number(((d.pitta / d.total) * 100).toFixed(1)),
-        kapha: Number(((d.kapha / d.total) * 100).toFixed(1))
+        vata: dimNorm.vata,
+        pitta: dimNorm.pitta,
+        kapha: dimNorm.kapha
       };
     } else {
-      subScores[key] = { vata: 33.3, pitta: 33.3, kapha: 33.3 };
+      subScores[key] = { vata: 34, pitta: 33, kapha: 33 };
     }
   });
 
@@ -132,14 +197,14 @@ export function calculatePrakriti(answers, questions, observationIndicators = []
     dominantPrakriti = "Sama Prakriti (Tridoshaja)";
     constitutionType = "Sama-Doshaja (Balanced Tridoshic)";
     classicalTerm = "समदोषज प्रकृति (Sama-Doshaja)";
-    rationale = `All three Doshas are in near equal proportion (Vata: ${vataPct}%, Pitta: ${pittaPct}%, Kapha: ${kaphaPct}%). Charaka and Vagbhata describe this as the supreme, ideal, yet rarest constitutional state.`;
+    rationale = `All three Doshas are in near equal proportion (Vata: ${vataPct}%, Pitta: ${pittaPct}%, Kapha: ${kaphaPct}%). Charaka and Vagbhata describe this as the supreme, ideal constitutional equilibrium.`;
   }
-  // Check 2: Eka-Doshaja (Single Dominant: >= 48% and >= 15% lead over second)
-  else if (top.pct >= 48.0 && (top.pct - second.pct) >= 15.0) {
+  // Check 2: Eka-Doshaja (Single Dominant: >= 45% and >= 12% lead over second)
+  else if (top.pct >= 45.0 && (top.pct - second.pct) >= 12.0) {
     dominantPrakriti = `${top.dosha} Dominant`;
     constitutionType = "Eka-Doshaja (Monodoshic)";
     classicalTerm = `${top.dosha === "Vata" ? "वातज" : top.dosha === "Pitta" ? "पित्तज" : "कफज"} प्रकृति (Eka-Doshaja)`;
-    rationale = `${top.dosha} represents ${top.pct}% of constitutional indicators, distinctly surpassing ${second.dosha} (${second.pct}%) by ${Number((top.pct - second.pct).toFixed(1))}%. Conforms to classical single-dosha predominance.`;
+    rationale = `${top.dosha} represents ${top.pct}% of constitutional indicators, distinctly surpassing ${second.dosha} (${second.pct}%) by ${top.pct - second.pct}%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).`;
   }
   // Check 3: Dwandwaja (Dual-Doshic / Bi-constitutional)
   else {
@@ -153,6 +218,13 @@ export function calculatePrakriti(answers, questions, observationIndicators = []
     vata: vataPct,
     pitta: pittaPct,
     kapha: kaphaPct,
+    dominant: top.dosha,
+    dominantPrakriti,
+    constitutionType,
+    classicalTerm,
+    rationale,
+    totalPoints: Number(totalPoints.toFixed(1)),
+    answeredCount,
     points: {
       vata: finalVata,
       pitta: finalPitta,
@@ -164,12 +236,12 @@ export function calculatePrakriti(answers, questions, observationIndicators = []
       observationPitta: obsPitta,
       observationKapha: obsKapha
     },
-    totalPoints: Number(totalPoints.toFixed(1)),
-    answeredCount,
-    dominantPrakriti,
-    constitutionType,
-    classicalTerm,
-    rationale,
-    subScores
+    subScores,
+    methodologyReferences: [
+      "Charaka Samhita Vimanasthana 8:95-100",
+      "Sushruta Samhita Sharirasthana 4:62-76",
+      "Ashtanga Hridaya Sharirasthana 3:83-104",
+      "SDM College of Ayurveda, Udupi Clinical Guidelines"
+    ]
   };
 }

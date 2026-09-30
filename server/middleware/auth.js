@@ -41,6 +41,16 @@ export function authenticateToken(req, res, next) {
       });
     }
 
+    if (String(user.role).toLowerCase() === "patient" || String(decoded.role).toLowerCase() === "patient") {
+      return res.status(403).json({
+        success: false,
+        message: "Patient portal access is disabled. Assessments and reports are accessible only via supervising Doctor or Student clinician.",
+        error: "Patient portal access is disabled. Assessments and reports are accessible only via supervising Doctor or Student clinician.",
+        errorCode: "PATIENT_ACCESS_DISABLED",
+        requestId: req.id || req.requestId || "unknown"
+      });
+    }
+
     req.user = {
       id: user.id,
       name: user.name,
@@ -118,9 +128,12 @@ export function forbidPatient(req, res, next) {
 }
 
 /**
- * Generates JWT token for an authenticated user
+ * Generates JWT token for an authenticated user (Doctor or Student only)
  */
 export function generateToken(user) {
+  if (user && String(user.role).toLowerCase() === "patient") {
+    throw new Error("Patient credentials and tokens cannot be generated. Patients exist only as clinical subjects.");
+  }
   return jwt.sign(
     {
       id: user.id,

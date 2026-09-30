@@ -1,6 +1,18 @@
 import React, { useState } from "react";
-import { ArrowLeft, Calendar, ShieldCheck, AlertCircle, FileText, CheckCircle2, User, Activity, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  ShieldCheck,
+  AlertCircle,
+  FileText,
+  CheckCircle2,
+  Activity,
+  Clock
+} from "lucide-react";
 import { DoshaRadarChart, DoshaProportionBar } from "../report/DoshaRadarChart";
+import { Button } from "../ui/Button";
+import { Badge } from "../ui/Badge";
+import { EmptyState } from "../ui/EmptyState";
 
 export function PatientHistoryView({
   patient,
@@ -11,24 +23,25 @@ export function PatientHistoryView({
 }) {
   const assessments = patient?.assessments || [];
   const [selectedIdxA, setSelectedIdxA] = useState(0);
-  const [selectedIdxB, setSelectedIdxB] = useState(assessments.length > 1 ? assessments.length - 1 : 0);
 
   if (!patient) return null;
 
   const currentA = assessments[selectedIdxA] || null;
-  const currentB = assessments[selectedIdxB] || null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Back & Patient Header */}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-2xs border border-stone-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onBack}
-            className="p-2 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 transition-colors"
+            className="p-2 rounded-xl"
+            aria-label="Back to Directory"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-stone-900 tracking-tight font-serif-heading">
@@ -37,32 +50,33 @@ export function PatientHistoryView({
               <span className="text-xs font-mono text-stone-500">({patient.id})</span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
-              {patient.age} yrs • {patient.gender} • {patient.city} • Baseline: <strong className="text-emerald-800">{patient.baselinePrakriti}</strong>
+              {patient.age} yrs • {patient.gender} • {patient.city} • Baseline:{" "}
+              <strong className="text-emerald-800">{patient.baselinePrakriti}</strong>
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-stone-500">
-            Total Evaluations Recorded: <strong className="text-stone-800 font-bold">{assessments.length}</strong>
-          </span>
+          <Badge variant="neutral" size="md">
+            Total Evaluations: <strong className="ml-1 text-stone-900">{assessments.length}</strong>
+          </Badge>
         </div>
       </div>
 
       {assessments.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-2xl border border-stone-200">
-          <Activity className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-stone-700">No Assessment Records Yet</h3>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
-            Initiate a new Prakriti assessment session for this patient to establish their baseline constitutional record.
-          </p>
-        </div>
+        <EmptyState
+          icon={Activity}
+          title="No Assessment Records Yet"
+          description="Initiate a new Prakriti assessment session for this patient to establish their baseline constitutional record."
+          actionLabel="Back to Directory"
+          onAction={onBack}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Timeline List (Left 4 cols) */}
           <div className="lg:col-span-4 space-y-4">
-            <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-emerald-700" />
+            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-emerald-800" />
               <span>Assessment Timeline</span>
             </h3>
 
@@ -75,9 +89,9 @@ export function PatientHistoryView({
                   <div
                     key={asm.id || idx}
                     onClick={() => setSelectedIdxA(idx)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
                       isSelected
-                        ? "bg-emerald-50/70 border-emerald-600 ring-2 ring-emerald-600/20 shadow-sm"
+                        ? "bg-emerald-50/80 border-emerald-600 ring-2 ring-emerald-600/20"
                         : "bg-white border-stone-200 hover:border-stone-300"
                     }`}
                   >
@@ -86,32 +100,33 @@ export function PatientHistoryView({
                         <Calendar className="w-3.5 h-3.5 text-stone-400" />
                         {asm.date}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 text-stone-700">
-                        {asm.scores.dominantPrakriti}
-                      </span>
+                      <Badge variant="neutral" size="sm">
+                        {asm.scores?.dominantPrakriti}
+                      </Badge>
                     </div>
 
                     <div className="text-[11px] text-stone-500 mb-2">
-                      Conducted by: <span className="font-medium text-stone-700">{asm.conductedBy?.name}</span>
+                      Conducted by:{" "}
+                      <span className="font-medium text-stone-700">
+                        {asm.conductedBy?.name || "Clinician"}
+                      </span>
                     </div>
 
                     {/* Proportion preview */}
-                    <DoshaProportionBar scores={asm.scores} className="h-2 mb-2" />
+                    <DoshaProportionBar scores={asm.scores} className="h-1.5 mb-2" />
 
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-stone-500">
-                        V: {asm.scores.vata}% • P: {asm.scores.pitta}% • K: {asm.scores.kapha}%
+                      <span className="text-stone-500 font-mono">
+                        V: {asm.scores?.vata}% • P: {asm.scores?.pitta}% • K: {asm.scores?.kapha}%
                       </span>
                       {isPending ? (
-                        <span className="text-amber-700 font-semibold flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
+                        <Badge variant="warning" size="sm" dot>
                           Needs Review
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <Badge variant="success" size="sm" dot>
                           Approved
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -123,60 +138,68 @@ export function PatientHistoryView({
           {/* Assessment Detail & Comparison (Right 8 cols) */}
           <div className="lg:col-span-8 space-y-5">
             {currentA && (
-              <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+              <div className="bg-white p-6 sm:p-7 rounded-3xl border border-stone-200/90 shadow-2xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
                   <div>
-                    <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wide">
-                      Selected Evaluation
+                    <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
+                      Selected Evaluation Dossier
                     </span>
-                    <h3 className="text-lg font-bold text-stone-900 font-serif-heading">
-                      {currentA.scores.dominantPrakriti} ({currentA.scores.constitutionType})
+                    <h3 className="text-xl font-bold text-stone-900 font-serif-heading mt-0.5">
+                      {currentA.scores?.dominantPrakriti} ({currentA.scores?.constitutionType || "Bi-Doshic"})
                     </h3>
-                    <div className="text-xs text-stone-500 flex items-center gap-2 mt-0.5">
-                      <span>Date: <strong>{currentA.date}</strong></span>
+                    <div className="text-xs text-stone-500 flex items-center gap-2 mt-1">
+                      <span>Date: <strong className="text-stone-700">{currentA.date}</strong></span>
                       <span>•</span>
-                      <span>Evaluator: <strong>{currentA.conductedBy?.name} ({currentA.conductedBy?.role})</strong></span>
+                      <span>
+                        Evaluator:{" "}
+                        <strong className="text-stone-700">
+                          {currentA.conductedBy?.name} ({currentA.conductedBy?.role || "Resident"})
+                        </strong>
+                      </span>
                     </div>
                   </div>
 
-                  <button
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={FileText}
                     onClick={() => onViewReport(patient, currentA)}
-                    className="px-4 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
                   >
-                    <FileText className="w-4 h-4 text-amber-300" />
-                    <span>View Formal Dossier</span>
-                  </button>
+                    View Formal Dossier
+                  </Button>
                 </div>
 
                 {/* Supervisor Review Action Box (Doctor Role) */}
                 {!currentA.supervisorApproved && (
-                  <div className="bg-amber-50 border border-amber-300/80 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="bg-amber-50 border border-amber-300/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-                        <AlertCircle className="w-4 h-4 text-amber-600" />
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                         <span>Student Draft Pending Senior Vaidya Sign-Off</span>
                       </div>
                       <p className="text-[11px] text-amber-800/90 mt-0.5">
-                        Conducted by student. Needs supervising clinical mentor to sign off and approve the constitutional findings.
+                        Conducted by student scholar. Needs supervising clinical mentor to sign off and approve findings.
                       </p>
                     </div>
 
                     {activeRole === "doctor" && (
-                      <button
+                      <Button
+                        variant="gold"
+                        size="sm"
+                        icon={ShieldCheck}
                         onClick={() => onSupervisorApprove(patient.id, currentA.id)}
-                        className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg shadow transition-colors flex items-center gap-1 whitespace-nowrap"
+                        className="whitespace-nowrap"
                       >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Sign Off & Approve</span>
-                      </button>
+                        Sign Off & Approve
+                      </Button>
                     )}
                   </div>
                 )}
 
                 {/* Visual Radar & Subscore Distribution */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                  <div className="flex flex-col items-center justify-center p-3 bg-stone-50/50 rounded-xl border border-stone-200">
-                    <DoshaRadarChart scores={currentA.scores} size={250} />
+                  <div className="flex flex-col items-center justify-center p-4 bg-stone-50/60 rounded-2xl border border-stone-200">
+                    <DoshaRadarChart scores={currentA.scores} size={240} />
                     <div className="text-[11px] text-stone-500 mt-2 text-center">
                       Tri-Dosha Polar Geometry (Equilateral Coordinate System)
                     </div>
@@ -185,50 +208,59 @@ export function PatientHistoryView({
                   <div className="space-y-4 text-xs">
                     <div>
                       <div className="flex justify-between font-semibold mb-1 text-sky-900">
-                        <span>Vata (वात): {currentA.scores.vata}%</span>
-                        <span>Air + Space</span>
+                        <span>Vata (वात): {currentA.scores?.vata}%</span>
+                        <span className="text-stone-500 text-[11px]">Air + Space</span>
                       </div>
-                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-sky-500" style={{ width: `${currentA.scores.vata}%` }} />
+                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-sky-500 rounded-full"
+                          style={{ width: `${currentA.scores?.vata}%` }}
+                        />
                       </div>
                     </div>
 
                     <div>
                       <div className="flex justify-between font-semibold mb-1 text-amber-900">
-                        <span>Pitta (पित्त): {currentA.scores.pitta}%</span>
-                        <span>Fire + Water</span>
+                        <span>Pitta (पित्त): {currentA.scores?.pitta}%</span>
+                        <span className="text-stone-500 text-[11px]">Fire + Water</span>
                       </div>
-                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500" style={{ width: `${currentA.scores.pitta}%` }} />
+                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-amber-500 rounded-full"
+                          style={{ width: `${currentA.scores?.pitta}%` }}
+                        />
                       </div>
                     </div>
 
                     <div>
                       <div className="flex justify-between font-semibold mb-1 text-emerald-900">
-                        <span>Kapha (कफ): {currentA.scores.kapha}%</span>
-                        <span>Water + Earth</span>
+                        <span>Kapha (कफ): {currentA.scores?.kapha}%</span>
+                        <span className="text-stone-500 text-[11px]">Water + Earth</span>
                       </div>
-                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-600" style={{ width: `${currentA.scores.kapha}%` }} />
+                      <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-600 rounded-full"
+                          style={{ width: `${currentA.scores?.kapha}%` }}
+                        />
                       </div>
                     </div>
 
                     {/* Dimensional Subscores */}
-                    {currentA.scores.subScores && (
+                    {currentA.scores?.subScores && (
                       <div className="pt-3 border-t border-stone-200 grid grid-cols-3 gap-2 text-center text-[10px]">
-                        <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                        <div className="bg-stone-50 p-2 rounded-xl border border-stone-200">
                           <div className="font-semibold text-stone-700">Physical</div>
                           <div className="text-stone-500 mt-0.5">
                             V:{currentA.scores.subScores.physical?.vata}% P:{currentA.scores.subScores.physical?.pitta}% K:{currentA.scores.subScores.physical?.kapha}%
                           </div>
                         </div>
-                        <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                        <div className="bg-stone-50 p-2 rounded-xl border border-stone-200">
                           <div className="font-semibold text-stone-700">Physiological</div>
                           <div className="text-stone-500 mt-0.5">
                             V:{currentA.scores.subScores.physiological?.vata}% P:{currentA.scores.subScores.physiological?.pitta}% K:{currentA.scores.subScores.physiological?.kapha}%
                           </div>
                         </div>
-                        <div className="bg-stone-50 p-2 rounded-lg border border-stone-200">
+                        <div className="bg-stone-50 p-2 rounded-xl border border-stone-200">
                           <div className="font-semibold text-stone-700">Psychological</div>
                           <div className="text-stone-500 mt-0.5">
                             V:{currentA.scores.subScores.psychological?.vata}% P:{currentA.scores.subScores.psychological?.pitta}% K:{currentA.scores.subScores.psychological?.kapha}%
@@ -241,7 +273,7 @@ export function PatientHistoryView({
 
                 {/* Free Text Observations */}
                 {currentA.observations?.freeText && (
-                  <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs">
+                  <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 text-xs">
                     <h4 className="font-bold text-stone-800 mb-1">
                       Recorded Clinical Observations & Notes
                     </h4>
@@ -258,3 +290,5 @@ export function PatientHistoryView({
     </div>
   );
 }
+
+export default PatientHistoryView;

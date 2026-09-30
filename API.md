@@ -1,393 +1,195 @@
-# AyurEssence Backend REST API Specification
+# AyurEssence Backend REST API Specification (v2.4 Clinician Pro)
 **Institution Partners:** SDM College of Ayurveda, Udupi & SMVITM Bantakal  
 **Base URL:** `http://localhost:5000/api`  
-**Authentication:** Standard HTTP Header: `Authorization: Bearer <JWT_TOKEN>`
+**Authentication:** HTTP Header: `Authorization: Bearer <JWT_TOKEN>`  
+**Standard Response Tracing Header:** `X-Request-Id: <UUID>`
 
 ---
 
-## Table of Endpoints
+## 1. Global Architectural Conventions
 
-| Category | Method | URL | Auth Required | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **System** | `GET` | `/health` | No | System health, database connection, and statistics |
-| **Auth** | `POST` | `/auth/register` | No | Register new Student, Doctor, or Patient |
-| **Auth** | `POST` | `/auth/login` | No | Login with email and password |
-| **Auth** | `GET` | `/auth/me` | Yes (Any) | Current user profile and active role |
-| **Questionnaire** | `GET` | `/questionnaires` | No | List all questionnaires with full questions and categories |
-| **Questionnaire** | `GET` | `/questionnaires/:id` | No | Get questionnaire by ID (or 'standard') |
-| **Questionnaire** | `POST` | `/questionnaires` | No / Doctor | Create a new questionnaire bundle |
-| **Assessments** | `POST` | `/assessments` | Yes (Any) | Submit new Prakriti assessment session |
-| **Assessments** | `GET` | `/assessments/:id` | Yes (Any) | Retrieve assessment by ID |
-| **Assessments** | `GET` | `/assessments/my` | Yes (Any) | Get logged-in user's submitted assessments |
-| **Assessments** | `PUT` | `/assessments/:id` | Yes (Any) | Update assessment (rejected if status is FINALIZED) |
-| **Prakriti** | `POST` | `/prakriti/calculate` | No | Dynamic calculation engine (guarantees V+P+K = 100%) |
-| **Reports** | `GET` | `/reports/:assessmentId` | No | Generate structured constitutional report |
-| **Doctor** | `GET` | `/doctor/assessments` | Yes (Doctor) | Doctor review queue of assessments |
-| **Doctor** | `GET` | `/doctor/assessments/:id` | Yes (Doctor) | Doctor view specific assessment record |
-| **Doctor** | `POST` | `/doctor/assessments/:id/finalize` | Yes (Doctor) | Approve & finalize assessment (SUBMITTED $\rightarrow$ FINALIZED) |
-| **NLP** | `POST` | `/nlp/analyze` | No | Free-form clinical text keyword & dosha signal analysis |
+### 1.1 Request ID Tracking
+Every incoming request receives a unique UUIDv4 identifier assigned via `X-Request-Id` middleware. If the client supplies an `X-Request-Id` header, it is preserved and mirrored. The ID is included in all structured logs and error responses.
 
----
+### 1.2 Rate Limiting
+Tiered in-memory rate limiting protects server availability:
+- **General API:** 100 requests / minute per client
+- **Auth Endpoints:** 20 attempts / 15 minutes per IP
+- **NLP Analysis:** 30 requests / minute
+- **Assessment Submission:** 40 requests / minute
 
-## 1. System Health
-### `GET /health`
-- **Auth Required:** No
-- **Request Body:** None
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "GramIntel AI AyurEssence backend is running",
-  "status": "healthy",
-  "service": "AyurEssence API",
-  "version": "1.0.0",
-  "timestamp": "2026-09-18T16:30:00.000Z",
-  "database": {
-    "status": "connected",
-    "usersCount": 3,
-    "patientsCount": 3,
-    "assessmentsCount": 4,
-    "questionsCount": 24
-  }
-}
-```
+Standard rate limit headers are returned:
+- `X-RateLimit-Limit`: Maximum requests allowed in window
+- `X-RateLimit-Remaining`: Remaining requests
+- `X-RateLimit-Reset`: Epoch timestamp when window resets
+- HTTP `429 Too Many Requests` returned when exceeded, along with `Retry-After`.
 
----
-
-## 2. Authentication
-
-### `POST /auth/register`
-- **Auth Required:** No
-- **Request Body:**
-```json
-{
-  "name": "Dr. Rashmi Nayak",
-  "email": "rashmi.nayak@sdm.edu",
-  "password": "Password@123",
-  "role": "Doctor",
-  "qualification": "BAMS, MD",
-  "institution": "SDM College of Ayurveda, Udupi"
-}
-```
-- **Success Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Doctor registered successfully.",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "USR-DOC-948201",
-    "name": "Dr. Rashmi Nayak",
-    "email": "rashmi.nayak@sdm.edu",
-    "role": "Doctor",
-    "institution": "SDM College of Ayurveda, Udupi",
-    "qualification": "BAMS, MD"
-  }
-}
-```
-- **Error Response (409 Conflict):**
+### 1.3 Centralized Error Response Contract
+All error responses strictly adhere to the following JSON structure:
 ```json
 {
   "success": false,
-  "message": "User with email 'rashmi.nayak@sdm.edu' is already registered.",
-  "error": "User with email 'rashmi.nayak@sdm.edu' is already registered."
+  "errorCode": "ASSESSMENT_ALREADY_FINALIZED",
+  "message": "This assessment has already been finalized and cannot be re-finalized.",
+  "requestId": "8f2a1b94-813c-4bfa-9f88-4235e128cb50"
 }
 ```
 
-### `POST /auth/login`
-- **Auth Required:** No
-- **Request Body:**
+---
+
+## 2. Table of API Endpoints
+
+| Category | Method | URL | Auth Required | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Health** | `GET` | `/health` | No | Liveness probe and quick stats |
+| **Health** | `GET` | `/health/ready` | No | Deep readiness check verifying DB pool connectivity |
+| **Auth** | `POST` | `/auth/register` | No | Register new Doctor, Student, or Patient |
+| **Auth** | `POST` | `/auth/login` | No | Authenticate and obtain JWT token |
+| **Auth** | `GET` | `/auth/me` | Any | Current authenticated user profile |
+| **Questionnaire** | `GET` | `/questionnaires` | No | List all active questionnaires (Cached) |
+| **Questionnaire** | `GET` | `/questionnaires/standard` | No | Get 24-question classical SDM questionnaire (Cached) |
+| **Patients** | `GET` | `/patients` | Doctor / Student | List registered clinical patients |
+| **Patients** | `POST` | `/patients` | Doctor / Student | Register a new clinical patient |
+| **Assessments** | `GET` | `/assessments` | Doctor / Student | List assessments with pagination (`page`, `limit`) |
+| **Assessments** | `POST` | `/assessments` | Doctor / Student | Create new assessment (DRAFT / SUBMITTED). Forbidden to Patients. |
+| **Assessments** | `GET` | `/assessments/:id` | Any | Retrieve assessment by ID |
+| **Assessments** | `PUT` | `/assessments/:id` | Doctor / Student | Update assessment (Forbidden if `FINALIZED`) |
+| **Assessments** | `PUT` | `/assessments/:id/question-notes/:qId` | Doctor / Student | Save per-question clinical observation note |
+| **Assessments** | `PUT` | `/assessments/:id/patient-message` | Doctor / Student | Update separate patient-facing message |
+| **Assessments** | `POST` | `/assessments/:id/transcription` | Doctor / Student | Insert voice dictation transcript into designated field |
+| **Assessments** | `GET` | `/assessments/:id/adaptive` | Any | Query 80% adaptive dosha threshold status |
+| **Doctor** | `GET` | `/doctor/assessments` | Doctor | Paginated clinical assessment queue |
+| **Doctor** | `POST` | `/doctor/assessments/:id/finalize` | Doctor | Atomic doctor finalization with row-level lock |
+| **Doctor** | `POST` | `/doctor/assessments/:id/deliver-report` | Doctor | Officially deliver Swastha report to patient |
+| **Reports** | `GET` | `/reports/:id?level=patient\|doctor` | Any | Fetch report. Strict redaction: internal notes removed for patients; requires delivery. |
+| **NLP** | `POST` | `/nlp/analyze` | No | Clinical free-text keyword & dosha signal analysis |
+
+---
+
+## 3. Detailed Endpoint Documentation
+
+### 3.1 Health & Readiness
+
+#### `GET /health`
+Returns quick service liveness.
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "service": "AyurEssence API",
+  "version": "2.4.0",
+  "timestamp": "2026-09-21T10:00:00.000Z"
+}
+```
+
+#### `GET /health/ready`
+Deep readiness check verifying database pool responsiveness.
+```json
+{
+  "success": true,
+  "status": "READY",
+  "ready": true,
+  "service": "AyurEssence API",
+  "version": "2.4.0",
+  "database": "connected",
+  "pool": {
+    "total": 10,
+    "idle": 8,
+    "waiting": 0
+  },
+  "timestamp": "2026-09-21T10:00:00.000Z"
+}
+```
+
+---
+
+### 3.2 Authentication
+
+#### `POST /auth/login`
 ```json
 {
   "email": "doctor@sdm.edu",
   "password": "Doctor@123"
 }
 ```
-- **Success Response (200 OK):**
+**Response (200 OK):**
 ```json
 {
   "success": true,
   "message": "Login successful",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
-    "id": "USR-DOC-001",
+    "id": "USR-SDM-DOC-001",
     "name": "Dr. K. Raghavendra Rao",
     "email": "doctor@sdm.edu",
-    "role": "Doctor",
-    "institution": "SDM College of Ayurveda & Hospital, Udupi"
-  }
-}
-```
-- **Error Response (401 Unauthorized):**
-```json
-{
-  "success": false,
-  "message": "Invalid email or password.",
-  "error": "Invalid email or password."
-}
-```
-
-### `GET /auth/me`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "user": {
-    "id": "USR-DOC-001",
-    "name": "Dr. K. Raghavendra Rao",
-    "email": "doctor@sdm.edu",
-    "role": "Doctor"
+    "role": "doctor"
   }
 }
 ```
 
 ---
 
-## 3. Questionnaires
+### 3.3 Assessments & Clinical Notes
 
-### `GET /questionnaires`
-- **Auth Required:** No
-- **Success Response (200 OK):** Returns array of questionnaires, each populated with questions, categories, and options.
-
-### `GET /questionnaires/standard`
-- **Auth Required:** No
-- **Success Response (200 OK):**
+#### `POST /assessments`
+Creates a new assessment. **Patients receive HTTP 403 (`PATIENT_ASSESSMENT_FORBIDDEN`).**
 ```json
 {
-  "success": true,
-  "data": {
-    "metadata": {
-      "id": "sdm-udupi-standard-24",
-      "title": "SDM Udupi Standard Comprehensive Prakriti Questionnaire",
-      "itemCount": 24
-    },
-    "questions": [
-      {
-        "id": "q1_frame",
-        "questionText": "Body Frame and Skeletal Structure",
-        "category": "Physical",
-        "dimension": "Physical",
-        "options": [
-          { "id": "v", "dosha": "vata", "weight": 1.0, "score": 1.0, "text": "Thin, slender, prominent joints" },
-          { "id": "p", "dosha": "pitta", "weight": 1.0, "score": 1.0, "text": "Medium, well-proportioned" },
-          { "id": "k", "dosha": "kapha", "weight": 1.0, "score": 1.0, "text": "Broad, heavy, well-knit joints" }
-        ]
-      }
-    ]
-  }
-}
-```
-
----
-
-## 4. Assessment Submission & Retrieval
-
-### `POST /assessments`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Request Body:**
-```json
-{
-  "questionnaireId": "sdm-udupi-standard-24",
+  "patientId": "PAT-UDU-2026-001",
+  "status": "DRAFT",
   "answers": {
     "q1_frame": "v",
-    "q2_weight": "v",
-    "q3_skin": "v",
-    "q7_agni": "p",
-    "q12_nidra": "v"
+    "q2_weight": "p"
   },
-  "observations": {
-    "freeText": "Patient complains of dry skin and poor sleep."
-  }
-}
-```
-- **Success Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Assessment submitted successfully.",
-  "assessment": {
-    "id": "ASM-974603",
-    "userId": "USR-STU-948123",
-    "status": "SUBMITTED",
-    "prakriti": {
-      "vata": 67,
-      "pitta": 33,
-      "kapha": 0,
-      "dominant": "Vata"
-    },
-    "scores": {
-      "vata": 67,
-      "pitta": 33,
-      "kapha": 0,
-      "dominant": "Vata",
-      "dominantPrakriti": "Vata Dominant",
-      "constitutionType": "Eka-Doshaja (Monodoshic)"
-    },
-    "createdAt": "2026-09-18T16:35:00.000Z",
-    "updatedAt": "2026-09-18T16:35:00.000Z"
-  }
-}
-```
-
-### `GET /assessments/:id`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Success Response (200 OK):** Returns full assessment object.
-
-### `GET /assessments/my`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Success Response (200 OK):** Returns array of all assessments submitted by or linked to the authenticated user.
-
-### `PUT /assessments/:id`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Error Response (403 Forbidden - when trying to modify finalized assessment):**
-```json
-{
-  "success": false,
-  "message": "Finalized assessment cannot be modified by normal user.",
-  "error": "Finalized assessment cannot be modified by normal user."
-}
-```
-
----
-
-## 5. Classical Prakriti Calculation Engine
-
-### `POST /prakriti/calculate`
-- **Auth Required:** No
-- **Request Body:**
-```json
-{
-  "answers": {
-    "q1": "v",
-    "q2": "p",
-    "q3": "k",
-    "q4": "v"
-  }
-}
-```
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "data": {
-    "vata": 50,
-    "pitta": 25,
-    "kapha": 25,
-    "dominant": "Vata",
-    "dominantPrakriti": "Vata Dominant",
-    "constitutionType": "Eka-Doshaja (Monodoshic)",
-    "rationale": "Vata represents 50% of constitutional indicators, exceeding Pitta (25%) by 25%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
-    "methodologyReferences": [
-      "Charaka Samhita Vimanasthana 8:95-100",
-      "Sushruta Samhita Sharirasthana 4:62-76",
-      "Ashtanga Hridaya Sharirasthana 3:83-104"
-    ]
-  }
-}
-```
-*Guaranteed invariant: `vata + pitta + kapha === 100`.*
-
----
-
-## 6. Report Generation
-
-### `GET /reports/:assessmentId`
-- **Auth Required:** No
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "report": {
-    "assessmentId": "ASM-974603",
-    "assessmentDate": "2026-09-18",
-    "status": "SUBMITTED",
-    "prakriti": {
-      "vata": 67,
-      "pitta": 33,
-      "kapha": 0,
-      "dominant": "Vata"
-    },
-    "basicInterpretation": "Your constitution shows predominant Vata doshic influence (Vata: 67%, Pitta: 33%, Kapha: 0%). Vata types benefit from grounding routines, warming foods, adequate rest, and hydration.",
-    "ethicalDisclaimer": "This report evaluates constitutional Prakriti for wellness guidance. It does not diagnose diseases or prescribe medicines."
-  }
-}
-```
-
----
-
-## 7. Doctor Review Workflow
-
-### `GET /doctor/assessments`
-- **Auth Required:** Yes (`Doctor` role)
-- **Success Response (200 OK):** Returns list of all submitted and finalized assessments.
-
-### `GET /doctor/assessments/:id`
-- **Auth Required:** Yes (`Doctor` role)
-- **Success Response (200 OK):** Returns detailed assessment and patient clinical dossier.
-
-### `POST /doctor/assessments/:id/finalize`
-- **Auth Required:** Yes (`Doctor` role)
-- **Request Body:**
-```json
-{
-  "notes": "Verified and signed off by Supervising Vaidya."
-}
-```
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Assessment approved and finalized by Supervising Doctor.",
-  "assessment": {
-    "id": "ASM-974603",
-    "status": "FINALIZED",
-    "supervisorApproved": true,
-    "supervisorNotes": "Verified and signed off by Supervising Vaidya."
-  }
-}
-```
-
----
-
-## 8. NLP Clinical Notes Analysis
-
-### `POST /nlp/analyze`
-- **Auth Required:** No
-- **Request Body:**
-```json
-{
-  "text": "Patient has dry skin, light sleep, and irregular digestion."
-}
-```
-- **Success Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "NLP analysis completed successfully.",
-  "text": "Patient has dry skin, light sleep, and irregular digestion.",
-  "dominantSignal": "Vata",
-  "summary": {
-    "vata": 2,
-    "pitta": 0,
-    "kapha": 0,
-    "totalSignals": 2
+  "questionNotes": {
+    "q1_frame": "Thin bone structure observed; dry ankles."
   },
-  "signals": [
-    {
-      "matchedPhrase": "dry skin",
-      "dosha": "vata",
-      "guna": "Ruksha (Dry) & Khara (Rough)",
-      "weight": 1.0,
-      "confidence": 0.91
-    },
-    {
-      "matchedPhrase": "light sleep",
-      "dosha": "vata",
-      "guna": "Alpa Nidra (Light/Disturbed Sleep)",
-      "weight": 1.1,
-      "confidence": 0.88
-    }
-  ]
+  "patientMessage": "Favor warm soups and daily oil massage."
 }
 ```
+
+#### `POST /assessments/:id/transcription`
+Inserts voice dictation text directly into designated target field.
+```json
+{
+  "field": "questionNotes.q1_frame",
+  "transcript": "Prominent tendon lines on dorsal foot observed."
+}
+```
+
+#### `GET /assessments/:id/adaptive`
+Returns adaptive status based on the configurable 80% dosha threshold.
+```json
+{
+  "success": true,
+  "assessmentId": "ASM-2026-001",
+  "threshold": 80,
+  "triggered": true,
+  "dominantDosha": "Vata",
+  "dominantPercentage": 82.5,
+  "authoritativeQuestionnairePreserved": true,
+  "indicator": "Constitutional analysis indicates dominant Vata (82.50%)."
+}
+```
+
+---
+
+### 3.4 Doctor Finalization & Report Delivery
+
+#### `POST /doctor/assessments/:id/finalize`
+Performs atomic finalization. Protected by mutex row locking. Duplicate attempts receive `409 Conflict`.
+```json
+{
+  "notes": "Verified classical Vata-Pitta Prakriti. Sign-off confirmed.",
+  "patientMessage": "Continue warm abhyanga daily."
+}
+```
+
+#### `POST /doctor/assessments/:id/deliver-report`
+Marks the assessment as delivered (`reportDelivered: true`). Patients can now view their Swastha Report.
+
+#### `GET /reports/:id?level=patient`
+Generates the patient report.
+- Returns `403 Forbidden` (`REPORT_NOT_DELIVERED`) if not delivered by doctor.
+- Strictly redacts internal clinician observations (`freeText`), Ashtavidha Pariksha, and supervisor notes.
+- Includes personalized `patientMessage`.

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="ae-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D6A4F" />
+      <stop offset="100%" stop-color="#1B4D3E" />
+    </linearGradient>
+    <linearGradient id="ae-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <linearGradient id="ae-sky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="#16382D" stroke="#F59E0B" stroke-width="2" />
+  <circle cx="50" cy="50" r="44" fill="#1B4D3E" />
+  <!-- Tri-Dosha Petals -->
+  <path d="M50 80 C42 67 38 52 50 37 C62 52 58 67 50 80 Z" fill="url(#ae-emerald)" />
+  <path d="M50 37 C35 33 24 43 22 58 C37 60 48 49 50 37 Z" fill="url(#ae-sky)" />
+  <path d="M50 37 C65 33 76 43 78 58 C63 60 52 49 50 37 Z" fill="url(#ae-gold)" />
+  <!-- Central Prana Core -->
+  <circle cx="50" cy="49" r="7" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" />
+  <circle cx="50" cy="49" r="3" fill="#1B4D3E" />
+  <path d="M50 18 L52 24 L50 27 L48 24 Z" fill="#F59E0B" />
+</svg>
