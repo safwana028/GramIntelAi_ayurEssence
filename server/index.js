@@ -30,6 +30,7 @@ import { reportRouter } from "./routes/reportRoutes.js";
 import { doctorRouter } from "./routes/doctorRoutes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Middlewares
 app.use(

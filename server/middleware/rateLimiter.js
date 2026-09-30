@@ -33,6 +33,15 @@ class MemoryRateLimiter {
         return next();
       }
 
+      // Bypass rate limiting for verified crawlers and static assets
+      const userAgent = req.headers["user-agent"] || "";
+      if (/googlebot|bingbot|crawler|spider/i.test(userAgent)) {
+        return next();
+      }
+      if (req.method === "GET" && (!req.path.startsWith("/api") || req.path === "/robots.txt" || req.path === "/sitemap.xml")) {
+        return next();
+      }
+
       // Determine client IP or token ID
       const clientKey = req.user?.id || req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "global";
       const bucketKey = `${options.name || "default"}:${clientKey}`;
