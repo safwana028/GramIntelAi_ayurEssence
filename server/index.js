@@ -64,6 +64,35 @@ app.use(requestLogger);
 // 3. Global General Rate Limiter
 app.use(generalRateLimiter);
 
+// Explicit Robots.txt handler ensuring immediate crawler allow directive
+app.get("/robots.txt", (req, res) => {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60");
+  res.send("User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: https://gramintelai-ayuressence.onrender.com/sitemap.xml\nSitemap: https://tridoshalab.com/sitemap.xml\n");
+});
+
+// Explicit Sitemap.xml handler
+app.get("/sitemap.xml", (req, res) => {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://gramintelai-ayuressence.onrender.com/</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://tridoshalab.com/</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+`);
+});
+
 // Health check endpoint (Preserved and enhanced)
 app.get("/api/health", async (req, res) => {
   const health = await dbConnection.healthCheck();

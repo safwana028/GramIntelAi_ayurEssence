@@ -403,6 +403,17 @@
       "institution": "SDM College of Ayurveda, Udupi",
       "phone": "",
       "createdAt": "2026-09-30T11:02:46.741Z"
+    },
+    {
+      "id": "USR-STU-809664",
+      "name": "Rohit Sharma",
+      "email": "ayur.student.1790770809577@sdm.edu",
+      "passwordHash": "$2b$10$kDN1LWZonj9YGcOrJDXEKecE9jgsVBGv8MQnzeD3lJpruAHiBtKwa",
+      "role": "Student",
+      "qualification": "BAMS Scholar",
+      "institution": "SDM College of Ayurveda, Udupi",
+      "phone": "",
+      "createdAt": "2026-09-30T12:20:09.664Z"
     }
   ],
   "patients": [
@@ -462,9 +473,13 @@
         "ASM-167255",
         "ASM-167369",
         "ASM-167606",
-        "ASM-167772"
+        "ASM-167772",
+        "ASM-810284",
+        "ASM-810431",
+        "ASM-810694",
+        "ASM-810888"
       ],
-      "updatedAt": "2026-09-30T11:02:47.787Z"
+      "updatedAt": "2026-09-30T12:20:10.900Z"
     },
     {
       "id": "PAT-UDU-2026-002",
@@ -817,6 +832,17 @@
       ],
       "baselinePrakriti": "Vata Dominant",
       "updatedAt": "2026-09-30T11:02:47.055Z"
+    },
+    {
+      "id": "USR-STU-809664",
+      "name": "Rohit Sharma",
+      "email": "ayur.student.1790770809577@sdm.edu",
+      "registeredDate": "2026-09-30",
+      "linkedAssessments": [
+        "ASM-809998"
+      ],
+      "baselinePrakriti": "Vata Dominant",
+      "updatedAt": "2026-09-30T12:20:10.015Z"
     }
   ],
   "questions": [
@@ -13433,6 +13459,761 @@
         "timestamp": "2026-09-30T11:02:47.811Z"
       },
       "finalizedAt": "2026-09-30T11:02:47.811Z"
+    },
+    {
+      "id": "ASM-809998",
+      "userId": "USR-STU-809664",
+      "patientId": "USR-STU-809664",
+      "patientEmail": "ayur.student.1790770809577@sdm.edu",
+      "questionnaireId": "sdm-udupi-standard-24",
+      "date": "2026-09-30",
+      "season": "Sharad (Autumn)",
+      "conductedBy": {
+        "id": "USR-STU-809664",
+        "name": "Rohit Sharma",
+        "role": "student"
+      },
+      "status": "FINALIZED",
+      "supervisorApproved": true,
+      "supervisorNotes": "Verified and approved by Chief Vaidya.",
+      "scores": {
+        "vata": 68,
+        "pitta": 26,
+        "kapha": 6,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 68% of constitutional indicators, exceeding Pitta (26%) by 42%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 15.4,
+        "answeredCount": 12,
+        "points": {
+          "vata": 10.4,
+          "pitta": 4,
+          "kapha": 1,
+          "questionnaireVata": 8.3,
+          "questionnairePitta": 4,
+          "questionnaireKapha": 0,
+          "observationVata": 2.1,
+          "observationPitta": 0,
+          "observationKapha": 1
+        },
+        "subScores": {
+          "physical": {
+            "vata": 63,
+            "pitta": 37,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 77,
+            "pitta": 23,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakritiResult": {
+        "vata": 68,
+        "pitta": 26,
+        "kapha": 6,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 68% of constitutional indicators, exceeding Pitta (26%) by 42%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 15.4,
+        "answeredCount": 12,
+        "points": {
+          "vata": 10.4,
+          "pitta": 4,
+          "kapha": 1,
+          "questionnaireVata": 8.3,
+          "questionnairePitta": 4,
+          "questionnaireKapha": 0,
+          "observationVata": 2.1,
+          "observationPitta": 0,
+          "observationKapha": 1
+        },
+        "subScores": {
+          "physical": {
+            "vata": 63,
+            "pitta": 37,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 77,
+            "pitta": 23,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakriti": {
+        "vata": 68,
+        "pitta": 26,
+        "kapha": 6,
+        "dominant": "Vata"
+      },
+      "observations": {
+        "freeText": "Patient presents with dry skin, light sleep, and erratic digestion.",
+        "ashtavidha": {},
+        "nlpSignals": [
+          {
+            "matchedPhrase": "dry skin",
+            "dosha": "vata",
+            "guna": "Ruksha (Dry) & Khara (Rough)",
+            "weight": 1,
+            "confidence": 0.88
+          },
+          {
+            "matchedPhrase": "light sleep",
+            "dosha": "vata",
+            "guna": "Alpa Nidra (Light/Disturbed Sleep)",
+            "weight": 1.1,
+            "confidence": 0.91
+          },
+          {
+            "matchedPhrase": "patient",
+            "dosha": "kapha",
+            "guna": "Dhriti & Sthirata",
+            "weight": 1,
+            "confidence": 0.95
+          }
+        ]
+      },
+      "questionNotes": {},
+      "patientMessage": "",
+      "answers": {
+        "q1_frame": "v",
+        "q2_weight": "v",
+        "q3_skin": "v",
+        "q4_hair": "v",
+        "q5_eyes": "p",
+        "q6_teeth": "p",
+        "q7_agni": "v",
+        "q8_koshta": "v",
+        "q9_thirst": "p",
+        "q10_perspiration": "p",
+        "q11_pulse": "v",
+        "q12_nidra": "v"
+      },
+      "reportDelivered": false,
+      "createdAt": "2026-09-30T12:20:09.998Z",
+      "updatedAt": "2026-09-30T12:20:10.236Z",
+      "finalizedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor",
+        "timestamp": "2026-09-30T12:20:10.233Z"
+      },
+      "finalizedAt": "2026-09-30T12:20:10.233Z"
+    },
+    {
+      "id": "ASM-810284",
+      "userId": "USR-DOC-001",
+      "patientId": "PAT-UDU-KAMATH-001",
+      "patientEmail": "patient@kamath.org",
+      "questionnaireId": "sdm-udupi-standard-24",
+      "date": "2026-09-30",
+      "season": "Sharad (Autumn)",
+      "conductedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor"
+      },
+      "status": "UNDER_REVIEW",
+      "supervisorApproved": false,
+      "supervisorNotes": "Verified and finalized by senior Vaidya.",
+      "scores": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 100% of constitutional indicators, exceeding Pitta (0%) by 100%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 1,
+        "answeredCount": 1,
+        "points": {
+          "vata": 1,
+          "pitta": 0,
+          "kapha": 0,
+          "questionnaireVata": 1,
+          "questionnairePitta": 0,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 100,
+            "pitta": 0,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakritiResult": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 100% of constitutional indicators, exceeding Pitta (0%) by 100%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 1,
+        "answeredCount": 1,
+        "points": {
+          "vata": 1,
+          "pitta": 0,
+          "kapha": 0,
+          "questionnaireVata": 1,
+          "questionnairePitta": 0,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 100,
+            "pitta": 0,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakriti": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata"
+      },
+      "observations": {
+        "freeText": "",
+        "ashtavidha": {},
+        "nlpSignals": []
+      },
+      "questionNotes": {},
+      "patientMessage": "",
+      "answers": {
+        "q1_frame": "v"
+      },
+      "reportDelivered": false,
+      "createdAt": "2026-09-30T12:20:10.284Z",
+      "updatedAt": "2026-09-30T12:20:10.369Z"
+    },
+    {
+      "id": "ASM-810431",
+      "userId": "USR-STU-001",
+      "patientId": "PAT-UDU-KAMATH-001",
+      "patientEmail": "patient@kamath.org",
+      "questionnaireId": "sdm-udupi-standard-24",
+      "date": "2026-09-30",
+      "season": "Sharad (Autumn)",
+      "conductedBy": {
+        "id": "USR-STU-001",
+        "name": "Dr. Mahesh Bhat",
+        "role": "student"
+      },
+      "status": "FINALIZED",
+      "supervisorApproved": true,
+      "supervisorNotes": "Officially finalized by Dr. K. Raghavendra Rao.",
+      "scores": {
+        "vata": 49,
+        "pitta": 47,
+        "kapha": 4,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata-Pitta",
+        "constitutionType": "Dwandwaja (Dual-Doshic)",
+        "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+        "rationale": "Combined predominance of Vata (49%) and Pitta (47%), with Kapha (4%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+        "totalPoints": 25.3,
+        "answeredCount": 24,
+        "points": {
+          "vata": 12.3,
+          "pitta": 12,
+          "kapha": 1,
+          "questionnaireVata": 12.3,
+          "questionnairePitta": 12,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 1
+        },
+        "subScores": {
+          "physical": {
+            "vata": 51,
+            "pitta": 49,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 46,
+            "pitta": 54,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 61,
+            "pitta": 39,
+            "kapha": 0
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakritiResult": {
+        "vata": 49,
+        "pitta": 47,
+        "kapha": 4,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata-Pitta",
+        "constitutionType": "Dwandwaja (Dual-Doshic)",
+        "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+        "rationale": "Combined predominance of Vata (49%) and Pitta (47%), with Kapha (4%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+        "totalPoints": 25.3,
+        "answeredCount": 24,
+        "points": {
+          "vata": 12.3,
+          "pitta": 12,
+          "kapha": 1,
+          "questionnaireVata": 12.3,
+          "questionnairePitta": 12,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 1
+        },
+        "subScores": {
+          "physical": {
+            "vata": 51,
+            "pitta": 49,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 46,
+            "pitta": 54,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 61,
+            "pitta": 39,
+            "kapha": 0
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakriti": {
+        "vata": 49,
+        "pitta": 47,
+        "kapha": 4,
+        "dominant": "Vata"
+      },
+      "observations": {
+        "freeText": "Patient reports restlessness and dry throat in early mornings.",
+        "ashtavidha": {},
+        "nlpSignals": [
+          {
+            "matchedPhrase": "patient",
+            "dosha": "kapha",
+            "guna": "Dhriti & Sthirata",
+            "weight": 1,
+            "confidence": 0.92
+          }
+        ]
+      },
+      "questionNotes": {
+        "q1_frame": "Prominent clavicles observed during examination"
+      },
+      "patientMessage": "Continue warm sesame oil abhyanga daily.",
+      "answers": {
+        "q1_frame": "v",
+        "q2_weight": "p",
+        "q3_skin": "v",
+        "q4_hair": "p",
+        "q5_eyes": "v",
+        "q6_teeth": "p",
+        "q7_agni": "v",
+        "q8_koshta": "p",
+        "q9_thirst": "v",
+        "q10_sweda": "p",
+        "q11_temp": "v",
+        "q12_nidra": "p",
+        "q13_swapna": "v",
+        "q14_bala": "p",
+        "q15_gati": "v",
+        "q16_vak": "p",
+        "q17_smriti": "v",
+        "q18_krodha": "p",
+        "q19_sankalpa": "v",
+        "q20_vyaya": "p",
+        "q21_social": "v",
+        "q22_nails": "p",
+        "q23_joints": "v",
+        "q24_vyadhikshamatva": "p"
+      },
+      "reportDelivered": true,
+      "createdAt": "2026-09-30T12:20:10.431Z",
+      "updatedAt": "2026-09-30T12:20:10.805Z",
+      "finalizedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor",
+        "timestamp": "2026-09-30T12:20:10.615Z"
+      },
+      "finalizedAt": "2026-09-30T12:20:10.615Z",
+      "reportDeliveredAt": "2026-09-30T12:20:10.793Z",
+      "deliveredBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao"
+      }
+    },
+    {
+      "id": "ASM-810694",
+      "userId": "USR-DOC-001",
+      "patientId": "PAT-UDU-KAMATH-001",
+      "patientEmail": "patient@kamath.org",
+      "questionnaireId": "sdm-udupi-standard-24",
+      "date": "2026-09-30",
+      "season": "Sharad (Autumn)",
+      "conductedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor"
+      },
+      "status": "DRAFT",
+      "supervisorApproved": false,
+      "supervisorNotes": "Verified and finalized by senior Vaidya.",
+      "scores": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 100% of constitutional indicators, exceeding Pitta (0%) by 100%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 1,
+        "answeredCount": 1,
+        "points": {
+          "vata": 1,
+          "pitta": 0,
+          "kapha": 0,
+          "questionnaireVata": 1,
+          "questionnairePitta": 0,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 100,
+            "pitta": 0,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakritiResult": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata Dominant",
+        "constitutionType": "Eka-Doshaja (Monodoshic)",
+        "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+        "rationale": "Vata represents 100% of constitutional indicators, exceeding Pitta (0%) by 100%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+        "totalPoints": 1,
+        "answeredCount": 1,
+        "points": {
+          "vata": 1,
+          "pitta": 0,
+          "kapha": 0,
+          "questionnaireVata": 1,
+          "questionnairePitta": 0,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 100,
+            "pitta": 0,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          },
+          "psychological": {
+            "vata": 34,
+            "pitta": 33,
+            "kapha": 33
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakriti": {
+        "vata": 100,
+        "pitta": 0,
+        "kapha": 0,
+        "dominant": "Vata"
+      },
+      "observations": {
+        "freeText": "",
+        "ashtavidha": {},
+        "nlpSignals": []
+      },
+      "questionNotes": {},
+      "patientMessage": "",
+      "answers": {
+        "q1_frame": "v"
+      },
+      "reportDelivered": false,
+      "createdAt": "2026-09-30T12:20:10.694Z",
+      "updatedAt": "2026-09-30T12:20:10.694Z"
+    },
+    {
+      "id": "ASM-810888",
+      "userId": "USR-DOC-001",
+      "patientId": "PAT-UDU-KAMATH-001",
+      "patientEmail": "patient@kamath.org",
+      "questionnaireId": "sdm-udupi-standard-24",
+      "date": "2026-09-30",
+      "season": "Sharad (Autumn)",
+      "conductedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor"
+      },
+      "status": "FINALIZED",
+      "supervisorApproved": true,
+      "supervisorNotes": "Doctor A",
+      "scores": {
+        "vata": 51,
+        "pitta": 49,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata-Pitta",
+        "constitutionType": "Dwandwaja (Dual-Doshic)",
+        "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+        "rationale": "Combined predominance of Vata (51%) and Pitta (49%), with Kapha (0%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+        "totalPoints": 24.3,
+        "answeredCount": 24,
+        "points": {
+          "vata": 12.3,
+          "pitta": 12,
+          "kapha": 0,
+          "questionnaireVata": 12.3,
+          "questionnairePitta": 12,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 51,
+            "pitta": 49,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 46,
+            "pitta": 54,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 61,
+            "pitta": 39,
+            "kapha": 0
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakritiResult": {
+        "vata": 51,
+        "pitta": 49,
+        "kapha": 0,
+        "dominant": "Vata",
+        "dominantPrakriti": "Vata-Pitta",
+        "constitutionType": "Dwandwaja (Dual-Doshic)",
+        "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+        "rationale": "Combined predominance of Vata (51%) and Pitta (49%), with Kapha (0%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+        "totalPoints": 24.3,
+        "answeredCount": 24,
+        "points": {
+          "vata": 12.3,
+          "pitta": 12,
+          "kapha": 0,
+          "questionnaireVata": 12.3,
+          "questionnairePitta": 12,
+          "questionnaireKapha": 0,
+          "observationVata": 0,
+          "observationPitta": 0,
+          "observationKapha": 0
+        },
+        "subScores": {
+          "physical": {
+            "vata": 51,
+            "pitta": 49,
+            "kapha": 0
+          },
+          "physiological": {
+            "vata": 46,
+            "pitta": 54,
+            "kapha": 0
+          },
+          "psychological": {
+            "vata": 61,
+            "pitta": 39,
+            "kapha": 0
+          }
+        },
+        "methodologyReferences": [
+          "Charaka Samhita Vimanasthana 8:95-100",
+          "Sushruta Samhita Sharirasthana 4:62-76",
+          "Ashtanga Hridaya Sharirasthana 3:83-104",
+          "SDM College of Ayurveda, Udupi Clinical Guidelines"
+        ]
+      },
+      "prakriti": {
+        "vata": 51,
+        "pitta": 49,
+        "kapha": 0,
+        "dominant": "Vata"
+      },
+      "observations": {
+        "freeText": "",
+        "ashtavidha": {},
+        "nlpSignals": []
+      },
+      "questionNotes": {},
+      "patientMessage": "",
+      "answers": {
+        "q1_frame": "v",
+        "q2_weight": "p",
+        "q3_skin": "v",
+        "q4_hair": "p",
+        "q5_eyes": "v",
+        "q6_teeth": "p",
+        "q7_agni": "v",
+        "q8_koshta": "p",
+        "q9_thirst": "v",
+        "q10_sweda": "p",
+        "q11_temp": "v",
+        "q12_nidra": "p",
+        "q13_swapna": "v",
+        "q14_bala": "p",
+        "q15_gati": "v",
+        "q16_vak": "p",
+        "q17_smriti": "v",
+        "q18_krodha": "p",
+        "q19_sankalpa": "v",
+        "q20_vyaya": "p",
+        "q21_social": "v",
+        "q22_nails": "p",
+        "q23_joints": "v",
+        "q24_vyadhikshamatva": "p"
+      },
+      "reportDelivered": false,
+      "createdAt": "2026-09-30T12:20:10.888Z",
+      "updatedAt": "2026-09-30T12:20:10.927Z",
+      "finalizedBy": {
+        "id": "USR-DOC-001",
+        "name": "Dr. K. Raghavendra Rao",
+        "role": "doctor",
+        "timestamp": "2026-09-30T12:20:10.924Z"
+      },
+      "finalizedAt": "2026-09-30T12:20:10.924Z"
     }
   ],
   "audit_logs": [
@@ -17531,6 +18312,345 @@
         }
       },
       "timestamp": "2026-09-30T11:02:47.820Z"
+    },
+    {
+      "id": "AUD-1790770810020-jd70w",
+      "actorId": "USR-STU-809664",
+      "actorRole": "student",
+      "action": "ASSESSMENT_CREATED",
+      "assessmentId": "ASM-809998",
+      "requestId": "5cf87cd1-4763-44ed-9401-53ffbd8ca0dc",
+      "metadata": {
+        "status": "SUBMITTED",
+        "dominantPrakriti": "Vata Dominant"
+      },
+      "timestamp": "2026-09-30T12:20:10.020Z"
+    },
+    {
+      "id": "AUD-1790770810243-g8zrp",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_FINALIZED",
+      "assessmentId": "ASM-809998",
+      "requestId": "26d73aea-adaf-4175-b983-fa4e4aaf6d61",
+      "metadata": {
+        "finalizedBy": "Dr. K. Raghavendra Rao",
+        "scores": {
+          "vata": 68,
+          "pitta": 26,
+          "kapha": 6,
+          "dominant": "Vata",
+          "dominantPrakriti": "Vata Dominant",
+          "constitutionType": "Eka-Doshaja (Monodoshic)",
+          "classicalTerm": "वातज प्रकृति (Eka-Doshaja)",
+          "rationale": "Vata represents 68% of constitutional indicators, exceeding Pitta (26%) by 42%. Conforms to classical single-dosha predominance (Charaka Vimana 8:95).",
+          "totalPoints": 15.4,
+          "answeredCount": 12,
+          "points": {
+            "vata": 10.4,
+            "pitta": 4,
+            "kapha": 1,
+            "questionnaireVata": 8.3,
+            "questionnairePitta": 4,
+            "questionnaireKapha": 0,
+            "observationVata": 2.1,
+            "observationPitta": 0,
+            "observationKapha": 1
+          },
+          "subScores": {
+            "physical": {
+              "vata": 63,
+              "pitta": 37,
+              "kapha": 0
+            },
+            "physiological": {
+              "vata": 77,
+              "pitta": 23,
+              "kapha": 0
+            },
+            "psychological": {
+              "vata": 34,
+              "pitta": 33,
+              "kapha": 33
+            }
+          },
+          "methodologyReferences": [
+            "Charaka Samhita Vimanasthana 8:95-100",
+            "Sushruta Samhita Sharirasthana 4:62-76",
+            "Ashtanga Hridaya Sharirasthana 3:83-104",
+            "SDM College of Ayurveda, Udupi Clinical Guidelines"
+          ]
+        }
+      },
+      "timestamp": "2026-09-30T12:20:10.243Z"
+    },
+    {
+      "id": "AUD-1790770810262-fkcpe",
+      "actorId": "USR-STU-809664",
+      "actorRole": "student",
+      "action": "UNAUTHORIZED_MODIFICATION_ATTEMPTED",
+      "assessmentId": "ASM-809998",
+      "requestId": "30d39a01-148c-4d05-b26c-72675a7f8d91",
+      "metadata": {
+        "reason": "Assessment is immutable once finalized"
+      },
+      "timestamp": "2026-09-30T12:20:10.262Z"
+    },
+    {
+      "id": "AUD-1790770810303-iv0i1",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_CREATED",
+      "assessmentId": "ASM-810284",
+      "requestId": "4945fdfb-6d22-4f14-86eb-2876811fde36",
+      "metadata": {
+        "status": "DRAFT",
+        "dominantPrakriti": "Vata Dominant"
+      },
+      "timestamp": "2026-09-30T12:20:10.303Z"
+    },
+    {
+      "id": "AUD-1790770810337-qswrw",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_UPDATED",
+      "assessmentId": "ASM-810284",
+      "requestId": "53c1bf41-db59-4096-87ff-cfc9de976a60",
+      "metadata": {
+        "fields": [
+          "status",
+          "scores",
+          "prakritiResult",
+          "prakriti"
+        ]
+      },
+      "timestamp": "2026-09-30T12:20:10.337Z"
+    },
+    {
+      "id": "AUD-1790770810375-4oi44",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_UPDATED",
+      "assessmentId": "ASM-810284",
+      "requestId": "f65d53ca-4b8c-4144-a39e-eeb2cacf7e51",
+      "metadata": {
+        "fields": [
+          "status",
+          "scores",
+          "prakritiResult",
+          "prakriti"
+        ]
+      },
+      "timestamp": "2026-09-30T12:20:10.375Z"
+    },
+    {
+      "id": "AUD-1790770810452-wv1qd",
+      "actorId": "USR-STU-001",
+      "actorRole": "student",
+      "action": "ASSESSMENT_CREATED",
+      "assessmentId": "ASM-810431",
+      "requestId": "3d948585-4aea-4cbf-993c-34967090c9a3",
+      "metadata": {
+        "status": "DRAFT",
+        "dominantPrakriti": "Vata-Pitta"
+      },
+      "timestamp": "2026-09-30T12:20:10.452Z"
+    },
+    {
+      "id": "AUD-1790770810527-h477d",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "VOICE_TRANSCRIPTION_INSERTED",
+      "assessmentId": "ASM-810431",
+      "requestId": "d635b1ac-eb4e-4dcc-ad4e-05a9018425e5",
+      "metadata": {
+        "destination": "clinicalObservation",
+        "length": 62
+      },
+      "timestamp": "2026-09-30T12:20:10.527Z"
+    },
+    {
+      "id": "AUD-1790770810590-mki3y",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_UPDATED",
+      "assessmentId": "ASM-810431",
+      "requestId": "179adbba-6c46-4289-b875-299a0d997d2f",
+      "metadata": {
+        "fields": [
+          "answers",
+          "scores",
+          "prakritiResult",
+          "prakriti"
+        ]
+      },
+      "timestamp": "2026-09-30T12:20:10.590Z"
+    },
+    {
+      "id": "AUD-1790770810622-56m0z",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_FINALIZED",
+      "assessmentId": "ASM-810431",
+      "requestId": "eaf041bc-0edb-4ac3-97e9-4ec7c66f9e3d",
+      "metadata": {
+        "finalizedBy": "Dr. K. Raghavendra Rao",
+        "scores": {
+          "vata": 49,
+          "pitta": 47,
+          "kapha": 4,
+          "dominant": "Vata",
+          "dominantPrakriti": "Vata-Pitta",
+          "constitutionType": "Dwandwaja (Dual-Doshic)",
+          "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+          "rationale": "Combined predominance of Vata (49%) and Pitta (47%), with Kapha (4%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+          "totalPoints": 25.3,
+          "answeredCount": 24,
+          "points": {
+            "vata": 12.3,
+            "pitta": 12,
+            "kapha": 1,
+            "questionnaireVata": 12.3,
+            "questionnairePitta": 12,
+            "questionnaireKapha": 0,
+            "observationVata": 0,
+            "observationPitta": 0,
+            "observationKapha": 1
+          },
+          "subScores": {
+            "physical": {
+              "vata": 51,
+              "pitta": 49,
+              "kapha": 0
+            },
+            "physiological": {
+              "vata": 46,
+              "pitta": 54,
+              "kapha": 0
+            },
+            "psychological": {
+              "vata": 61,
+              "pitta": 39,
+              "kapha": 0
+            }
+          },
+          "methodologyReferences": [
+            "Charaka Samhita Vimanasthana 8:95-100",
+            "Sushruta Samhita Sharirasthana 4:62-76",
+            "Ashtanga Hridaya Sharirasthana 3:83-104",
+            "SDM College of Ayurveda, Udupi Clinical Guidelines"
+          ]
+        }
+      },
+      "timestamp": "2026-09-30T12:20:10.622Z"
+    },
+    {
+      "id": "AUD-1790770810652-laq1r",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "UNAUTHORIZED_MODIFICATION_ATTEMPTED",
+      "assessmentId": "ASM-810431",
+      "requestId": "2f328b73-3dec-4b14-b326-2b18254ac1e5",
+      "metadata": {
+        "reason": "Assessment is immutable once finalized"
+      },
+      "timestamp": "2026-09-30T12:20:10.652Z"
+    },
+    {
+      "id": "AUD-1790770810714-lf0rg",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_CREATED",
+      "assessmentId": "ASM-810694",
+      "requestId": "14f696ca-62e1-4d70-8b5f-b8e5647530b7",
+      "metadata": {
+        "status": "DRAFT",
+        "dominantPrakriti": "Vata Dominant"
+      },
+      "timestamp": "2026-09-30T12:20:10.714Z"
+    },
+    {
+      "id": "AUD-1790770810810-ldl6u",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "REPORT_DELIVERED",
+      "assessmentId": "ASM-810431",
+      "requestId": "9dfd6ab0-7578-4068-ba93-da590843b787",
+      "metadata": {
+        "deliveredToPatientId": "PAT-UDU-KAMATH-001"
+      },
+      "timestamp": "2026-09-30T12:20:10.810Z"
+    },
+    {
+      "id": "AUD-1790770810903-8zl0f",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_CREATED",
+      "assessmentId": "ASM-810888",
+      "requestId": "8a6b3686-152c-4b41-a618-7c5ec5eec22b",
+      "metadata": {
+        "status": "SUBMITTED",
+        "dominantPrakriti": "Vata-Pitta"
+      },
+      "timestamp": "2026-09-30T12:20:10.903Z"
+    },
+    {
+      "id": "AUD-1790770810931-2irie",
+      "actorId": "USR-DOC-001",
+      "actorRole": "doctor",
+      "action": "ASSESSMENT_FINALIZED",
+      "assessmentId": "ASM-810888",
+      "requestId": "1a308e6b-14c1-4b8c-a919-68387a383002",
+      "metadata": {
+        "finalizedBy": "Dr. K. Raghavendra Rao",
+        "scores": {
+          "vata": 51,
+          "pitta": 49,
+          "kapha": 0,
+          "dominant": "Vata",
+          "dominantPrakriti": "Vata-Pitta",
+          "constitutionType": "Dwandwaja (Dual-Doshic)",
+          "classicalTerm": "द्वन्द्वज प्रकृति (Vata-Pitta)",
+          "rationale": "Combined predominance of Vata (51%) and Pitta (49%), with Kapha (0%) as recessive. This bi-constitutional combination is present in ~85% of individuals (Ashtanga Hridaya Sharira 3:84).",
+          "totalPoints": 24.3,
+          "answeredCount": 24,
+          "points": {
+            "vata": 12.3,
+            "pitta": 12,
+            "kapha": 0,
+            "questionnaireVata": 12.3,
+            "questionnairePitta": 12,
+            "questionnaireKapha": 0,
+            "observationVata": 0,
+            "observationPitta": 0,
+            "observationKapha": 0
+          },
+          "subScores": {
+            "physical": {
+              "vata": 51,
+              "pitta": 49,
+              "kapha": 0
+            },
+            "physiological": {
+              "vata": 46,
+              "pitta": 54,
+              "kapha": 0
+            },
+            "psychological": {
+              "vata": 61,
+              "pitta": 39,
+              "kapha": 0
+            }
+          },
+          "methodologyReferences": [
+            "Charaka Samhita Vimanasthana 8:95-100",
+            "Sushruta Samhita Sharirasthana 4:62-76",
+            "Ashtanga Hridaya Sharirasthana 3:83-104",
+            "SDM College of Ayurveda, Udupi Clinical Guidelines"
+          ]
+        }
+      },
+      "timestamp": "2026-09-30T12:20:10.931Z"
     }
   ],
   "reports": []
