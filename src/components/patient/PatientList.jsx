@@ -68,10 +68,10 @@ export function PatientList({
             onChange={(e) => setFilterPrakriti(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white text-stone-700"
           >
-            <option value="all">All Constitutions (ಎಲ್ಲಾ ಪ್ರಕೃತಿ)</option>
-            <option value="vata">Vata Predominant</option>
-            <option value="pitta">Pitta Predominant</option>
-            <option value="kapha">Kapha Predominant</option>
+            <option value="all">{t.allConstitutions || "All Constitutions"}</option>
+            <option value="vata">{t.vataPredominant || "Vata Predominant"}</option>
+            <option value="pitta">{t.pittaPredominant || "Pitta Predominant"}</option>
+            <option value="kapha">{t.kaphaPredominant || "Kapha Predominant"}</option>
           </select>
 
           {activeRole !== "patient" && (
@@ -94,7 +94,7 @@ export function PatientList({
           icon={Users}
           title="No Patients Found"
           description="No registered profiles match your search criteria. Try a different query or add a new patient."
-          actionLabel={activeRole !== "patient" ? "Register New Patient" : undefined}
+          actionLabel={activeRole !== "patient" ? (t.newPatientBtn || "Register New Patient") : undefined}
           onAction={activeRole !== "patient" ? onOpenNewPatientModal : undefined}
           actionIcon={UserPlus}
         />
@@ -153,7 +153,7 @@ export function PatientList({
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-400 text-[11px]">Diet (Ahara):</span>
+                      <span className="text-stone-400 text-[11px]">{t.diet || "Diet Type"} (Ahara):</span>
                       <span className="font-medium text-stone-700">
                         {patient.dietType || "Vegetarian"}
                       </span>
@@ -202,7 +202,7 @@ export function PatientList({
                         onClick={() => onQuickViewReport(patient, latestAssessment)}
                         className="w-full text-xs"
                       >
-                        View Dossier
+                        {t.inspectDossier || "View Dossier"}
                       </Button>
                     ) : (
                       <Button

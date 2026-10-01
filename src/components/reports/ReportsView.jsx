@@ -93,7 +93,7 @@ export function ReportsView({
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-stone-600 bg-stone-100 px-3 py-1.5 rounded-xl font-semibold">
-            Total Dossiers: <strong className="text-stone-900">{allReports.length}</strong>
+            {t.totalDossiers || "Total Dossiers"}: <strong className="text-stone-900">{allReports.length}</strong>
           </span>
         </div>
       </div>
@@ -106,7 +106,7 @@ export function ReportsView({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by patient, ID, or evaluator..."
+            placeholder={t.searchPlaceholder || "Search by patient, ID, or evaluator..."}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-stone-50/50"
           />
         </div>
@@ -117,10 +117,10 @@ export function ReportsView({
             onChange={(e) => setFilterConstitution(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white text-stone-700"
           >
-            <option value="all">All Constitutions</option>
-            <option value="vata">Vata Dominant</option>
-            <option value="pitta">Pitta Dominant</option>
-            <option value="kapha">Kapha Dominant</option>
+            <option value="all">{t.allConstitutions || "All Constitutions"}</option>
+            <option value="vata">{t.vataPredominant || "Vata Dominant"}</option>
+            <option value="pitta">{t.pittaPredominant || "Pitta Dominant"}</option>
+            <option value="kapha">{t.kaphaPredominant || "Kapha Dominant"}</option>
           </select>
 
           <select
@@ -128,10 +128,10 @@ export function ReportsView({
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white text-stone-700"
           >
-            <option value="all">All Statuses</option>
-            <option value="delivered">Delivered to Patient</option>
-            <option value="approved">Supervisor Approved</option>
-            <option value="pending">Pending Sign-Off</option>
+            <option value="all">{t.allStatuses || "All Statuses"}</option>
+            <option value="delivered">{t.deliveredStatus || "Delivered to Patient"}</option>
+            <option value="approved">{t.approvedStatus || "Supervisor Approved"}</option>
+            <option value="pending">{t.pendingStatus || "Pending Sign-Off"}</option>
           </select>
         </div>
       </div>
@@ -170,28 +170,28 @@ export function ReportsView({
 
                     {report.reportDelivered ? (
                       <Badge variant="success" size="sm" dot>
-                        Delivered
+                        {t.deliveredToPatient || "Delivered"}
                       </Badge>
                     ) : report.supervisorApproved ? (
                       <Badge variant="info" size="sm" dot>
-                        Verified
+                        {t.approvedStatus || "Verified"}
                       </Badge>
                     ) : (
                       <Badge variant="warning" size="sm" dot>
-                        Draft / Review
+                        {t.pendingStatus || "Draft / Review"}
                       </Badge>
                     )}
                   </div>
 
                   <div className="my-3 space-y-1.5 text-xs text-stone-600">
                     <div className="flex justify-between items-center">
-                      <span className="text-stone-400 text-[11px]">Dominant Prakriti:</span>
+                      <span className="text-stone-400 text-[11px]">{t.dominantDosha || "Dominant Prakriti"}:</span>
                       <strong className="text-stone-900 font-serif-heading">
                         {report.scores?.dominantPrakriti}
                       </strong>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-stone-400 text-[11px]">Evaluation Date:</span>
+                      <span className="text-stone-400 text-[11px]">{t.date || "Evaluation Date"}:</span>
                       <span className="font-medium text-stone-700 flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-stone-400" />
                         {report.date}
@@ -199,19 +199,19 @@ export function ReportsView({
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-stone-400 text-[11px]">
-                        {report.conductedBy?.role === "patient" ? "Submitted By:" : "Conducted By:"}
+                        {report.conductedBy?.role === "patient" ? "Submitted By:" : (t.conductedByLabel || "Conducted By:")}
                       </span>
                       <span className="font-medium text-stone-700 truncate max-w-[170px] flex items-center gap-1">
                         {report.conductedBy?.role === "patient" ? (
                           <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
-                            👤 Patient
+                            👤 {t.rolePatient || "Patient"}
                           </span>
                         ) : report.conductedBy?.role === "student" ? (
                           <span className="text-[10px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">
-                            🎓 Scholar
+                            🎓 {t.academicScholar || "Scholar"}
                           </span>
                         ) : null}
-                        <span>{report.conductedBy?.name || "Clinician"}</span>
+                        <span>{report.conductedBy?.name || (t.seniorVaidya || "Clinician")}</span>
                       </span>
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export function ReportsView({
                     }}
                     className="flex-1"
                   >
-                    View Dossier
+                    {t.inspectDossier || "View Dossier"}
                   </Button>
 
                   {activeRole === "doctor" && !report.reportDelivered && (
@@ -246,9 +246,9 @@ export function ReportsView({
                       icon={Send}
                       onClick={() => onDoctorDeliverReport(report.patientId, report.id)}
                       className="px-2.5"
-                      title="Deliver to Patient Swastha Portal"
+                      title={t.btnDeliverReport || "Deliver to Patient Swastha Portal"}
                     >
-                      Deliver
+                      {t.btnDeliverReport || "Deliver"}
                     </Button>
                   )}
                 </div>

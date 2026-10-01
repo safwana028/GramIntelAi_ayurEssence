@@ -125,7 +125,7 @@ export function ReviewQueue({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search patient, student, or constitution..."
+            placeholder={t.searchPlaceholder || "Search patient, student, or constitution..."}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-stone-50/50"
           />
         </div>
@@ -140,7 +140,7 @@ export function ReviewQueue({
                   : "text-stone-600 hover:text-stone-900"
               }`}
             >
-              Pending ({pendingCount})
+              {t.pendingStatus || "Pending"} ({pendingCount})
             </button>
             <button
               onClick={() => setFilterStatus("approved")}
@@ -150,7 +150,7 @@ export function ReviewQueue({
                   : "text-stone-600 hover:text-stone-900"
               }`}
             >
-              Approved
+              {t.approvedStatus || "Approved"}
             </button>
             <button
               onClick={() => setFilterStatus("all")}
@@ -160,7 +160,7 @@ export function ReviewQueue({
                   : "text-stone-600 hover:text-stone-900"
               }`}
             >
-              All Items
+              {t.allStatuses || "All Items"}
             </button>
           </div>
         </div>
@@ -205,11 +205,11 @@ export function ReviewQueue({
                       </span>
                       {isPending ? (
                         <Badge variant="warning" size="sm" dot>
-                          Pending Sign-Off
+                          {t.pendingStatus || "Pending Sign-Off"}
                         </Badge>
                       ) : (
                         <Badge variant="success" size="sm" dot>
-                          Official Sign-Off Granted
+                          {t.approvedStatus || "Official Sign-Off Granted"}
                         </Badge>
                       )}
                     </div>
@@ -227,7 +227,7 @@ export function ReviewQueue({
 
                   <div className="flex items-center gap-2">
                     <Badge variant="neutral" size="md">
-                      Dominant: <strong className="ml-1 text-stone-900">{item.scores?.dominantPrakriti}</strong>
+                      {t.dominantDosha || "Dominant"}: <strong className="ml-1 text-stone-900">{item.scores?.dominantPrakriti}</strong>
                     </Badge>
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export function ReviewQueue({
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-stone-50/80 p-3.5 rounded-xl border border-stone-200">
                   <div className="md:col-span-8 space-y-1.5">
                     <div className="flex justify-between text-[11px] font-semibold text-stone-600">
-                      <span>Constitutional Proportion (Vata • Pitta • Kapha)</span>
+                      <span>{t.scoreBreakdown || "Constitutional Proportion (Vata • Pitta • Kapha)"}</span>
                       <span>{item.scores?.constitutionType || "Bi-Doshic"}</span>
                     </div>
                     <DoshaProportionBar scores={item.scores} className="h-2" />
@@ -244,15 +244,15 @@ export function ReviewQueue({
 
                   <div className="md:col-span-4 flex items-center justify-around text-center text-xs">
                     <div>
-                      <span className="text-[10px] text-sky-800 font-bold block">Vata</span>
+                      <span className="text-[10px] text-sky-800 font-bold block">{t.vata || "Vata"}</span>
                       <span className="font-bold text-stone-800">{item.scores?.vata}%</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-amber-800 font-bold block">Pitta</span>
+                      <span className="text-[10px] text-amber-800 font-bold block">{t.pitta || "Pitta"}</span>
                       <span className="font-bold text-stone-800">{item.scores?.pitta}%</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-emerald-800 font-bold block">Kapha</span>
+                      <span className="text-[10px] text-emerald-800 font-bold block">{t.kapha || "Kapha"}</span>
                       <span className="font-bold text-stone-800">{item.scores?.kapha}%</span>
                     </div>
                   </div>
@@ -263,19 +263,19 @@ export function ReviewQueue({
                   <div className="text-stone-600 flex flex-wrap items-center gap-2">
                     {item.conductedBy?.role === "patient" ? (
                       <span className="inline-flex items-center gap-1 font-semibold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full text-[11px] border border-purple-200">
-                        👤 Patient Self-Assessment
+                        👤 {t.submittedByPatient || "Patient Self-Assessment"}
                       </span>
                     ) : item.conductedBy?.role === "student" ? (
                       <span className="inline-flex items-center gap-1 font-semibold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full text-[11px] border border-sky-200">
-                        🎓 Ayurveda Scholar (Student)
+                        🎓 {t.academicScholar || "Ayurveda Scholar (Student)"}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-[11px] border border-emerald-200">
-                        👨‍⚕️ Clinician
+                        👨‍⚕️ {t.seniorVaidya || "Clinician"}
                       </span>
                     )}
                     <span>
-                      {item.conductedBy?.role === "patient" ? "Submitter:" : "Evaluator:"}{" "}
+                      {item.conductedBy?.role === "patient" ? "Submitter:" : (t.conductedByLabel || "Evaluator:")}{" "}
                       <strong className="text-stone-900">
                         {item.conductedBy?.name || (item.conductedBy?.role === "patient" ? item.patientName : "BAMS Scholar")}
                       </strong>
@@ -323,7 +323,7 @@ export function ReviewQueue({
       <Modal
         isOpen={Boolean(selectedForApproval)}
         onClose={() => setSelectedForApproval(null)}
-        title="Official Clinical Sign-Off"
+        title={t.btnSignOff || "Official Clinical Sign-Off"}
         subtitle={`Patient: ${selectedForApproval?.patientName}`}
         maxWidth="max-w-md"
         footer={
@@ -333,7 +333,7 @@ export function ReviewQueue({
               size="sm"
               onClick={() => setSelectedForApproval(null)}
             >
-              Cancel
+              {t.cancelBtn || "Cancel"}
             </Button>
             <Button
               variant="gold"
@@ -341,7 +341,7 @@ export function ReviewQueue({
               icon={ShieldCheck}
               onClick={handleConfirmApproval}
             >
-              Confirm Official Sign-Off
+              {t.btnSignOff || "Confirm Official Sign-Off"}
             </Button>
           </>
         }

@@ -49,16 +49,16 @@ export function StudentDashboard({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-400 text-stone-950 uppercase tracking-wider">
-              BAMS Academic & Clinical Training Portal
+              {t.academicStudentWorkflow || "BAMS Academic & Clinical Training Portal"}
             </span>
             <span className="text-blue-200 text-xs">•</span>
             <span className="text-xs text-blue-200">SDMCA Udupi / SMVITM Bantakal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold font-serif-heading text-sky-100">
-            Ayurvedic Scholar Workspace
+            {t.studentRoleBadge || "Ayurvedic Scholar Workspace"}
           </h1>
           <p className="text-xs sm:text-sm text-blue-100/90 max-w-xl">
-            Conduct supervised Prakriti evaluations under clinical mentorship. Your submissions will be routed to senior Vaidyas for verification.
+            {t.loginStudentDesc || "Conduct supervised Prakriti evaluations under clinical mentorship. Your submissions will be routed to senior Vaidyas for verification."}
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export function StudentDashboard({
             icon={Sparkles}
             onClick={() => onNavigate("assessment")}
           >
-            New Assessment
+            {t.navNewAssessment || "New Assessment"}
           </Button>
           <Button
             variant="outline"
@@ -78,7 +78,7 @@ export function StudentDashboard({
             onClick={onOpenMethodology}
             className="bg-white/10 text-white border-white/20 hover:bg-white/20"
           >
-            Study Samhita Shlokas
+            {t.navSamhitaReferences || "Study Samhita Shlokas"}
           </Button>
           {onSignOut && (
             <Button
@@ -97,7 +97,7 @@ export function StudentDashboard({
       {/* KPI Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
         <StatCard
-          title="Evaluations Conducted"
+          title={t.evaluationsConducted || "Evaluations Conducted"}
           value={totalConducted}
           subtitle="Clinical training sessions"
           icon={GraduationCap}
@@ -105,17 +105,17 @@ export function StudentDashboard({
           onClick={() => onNavigate("reports")}
         />
         <StatCard
-          title="Supervisor Approved"
+          title={t.approvedStatus || "Supervisor Approved"}
           value={verifiedCount}
-          subtitle="Verified by Senior Vaidya"
+          subtitle={t.approvedBySupervisor || "Verified by Senior Vaidya"}
           icon={CheckCircle2}
           color="emerald"
           onClick={() => onNavigate("reports")}
         />
         <StatCard
-          title="Awaiting Review"
+          title={t.pendingStatus || "Awaiting Review"}
           value={pendingCount}
-          subtitle="In supervisor queue"
+          subtitle={t.pendingSupervisorReview || "In supervisor queue"}
           icon={AlertCircle}
           color={pendingCount > 0 ? "amber" : "emerald"}
         />
@@ -129,7 +129,7 @@ export function StudentDashboard({
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div>
                 <h2 className="text-base font-bold text-stone-900 font-serif-heading">
-                  My Recent Clinical Submissions
+                  {t.evaluationsConducted || "My Recent Clinical Submissions"}
                 </h2>
                 <p className="text-xs text-stone-500 mt-0.5">
                   Track the status of your patient evaluations and supervisor comments.
@@ -143,7 +143,7 @@ export function StudentDashboard({
                 iconRight={ArrowRight}
                 className="text-xs text-sky-800"
               >
-                All Reports
+                {t.navReports || "All Reports"}
               </Button>
             </div>
 
@@ -160,7 +160,7 @@ export function StudentDashboard({
                     size="sm"
                     onClick={() => onNavigate("patients")}
                   >
-                    Open Patient Directory
+                    {t.navPatients || "Open Patient Directory"}
                   </Button>
                 </div>
               </div>
@@ -186,11 +186,11 @@ export function StudentDashboard({
 
                       {asm.supervisorApproved ? (
                         <Badge variant="success" size="sm" dot>
-                          Approved by Vaidya
+                          {t.approvedBySupervisor || "Approved by Vaidya"}
                         </Badge>
                       ) : (
                         <Badge variant="warning" size="sm" dot>
-                          Pending Review
+                          {t.pendingApproval || "Pending Review"}
                         </Badge>
                       )}
                     </div>
@@ -199,7 +199,7 @@ export function StudentDashboard({
 
                     <div className="flex items-center justify-between text-xs pt-1 border-t border-stone-100">
                       <span className="text-stone-600 font-semibold">
-                        Dominant: {asm.scores?.dominantPrakriti}
+                        {t.dominantDosha || "Dominant"}: {asm.scores?.dominantPrakriti}
                       </span>
 
                       <button
@@ -210,7 +210,7 @@ export function StudentDashboard({
                         }}
                         className="text-xs font-semibold text-sky-800 hover:text-sky-900 hover:underline flex items-center gap-1"
                       >
-                        <span>View Dossier</span>
+                        <span>{t.inspectDossier || "View Dossier"}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -227,7 +227,7 @@ export function StudentDashboard({
             <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
               <Award className="w-5 h-5 text-amber-500" />
               <h3 className="text-sm font-bold text-stone-900 font-serif-heading">
-                Classical Pariksha Reference Aids
+                {t.classicalCitations || "Classical Pariksha Reference Aids"}
               </h3>
             </div>
 
@@ -237,7 +237,7 @@ export function StudentDashboard({
                   Charaka Samhita • Vimanasthana 8:95
                 </div>
                 <p className="italic text-stone-700 leading-relaxed text-[11px]">
-                  "तत्र प्रकृतिरुच्यते स्वभावः..." — Constitution is the inborn physiological nature determined by maternal and paternal Sukra-Shonita at the instant of conception.
+                  "तत्र प्रकृतिरुच್ಯते स्वभावः..." — Constitution is the inborn physiological nature determined by maternal and paternal Sukra-Shonita at the instant of conception.
                 </p>
               </div>
 
@@ -257,7 +257,7 @@ export function StudentDashboard({
                 icon={BookOpen}
                 className="w-full text-xs text-stone-700"
               >
-                Open Full Samhita Compendium
+                {t.navSamhitaReferences || "Open Full Samhita Compendium"}
               </Button>
             </div>
           </div>

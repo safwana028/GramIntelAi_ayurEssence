@@ -86,14 +86,14 @@ export function PatientDashboard({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm text-stone-900">
-                  Self-Assessment Submitted — Under Doctor Review
+                  {t.submittedByPatient || "Self-Assessment Submitted"} — {t.pendingApproval || "Under Doctor Review"}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-stone-950">
                   {t.pendingApproval || "Pending Review"}
                 </span>
               </div>
               <p className="text-xs text-stone-700 mt-1 leading-relaxed">
-                Your 24-question Prakriti assessment has been recorded and submitted to the Institutional Doctor Review Queue. Dr. K. Raghavendra Rao will verify your clinical observations and endorse your Dinacharya lifestyle guide.
+                {t.ethicalDisclaimerDetailed || "Your 24-question Prakriti assessment has been recorded and submitted to the Institutional Doctor Review Queue. Dr. K. Raghavendra Rao will verify your clinical observations and endorse your Dinacharya lifestyle guide."}
               </p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export function PatientDashboard({
             onClick={() => onQuickViewReport(patient, latestAssessment)}
             className="whitespace-nowrap shrink-0"
           >
-            View Submitted Draft
+            {t.viewPatientSummary || "View Submitted Draft"}
           </Button>
         </div>
       )}
@@ -118,14 +118,14 @@ export function PatientDashboard({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm text-stone-900">
-                  Official Prakriti Report Verified & Available
+                  {t.verifiedByDoctor || "Official Prakriti Report Verified & Available"}
                 </h3>
                 <Badge variant="success" size="sm" dot>
-                  Doctor Finalized
+                  {t.finalized || "Doctor Finalized"}
                 </Badge>
               </div>
               <p className="text-xs text-stone-700 mt-1 leading-relaxed">
-                Your constitution has been confirmed as <strong className="text-emerald-900">{latestAssessment.scores?.dominantPrakriti}</strong>. Verified by Supervising Vaidya with classical diet (Ahara) and seasonal regimen (Ritucharya).
+                {t.yourConstitution || "Your constitution has been confirmed as"}: <strong className="text-emerald-900">{latestAssessment.scores?.dominantPrakriti}</strong>. {t.approvedBySupervisor || "Verified by Supervising Vaidya with classical diet (Ahara) and seasonal regimen (Ritucharya)." }
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export function PatientDashboard({
             onClick={() => onQuickViewReport(patient, latestAssessment)}
             className="whitespace-nowrap shrink-0"
           >
-            View Official Report
+            {t.viewPatientSummary || "View Official Report"}
           </Button>
         </div>
       )}
@@ -148,7 +148,7 @@ export function PatientDashboard({
           <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-stone-900 font-serif-heading">
-                Patient Dossier
+                {t.patientDemographicsTitle || "Patient Dossier"}
               </h2>
               <span className="text-xs font-mono text-stone-500">
                 {patient?.id}
@@ -157,27 +157,27 @@ export function PatientDashboard({
 
             <div className="space-y-2.5 text-xs text-stone-600 pt-1">
               <div className="flex justify-between py-1.5 border-b border-stone-100">
-                <span className="text-stone-500">Full Name</span>
+                <span className="text-stone-500">{t.name || "Full Name"}</span>
                 <span className="font-semibold text-stone-900">{patient?.name}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-stone-100">
-                <span className="text-stone-500">Age & Gender</span>
+                <span className="text-stone-500">{t.age || "Age"} & {t.gender || "Gender"}</span>
                 <span className="font-semibold text-stone-900">{patient?.age} yrs • {patient?.gender}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-stone-100">
-                <span className="text-stone-500">Registered Email</span>
+                <span className="text-stone-500">{t.contact || "Registered Email"}</span>
                 <span className="font-semibold text-stone-900">{patient?.email}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-stone-100">
-                <span className="text-stone-500">Location</span>
+                <span className="text-stone-500">{t.location || "Location"}</span>
                 <span className="font-semibold text-stone-900">{patient?.city}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-stone-100">
-                <span className="text-stone-500">Baseline Prakriti</span>
-                <span className="font-bold text-emerald-800">{patient?.baselinePrakriti || "Pending Assessment"}</span>
+                <span className="text-stone-500">{t.constitution || "Baseline Prakriti"}</span>
+                <span className="font-bold text-emerald-800">{patient?.baselinePrakriti || (t.pendingApproval || "Pending Assessment")}</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-stone-500">Primary Complaint</span>
+                <span className="text-stone-500">{t.primaryComplaint || "Primary Complaint"}</span>
                 <span className="font-medium text-stone-800 text-right max-w-[180px] truncate">{patient?.primaryComplaint}</span>
               </div>
             </div>
@@ -190,7 +190,7 @@ export function PatientDashboard({
                 onClick={() => onStartAssessment(patient)}
                 className="w-full justify-center"
               >
-                {latestAssessment ? "Take New Assessment Session" : "Begin First Assessment"}
+                {t.startSelfAssessment || "Begin First Assessment"}
               </Button>
             </div>
           </div>
@@ -199,13 +199,13 @@ export function PatientDashboard({
           <div className="bg-emerald-950 text-white rounded-3xl p-6 shadow-sm border border-emerald-900 space-y-3">
             <div className="flex items-center gap-2 text-amber-400">
               <BookOpen className="w-5 h-5" />
-              <span className="text-xs font-bold uppercase tracking-wider">Charaka Samhita Vimana 8</span>
+              <span className="text-xs font-bold uppercase tracking-wider">{t.charakaCitation || "Charaka Samhita Reference"}</span>
             </div>
             <p className="text-xs text-emerald-200/90 leading-relaxed italic">
-              "तत्र प्रकृत्या वातलाः, पित्तलाः, श्लेಷ್ಮಲಾಃ... समधातवश्च भवन्ति।"
+              "तत्र प्रकृत्या वातलाः, पित्तलाः, श्लेष्मलाः... समधातवश्च भवन्ति।"
             </p>
             <p className="text-[11px] text-emerald-300/80 leading-relaxed">
-              Every individual possesses a unique inherent constitutional balance determined at conception. Understanding your Prakriti allows optimal lifestyle adaptation without suppressing innate biological rhythms.
+              {t.ethicalDisclaimerDetailed || "Every individual possesses a unique inherent constitutional balance determined at conception. Understanding your Prakriti allows optimal lifestyle adaptation without suppressing innate biological rhythms."}
             </p>
           </div>
         </div>
@@ -216,14 +216,14 @@ export function PatientDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-stone-900 font-serif-heading">
-                  My Constitutional History
+                  {t.navHistory || "My Constitutional History"}
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Track your constitutional assessments and doctor approvals
+                  {t.patientDashboardSubtitle || "Track your constitutional assessments and doctor approvals"}
                 </p>
               </div>
               <Badge variant="neutral" size="sm">
-                Total Sessions: {assessments.length}
+                {t.totalDossiers || "Total Sessions"}: {assessments.length}
               </Badge>
             </div>
 
@@ -242,7 +242,7 @@ export function PatientDashboard({
                   icon={Sparkles}
                   onClick={() => onStartAssessment(patient)}
                 >
-                  Start Self-Assessment
+                  {t.startSelfAssessment || "Start Self-Assessment"}
                 </Button>
               </div>
             ) : (
@@ -260,11 +260,11 @@ export function PatientDashboard({
                         <span className="text-xs font-mono text-stone-500">({asm.id})</span>
                         {asm.supervisorApproved ? (
                           <Badge variant="success" size="sm" dot>
-                            Doctor Verified
+                            {t.verifiedByDoctor || "Doctor Verified"}
                           </Badge>
                         ) : (
                           <Badge variant="warning" size="sm" dot>
-                            Under Review
+                            {t.pendingApproval || "Under Review"}
                           </Badge>
                         )}
                       </div>
@@ -277,7 +277,7 @@ export function PatientDashboard({
 
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px] font-semibold text-stone-600">
-                        <span>Constitutional Proportion (Vata • Pitta • Kapha)</span>
+                        <span>{t.scoreBreakdown || "Constitutional Proportion (Vata • Pitta • Kapha)"}</span>
                         <span>{asm.scores?.constitutionType || "Bi-Doshic"}</span>
                       </div>
                       <DoshaProportionBar scores={asm.scores} className="h-2" />
@@ -285,13 +285,13 @@ export function PatientDashboard({
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-stone-200/60 text-xs">
                       <div className="text-stone-600 text-[11px]">
-                        Conducted by:{" "}
+                        {t.conductedByLabel || "Conducted by"}:{" "}
                         <span className="font-semibold text-stone-800">
-                          {asm.conductedBy?.name || "Patient Self-Assessment"}
+                          {asm.conductedBy?.name || (t.submittedByPatient || "Patient Self-Assessment")}
                         </span>
                         {asm.conductedBy?.role === "patient" && (
                           <span className="ml-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">
-                            Self-Assessment
+                            {t.submittedByPatient || "Self-Assessment"}
                           </span>
                         )}
                       </div>
@@ -302,7 +302,7 @@ export function PatientDashboard({
                         icon={FileText}
                         onClick={() => onQuickViewReport(patient, asm)}
                       >
-                        View Report & Dinacharya
+                        {t.viewPatientSummary || "View Report & Dinacharya"}
                       </Button>
                     </div>
                   </div>

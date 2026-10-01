@@ -194,56 +194,45 @@ export function AppShell({
           </div>
         </div>
 
-        {/* Role Switcher Pill */}
+        {/* Active Domain Workspace Badge (Strict Isolation: No switching to other 2 roles) */}
         <div className="px-4 py-3 border-b border-emerald-900/50 bg-[#0B1E17]/60">
           <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1.5 flex items-center justify-between">
-            <span>Clinical Workspace</span>
-            <span className="text-[9px] text-stone-400 font-normal">Switch Role:</span>
+            <span>{t.activeWorkspace || "Active Workspace"}</span>
+            <span className="text-[9px] text-amber-400/90 font-mono font-medium">{t.loggedAs || "Logged in"}</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-1 bg-[#122A22] p-1 rounded-xl border border-emerald-800/80 text-xs">
-            <button
-              type="button"
-              onClick={() => onRoleChange("doctor")}
-              className={`py-1.5 min-h-[36px] rounded-lg font-semibold flex items-center justify-center gap-1 transition-all text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                activeRole === "doctor"
-                  ? "bg-amber-500 text-stone-950 shadow-sm"
-                  : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-              }`}
-              title="Doctor (Vaidya) View"
-            >
-              <Stethoscope className="w-3.5 h-3.5" />
-              <span>Doctor</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onRoleChange("student")}
-              className={`py-1.5 min-h-[36px] rounded-lg font-semibold flex items-center justify-center gap-1 transition-all text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                activeRole === "student"
-                  ? "bg-sky-500 text-white shadow-sm"
-                  : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-              }`}
-              title="Student Scholar View"
-            >
-              <GraduationCap className="w-3.5 h-3.5" />
-              <span>Scholar</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onRoleChange("patient")}
-              className={`py-1.5 min-h-[36px] rounded-lg font-semibold flex items-center justify-center gap-1 transition-all text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
-                activeRole === "patient"
-                  ? "bg-emerald-500 text-stone-950 shadow-sm"
-                  : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
-              }`}
-              title="Patient Swastha View"
-            >
-              <HeartHandshake className="w-3.5 h-3.5" />
-              <span>Patient</span>
-            </button>
+          <div className={`p-2.5 rounded-xl border flex items-center gap-2.5 ${
+            activeRole === "doctor"
+              ? "bg-amber-950/40 border-amber-600/50 text-amber-200"
+              : activeRole === "student"
+              ? "bg-sky-950/40 border-sky-600/50 text-sky-200"
+              : "bg-emerald-950/40 border-emerald-600/50 text-emerald-200"
+          }`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              activeRole === "doctor"
+                ? "bg-amber-500 text-stone-950"
+                : activeRole === "student"
+                ? "bg-sky-500 text-white"
+                : "bg-emerald-500 text-stone-950"
+            }`}>
+              {activeRole === "doctor" && <Stethoscope className="w-4 h-4" />}
+              {activeRole === "student" && <GraduationCap className="w-4 h-4" />}
+              {activeRole === "patient" && <HeartHandshake className="w-4 h-4" />}
+            </div>
+            <div className="overflow-hidden">
+              <div className="font-bold text-xs text-white truncate">
+                {activeRole === "doctor" && (t.seniorVaidya || "Senior Vaidya Workspace")}
+                {activeRole === "student" && (t.academicScholar || "BAMS Scholar Workspace")}
+                {activeRole === "patient" && (t.registeredPatient || "Patient Swastha Workspace")}
+              </div>
+              <div className="text-[10px] text-stone-300 truncate">
+                {currentUser?.email || currentUser?.name || (activeRole === "doctor" ? "dr.rao@sdm.ac.in" : activeRole === "student" ? "scholar@sdm.ac.in" : "patient@ayuressence.in")}
+              </div>
+            </div>
           </div>
+          <p className="text-[9px] text-stone-400 mt-1.5 leading-tight italic">
+            {t.switchDomainNotice || "To switch between Doctor, Student, or Patient portals, please log out."}
+          </p>
         </div>
 
         {/* Navigation Items */}
@@ -312,7 +301,7 @@ export function AppShell({
             className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-medium bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-            <span>Samhita References</span>
+            <span>{t.navSamhitaReferences || "Samhita References"}</span>
           </button>
 
           {/* User Profile Card / Auth Button */}
@@ -320,7 +309,7 @@ export function AppShell({
             type="button"
             onClick={onOpenAuthModal}
             className="w-full flex items-center justify-between p-2 rounded-xl bg-emerald-900/50 hover:bg-emerald-900/80 border border-emerald-800/80 transition-all text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-            title="Switch Clinician / Sign In"
+            title="Clinician Session"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-stone-950 font-bold text-xs flex items-center justify-center shrink-0">
@@ -337,6 +326,17 @@ export function AppShell({
             </div>
             <ChevronRight className="w-4 h-4 text-emerald-400 shrink-0" />
           </button>
+
+          {onSignOut && (
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold bg-rose-950/60 hover:bg-rose-900/70 text-rose-200 border border-rose-800/60 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{t.logoutBtn || "Log Out"}</span>
+            </button>
+          )}
         </div>
       </aside>
 
@@ -413,49 +413,33 @@ export function AppShell({
               </button>
             </div>
 
-            {/* Role Switcher */}
-            <div className="my-3 space-y-1">
-              <div className="text-[10px] uppercase font-bold text-emerald-300">
-                Switch Role Mode:
+            {/* Active Domain Workspace Badge (Strict Isolation: No switching to other 2 roles) */}
+            <div className="my-3 px-3 py-2.5 bg-[#122A22] rounded-2xl border border-emerald-800/80 space-y-1">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
+                <span>{t.activeWorkspace || "Active Workspace"}</span>
+                <span className="text-[9px] text-amber-400 font-mono">{t.loggedAs || "Logged in"}</span>
               </div>
-              <div className="grid grid-cols-3 gap-1 bg-[#0E261E] p-1 rounded-xl text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onRoleChange("doctor");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
-                    activeRole === "doctor" ? "bg-amber-500 text-stone-950 font-bold" : "text-emerald-200"
-                  }`}
-                >
-                  Doctor
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onRoleChange("student");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
-                    activeRole === "student" ? "bg-sky-500 text-white font-bold" : "text-emerald-200"
-                  }`}
-                >
-                  Scholar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onRoleChange("patient");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
-                    activeRole === "patient" ? "bg-emerald-500 text-stone-950 font-bold" : "text-emerald-200"
-                  }`}
-                >
-                  Patient
-                </button>
+              <div className="flex items-center gap-2 pt-1">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                  activeRole === "doctor"
+                    ? "bg-amber-500 text-stone-950"
+                    : activeRole === "student"
+                    ? "bg-sky-500 text-white"
+                    : "bg-emerald-500 text-stone-950"
+                }`}>
+                  {activeRole === "doctor" && <Stethoscope className="w-3.5 h-3.5" />}
+                  {activeRole === "student" && <GraduationCap className="w-3.5 h-3.5" />}
+                  {activeRole === "patient" && <HeartHandshake className="w-3.5 h-3.5" />}
+                </div>
+                <div className="text-xs font-bold text-white">
+                  {activeRole === "doctor" && (t.seniorVaidya || "Senior Vaidya Workspace")}
+                  {activeRole === "student" && (t.academicScholar || "BAMS Scholar Workspace")}
+                  {activeRole === "patient" && (t.registeredPatient || "Patient Swastha Workspace")}
+                </div>
               </div>
+              <p className="text-[9px] text-stone-400 italic pt-1">
+                {t.switchDomainNotice || "To switch between Doctor, Student, or Patient portals, please log out."}
+              </p>
             </div>
 
             {/* Mobile Nav Links */}
@@ -508,8 +492,22 @@ export function AppShell({
                 className="w-full py-2.5 min-h-[44px] bg-emerald-950 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-emerald-200 border border-emerald-700/50"
               >
                 <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                <span>Samhita References</span>
+                <span>{t.navSamhitaReferences || "Samhita References"}</span>
               </button>
+
+              {onSignOut && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onSignOut();
+                  }}
+                  className="w-full py-2.5 min-h-[44px] bg-rose-950/70 hover:bg-rose-900/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 text-rose-200 border border-rose-700/60"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{t.logoutBtn || "Log Out"}</span>
+                </button>
+              )}
             </div>
           </div>
           <div

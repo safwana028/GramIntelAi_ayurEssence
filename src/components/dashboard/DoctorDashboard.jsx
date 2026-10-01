@@ -69,16 +69,16 @@ export function DoctorDashboard({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-stone-950 uppercase tracking-wider">
-              Senior Vaidya Workspace
+              {t.seniorVaidyaWorkspace || "Senior Vaidya Workspace"}
             </span>
             <span className="text-emerald-300 text-xs">•</span>
             <span className="text-xs text-emerald-200">SDM College of Ayurveda, Udupi</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold font-serif-heading text-amber-100">
-            Ayurvedic Clinical Overview
+            {t.clinicalOverview || "Ayurvedic Clinical Overview"}
           </h1>
           <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl">
-            Monitor institutional patient records, verify student constitutional assessments, and supervise constitutional Dinacharya recommendations.
+            {t.appSubtitle || "Evidence-Based Ayurvedic Prakriti Assessment Platform"}
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export function DoctorDashboard({
             icon={Sparkles}
             onClick={() => onNavigate("assessment")}
           >
-            Start Assessment
+            {t.navNewAssessment || "Start Assessment"}
           </Button>
           <Button
             variant="outline"
@@ -98,7 +98,7 @@ export function DoctorDashboard({
             onClick={onOpenNewPatientModal}
             className="bg-white/10 text-white border-white/20 hover:bg-white/20"
           >
-            Add Patient
+            {t.newPatientBtn || "+ New Patient"}
           </Button>
           {onSignOut && (
             <Button
@@ -160,37 +160,37 @@ export function DoctorDashboard({
       {/* KPI Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
-          title="Registered Patients"
+          title={t.registeredPatientsCard || "Registered Patients"}
           value={totalPatients}
-          subtitle="Active OPD Directory"
+          subtitle={t.activeOpdDirectory || "Active OPD Directory"}
           icon={Users}
           color="emerald"
           onClick={() => onNavigate("patients")}
         />
         <StatCard
-          title="Assessments Conducted"
+          title={t.assessmentsConductedCard || "Assessments Conducted"}
           value={totalAssessments}
-          subtitle={`${deliveredAssessments.length} delivered to patient`}
+          subtitle={`${deliveredAssessments.length} ${t.deliveredStatus || "delivered to patient"}`}
           icon={FileCheck2}
           color="sky"
           onClick={() => onNavigate("reports")}
         />
         <StatCard
-          title="Review Queue"
+          title={t.reviewQueueCard || "Review Queue"}
           value={pendingAssessments.length}
           subtitle={
             pendingAssessments.length > 0
-              ? "Requires supervisor sign-off"
-              : "All student drafts verified"
+              ? (t.requiresSupervisorSignoff || "Requires supervisor sign-off")
+              : (t.allStudentDraftsVerified || "All student drafts verified")
           }
           icon={AlertCircle}
           color={pendingAssessments.length > 0 ? "amber" : "emerald"}
           onClick={() => onNavigate("reviewQueue")}
         />
         <StatCard
-          title="Cohort Tridosha"
+          title={t.cohortTridosha || "Cohort Tridosha"}
           value={`${Math.round((doshaCounts.pitta / (totalPatients || 1)) * 100)}%`}
-          subtitle="Pitta dominant in coastal zone"
+          subtitle="Pitta dominant in cohort"
           icon={Activity}
           color="purple"
         />
@@ -205,10 +205,10 @@ export function DoctorDashboard({
               <div>
                 <h2 className="text-base font-bold text-stone-900 font-serif-heading flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600" />
-                  <span>Assessments Awaiting Sign-Off</span>
+                  <span>{t.assessmentsAwaitingSignOff || "Assessments Awaiting Sign-Off"}</span>
                 </h2>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  Academic evaluations by BAMS scholars and patient self-assessments needing senior clinical validation.
+                  {t.loginDoctorDesc || "Academic evaluations by BAMS scholars and patient self-assessments needing senior clinical validation."}
                 </p>
               </div>
 
@@ -219,7 +219,7 @@ export function DoctorDashboard({
                 iconRight={ArrowRight}
                 className="text-xs text-emerald-800"
               >
-                View All ({pendingAssessments.length})
+                {t.viewAll || "View All"} ({pendingAssessments.length})
               </Button>
             </div>
 
@@ -227,10 +227,10 @@ export function DoctorDashboard({
               <div className="p-8 text-center bg-stone-50 rounded-2xl border border-dashed border-stone-200 space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
                 <h4 className="text-xs font-bold text-stone-800">
-                  Review Queue Is Up to Date
+                  {t.reviewQueueUpToDate || "Review Queue Is Up to Date"}
                 </h4>
                 <p className="text-xs text-stone-500 max-w-sm mx-auto">
-                  All student clinical assessments have been officially verified and signed off.
+                  {t.allStudentDraftsVerified || "All student clinical assessments have been officially verified and signed off."}
                 </p>
               </div>
             ) : (
@@ -288,7 +288,7 @@ export function DoctorDashboard({
                           }}
                           className="px-2.5 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 bg-white border border-stone-300 rounded-lg shadow-2xs hover:bg-stone-50"
                         >
-                          Inspect Dossier
+                          {t.inspectDossier || "Inspect Dossier"}
                         </button>
                         <Button
                           variant="gold"
@@ -297,7 +297,7 @@ export function DoctorDashboard({
                           onClick={() => onSupervisorApprove(asm.patientId, asm.id)}
                           className="py-1 text-xs"
                         >
-                          Sign Off
+                          {t.btnSignOff || "Sign Off"}
                         </Button>
                       </div>
                     </div>
@@ -313,7 +313,7 @@ export function DoctorDashboard({
           {/* Quick Clinical Actions */}
           <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-2xs space-y-4">
             <h3 className="text-sm font-bold text-stone-900 font-serif-heading">
-              Quick Clinical Navigation
+              {t.quickClinicalActions || "Quick Clinical Navigation"}
             </h3>
             <div className="grid grid-cols-2 gap-2.5">
               <button
@@ -322,8 +322,8 @@ export function DoctorDashboard({
                 className="p-3.5 rounded-2xl border border-stone-200 hover:border-emerald-600/50 hover:bg-emerald-50/40 text-left transition-all group"
               >
                 <Users className="w-5 h-5 text-emerald-800 group-hover:scale-105 transition-transform" />
-                <div className="font-bold text-xs text-stone-800 mt-2">Patient Directory</div>
-                <div className="text-[10px] text-stone-500">Search {totalPatients} profiles</div>
+                <div className="font-bold text-xs text-stone-800 mt-2">{t.navPatients || "Patient Directory"}</div>
+                <div className="text-[10px] text-stone-500">{totalPatients} {t.registeredPatientsCard || "Profiles"}</div>
               </button>
 
               <button
@@ -332,8 +332,8 @@ export function DoctorDashboard({
                 className="p-3.5 rounded-2xl border border-stone-200 hover:border-emerald-600/50 hover:bg-emerald-50/40 text-left transition-all group"
               >
                 <FileText className="w-5 h-5 text-sky-800 group-hover:scale-105 transition-transform" />
-                <div className="font-bold text-xs text-stone-800 mt-2">Reports Archive</div>
-                <div className="text-[10px] text-stone-500">Delivered dossiers</div>
+                <div className="font-bold text-xs text-stone-800 mt-2">{t.navReports || "Reports Archive"}</div>
+                <div className="text-[10px] text-stone-500">{t.clinicalArchive || "Delivered dossiers"}</div>
               </button>
 
               <button
@@ -342,8 +342,8 @@ export function DoctorDashboard({
                 className="p-3.5 rounded-2xl border border-stone-200 hover:border-emerald-600/50 hover:bg-emerald-50/40 text-left transition-all group"
               >
                 <Layers className="w-5 h-5 text-amber-700 group-hover:scale-105 transition-transform" />
-                <div className="font-bold text-xs text-stone-800 mt-2">Questionnaire Builder</div>
-                <div className="text-[10px] text-stone-500">Custom protocols</div>
+                <div className="font-bold text-xs text-stone-800 mt-2">{t.navQuestionnaireBuilder || "Questionnaire Builder"}</div>
+                <div className="text-[10px] text-stone-500">{t.navBuilder || "Custom protocols"}</div>
               </button>
 
               <button
@@ -353,7 +353,7 @@ export function DoctorDashboard({
               >
                 <Download className="w-5 h-5 text-stone-700 group-hover:scale-105 transition-transform" />
                 <div className="font-bold text-xs text-stone-800 mt-2">Backup Database</div>
-                <div className="text-[10px] text-stone-500">Export JSON archive</div>
+                <div className="text-[10px] text-stone-500">JSON archive</div>
               </button>
             </div>
           </div>
@@ -362,14 +362,14 @@ export function DoctorDashboard({
           <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
               <h3 className="text-sm font-bold text-stone-900 font-serif-heading">
-                Recent Evaluations
+                {t.evaluationsConducted || "Recent Evaluations"}
               </h3>
               <button
                 type="button"
                 onClick={() => onNavigate("reports")}
                 className="text-xs font-semibold text-emerald-800 hover:underline"
               >
-                View all
+                {t.viewAll || "View all"}
               </button>
             </div>
 
@@ -391,11 +391,11 @@ export function DoctorDashboard({
                   <div className="flex items-center gap-2">
                     {asm.supervisorApproved ? (
                       <Badge variant="success" size="sm">
-                        Verified
+                        {t.approvedStatus || "Verified"}
                       </Badge>
                     ) : (
                       <Badge variant="warning" size="sm">
-                        Pending
+                        {t.pendingStatus || "Pending"}
                       </Badge>
                     )}
 
@@ -406,7 +406,7 @@ export function DoctorDashboard({
                         if (pat) onQuickViewReport(pat, asm);
                       }}
                       className="p-1 rounded-lg hover:bg-stone-100 text-stone-600"
-                      title="View Dossier"
+                      title={t.inspectDossier || "View Dossier"}
                     >
                       <ArrowRight className="w-4 h-4" />
                     </button>

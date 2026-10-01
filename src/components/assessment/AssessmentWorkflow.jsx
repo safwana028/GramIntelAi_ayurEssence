@@ -357,16 +357,17 @@ export function AssessmentWorkflow({
   return (
     <div className="space-y-6">
       {/* Immutability Banner if Finalized */}
+      {/* Immutability Banner if Finalized */}
       {isFinalized && (
         <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2.5">
             <Lock className="w-5 h-5 text-amber-700 shrink-0" />
             <div>
               <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
-                🔒 Assessment Finalized — Immutable Record
+                {t.lockedAssessmentNotice || "🔒 Assessment Finalized — Immutable Record"}
               </h4>
               <p className="text-[11px] text-amber-800">
-                This clinical assessment has been formally approved and locked. Answers, notes, and constitutional scoring cannot be modified.
+                {t.lockedAssessmentDesc || "This clinical assessment has been formally approved and locked. Answers, notes, and constitutional scoring cannot be modified."}
               </p>
             </div>
           </div>
@@ -379,11 +380,11 @@ export function AssessmentWorkflow({
                 className="px-3.5 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow flex items-center gap-1.5"
               >
                 <Share2 className="w-3.5 h-3.5 text-amber-400" />
-                <span>Deliver Patient Report</span>
+                <span>{t.btnDeliverReport || "Deliver Patient Report"}</span>
               </button>
             )}
             <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-200 text-amber-950 border border-amber-300">
-              {reportDelivered ? "Delivered to Patient" : "Pending Delivery"}
+              {reportDelivered ? (t.deliveredToPatient || "Delivered to Patient") : (t.pendingDelivery || "Pending Delivery")}
             </span>
           </div>
         </div>
@@ -393,11 +394,11 @@ export function AssessmentWorkflow({
       <div className="no-print bg-white p-4 rounded-2xl shadow-sm border border-stone-200">
         <div className="flex items-center justify-between overflow-x-auto gap-2 pb-1">
           {[
-            { step: 1, label: "1. Patient & Context" },
-            { step: 2, label: `2. 24 Questions (${answeredCount}/24)` },
-            { step: 3, label: "3. Clinical Notes & Voice" },
-            { step: 4, label: "4. Review & Finalize" },
-            { step: 5, label: "5. Constitutional Reports" }
+            { step: 1, label: t.step1Stepper || "1. Patient & Context" },
+            { step: 2, label: `${t.step2Stepper || "2. 24 Questions"} (${answeredCount}/24)` },
+            { step: 3, label: t.step3Stepper || "3. Clinical Notes & Voice" },
+            { step: 4, label: t.step4Stepper || "4. Review & Finalize" },
+            { step: 5, label: t.step5Stepper || "5. Constitutional Reports" }
           ].map((item) => (
             <button
               key={item.step}
@@ -432,17 +433,21 @@ export function AssessmentWorkflow({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 space-y-6 max-w-4xl mx-auto">
           <div className="border-b border-stone-100 pb-4">
             <h3 className="text-lg font-bold text-stone-900 font-serif-heading">
-              1. Patient Profile & Clinical Assessment Context
+              {t.step1Title || "1. Patient Profile & Clinical Assessment Context"}
             </h3>
             <p className="text-xs text-stone-500 mt-1">
-              Select patient, specify seasonal context (Ritu), and confirm clinician credentials.
+              {activeLang === "kn"
+                ? "ರೋಗಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ, ಋತುಮಾನದ ಸನ್ನಿವೇಶವನ್ನು (ಋತು) ನಿರ್ದಿಷ್ಟಪಡಿಸಿ ಮತ್ತು ವೈದ್ಯರ ವಿವರಗಳನ್ನು ದೃಢೀಕರಿಸಿ."
+                : activeLang === "hi"
+                ? "रोगी का चयन करें, मौसमी संदर्भ (ऋतु) निर्दिष्ट करें और चिकित्सक विवरण की पुष्टि करें।"
+                : "Select patient, specify seasonal context (Ritu), and confirm clinician credentials."}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
             <div>
               <label className="block font-semibold text-stone-700 mb-1.5">
-                {activeRole === "patient" ? "Patient Profile *" : "Active Patient *"}
+                {activeRole === "patient" ? (t.patientDemographicsTitle || "Patient Profile *") : (t.patientDemographicsTitle || "Active Patient *")}
               </label>
               <select
                 disabled={isFinalized || activeRole === "patient"}
@@ -459,7 +464,7 @@ export function AssessmentWorkflow({
             </div>
 
             <div>
-              <label className="block font-semibold text-stone-700 mb-1.5">Evaluation Purpose</label>
+              <label className="block font-semibold text-stone-700 mb-1.5">{t.primaryComplaint || "Evaluation Purpose"}</label>
               <select
                 disabled={isFinalized}
                 value={assessmentType}
@@ -467,32 +472,32 @@ export function AssessmentWorkflow({
                 className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white"
               >
                 {activeRole === "patient" && (
-                  <option value="Patient Self-Assessment">Patient Self-Assessment (Swastha Pariksha)</option>
+                  <option value="Patient Self-Assessment">{t.purposePatient || "Patient Self-Assessment (Swastha Pariksha)"}</option>
                 )}
-                <option value="Baseline Janma Prakriti">Baseline Janma Prakriti (Primary Constitution)</option>
-                <option value="Seasonal Constitutional Review">Seasonal Constitutional Review (Ritucharya)</option>
-                <option value="Student Academic Training Case">Student Academic Training Case (Supervised)</option>
+                <option value="Baseline Janma Prakriti">{t.purposeJanma || "Baseline Janma Prakriti (Primary Constitution)"}</option>
+                <option value="Seasonal Constitutional Review">{t.purposeSeasonal || "Seasonal Constitutional Review (Ritucharya)"}</option>
+                <option value="Student Academic Training Case">{t.purposeStudent || "Student Academic Training Case (Supervised)"}</option>
               </select>
             </div>
 
             <div>
-              <label className="block font-semibold text-stone-700 mb-1.5">Current Season (Ritu)</label>
+              <label className="block font-semibold text-stone-700 mb-1.5">{t.season || "Current Season (Ritu)"}</label>
               <select
                 disabled={isFinalized}
                 value={season}
                 onChange={(e) => setSeason(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white"
               >
-                <option value="Varsha / Sharad (Autumn)">Varsha / Sharad (Monsoon to Autumn)</option>
-                <option value="Hemanta / Shishira (Winter)">Hemanta / Shishira (Winter)</option>
-                <option value="Vasanta (Spring)">Vasanta (Spring)</option>
-                <option value="Grishma (Summer)">Grishma (Summer)</option>
+                <option value="Varsha / Sharad (Autumn)">{t.seasonVarsha || "Varsha / Sharad (Monsoon to Autumn)"}</option>
+                <option value="Hemanta / Shishira (Winter)">{t.seasonHemanta || "Hemanta / Shishira (Winter)"}</option>
+                <option value="Vasanta (Spring)">{t.seasonVasanta || "Vasanta (Spring)"}</option>
+                <option value="Grishma (Summer)">{t.seasonGrishma || "Grishma (Summer)"}</option>
               </select>
             </div>
 
             <div>
               <label className="block font-semibold text-stone-700 mb-1.5">
-                {activeRole === "patient" ? "Submitter (Patient Profile)" : "Examiner Clinician"}
+                {activeRole === "patient" ? (t.submittedByPatient || "Submitter (Patient Profile)") : (t.conductedByLabel || "Examiner Clinician")}
               </label>
               <input
                 disabled={isFinalized || activeRole === "patient"}
@@ -510,10 +515,14 @@ export function AssessmentWorkflow({
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-amber-900 text-xs">
                   <Wand2 className="w-4 h-4 text-amber-600" />
-                  <span>Evaluation Demo Presets (Populates all 24 questions & notes)</span>
+                  <span>{t.quickFillDemo || "Evaluation Demo Presets (Populates all 24 questions & notes)"}</span>
                 </div>
                 <p className="text-[11px] text-amber-800/80 mt-0.5">
-                  Fills all 24 questionnaire questions with realistic clinical observations for fast testing.
+                  {activeLang === "kn"
+                    ? "ವೇಗದ ಪರೀಕ್ಷೆಗಾಗಿ ಎಲ್ಲಾ ೨೪ ಪ್ರಶ್ನೆಗಳನ್ನು ಕ್ಲಿನಿಕಲ್ ಅವಲೋಕನಗಳೊಂದಿಗೆ ಭರ್ತಿ ಮಾಡುತ್ತದೆ."
+                    : activeLang === "hi"
+                    ? "त्वरित परीक्षण हेतु सभी 24 प्रश्नों को यथार्थवादी अवलोकनों के साथ भरता है।"
+                    : "Fills all 24 questionnaire questions with realistic clinical observations for fast testing."}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -541,7 +550,7 @@ export function AssessmentWorkflow({
               onClick={() => setCurrentStep(2)}
               className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors"
             >
-              <span>Next: 24 Questions</span>
+              <span>{t.nextQuestions || "Next: 24 Questions"}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -556,17 +565,22 @@ export function AssessmentWorkflow({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               {/* Category Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
-                {["All", "Physical", "Physiological", "Psychological"].map((cat) => (
+                {[
+                  { key: "All", label: t.dimensionAll || "All Questions (24)" },
+                  { key: "Physical", label: t.dimensionPhysical || "Physical (Sharirika)" },
+                  { key: "Physiological", label: t.dimensionPhysiological || "Physiological (Kriyatmaka)" },
+                  { key: "Psychological", label: t.dimensionPsychological || "Psychological (Manasika)" }
+                ].map((cat) => (
                   <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
+                    key={cat.key}
+                    onClick={() => setActiveCategory(cat.key)}
                     className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                      activeCategory === cat
+                      activeCategory === cat.key
                         ? "bg-emerald-800 text-white font-semibold"
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
                   >
-                    {cat === "All" ? "All Questions (24)" : cat}
+                    {cat.label}
                   </button>
                 ))}
               </div>
@@ -575,7 +589,7 @@ export function AssessmentWorkflow({
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <div className="text-right text-xs">
                   <div className="font-semibold text-stone-800">
-                    Question Progress: {answeredCount} / 24 Answered ({progressPercent}%)
+                    {t.questionProgress || "Question Progress"}: {answeredCount} / 24 {t.answered || "Answered"} ({progressPercent}%)
                   </div>
                   <div className="w-40 h-2 bg-stone-100 rounded-full overflow-hidden mt-1">
                     <div
@@ -593,7 +607,7 @@ export function AssessmentWorkflow({
                     className="px-3 py-1.5 text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 rounded-lg flex items-center gap-1 transition-colors whitespace-nowrap"
                   >
                     <Save className="w-3.5 h-3.5 text-stone-600" />
-                    <span>Save Draft</span>
+                    <span>{t.saveDraft || "Save Draft"}</span>
                   </button>
                 )}
               </div>
@@ -624,7 +638,7 @@ export function AssessmentWorkflow({
                 <div className="flex items-center gap-1.5 text-amber-900">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>
-                    <strong>{24 - answeredCount} questions remaining:</strong> Mandatory 24 questions required before final submission.
+                    <strong>{24 - answeredCount} {t.missingQuestionsWarning || "questions remaining: Mandatory 24 questions required before final submission."}</strong>
                   </span>
                 </div>
                 <span className="text-[11px] font-mono text-amber-800">
@@ -665,10 +679,14 @@ export function AssessmentWorkflow({
                     <div>
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
-                          Question {questionNum} of 24
+                          {t.questionNumLabel || "Question"} {questionNum} {t.of24 || "of 24"}
                         </span>
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600 uppercase">
-                          {q.dimension}
+                          {q.dimension === "Physical"
+                            ? (t.dimensionPhysical || "Physical")
+                            : q.dimension === "Physiological"
+                            ? (t.dimensionPhysiological || "Physiological")
+                            : (t.dimensionPsychological || "Psychological")}
                         </span>
                         <span className="text-[11px] font-serif text-emerald-800 italic">
                           {q.sanskritTrait}
@@ -730,13 +748,13 @@ export function AssessmentWorkflow({
 
                           <div className="flex items-center justify-between mt-3 pt-2 border-t border-stone-100">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${badgeColor}`}>
-                              {opt.dosha}
+                              {t[opt.dosha] || opt.dosha}
                             </span>
                             <div
                               className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                                 isSelected
-                                  ? "border-emerald-600 bg-emerald-600 text-white"
-                                  : "border-stone-300 bg-white"
+                                    ? "border-emerald-600 bg-emerald-600 text-white"
+                                    : "border-stone-300 bg-white"
                               }`}
                             >
                               {isSelected && <Check className="w-3 h-3" />}
@@ -751,7 +769,7 @@ export function AssessmentWorkflow({
                   <div className="mt-4 pt-3 border-t border-stone-100 space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="block text-[11px] font-semibold text-stone-700">
-                        Additional observation / note (Question {questionNum}):
+                        {t.additionalObservationNote || "Additional observation / note"} ({t.questionNumLabel || "Question"} {questionNum}):
                       </label>
                       {!isFinalized && (
                         <InlineVoiceDictation
@@ -766,7 +784,7 @@ export function AssessmentWorkflow({
                       type="text"
                       value={currentNote}
                       onChange={(e) => handleUpdateQuestionNote(q.id, e.target.value)}
-                      placeholder="e.g. Mild dryness on shins; seasonal fluctuation in winter..."
+                      placeholder={t.clinicalObservationPlaceholder || "e.g. Mild dryness on shins; seasonal fluctuation in winter..."}
                       className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs focus:ring-1 focus:ring-emerald-600 bg-stone-50/40 text-stone-800"
                     />
                   </div>
@@ -780,11 +798,11 @@ export function AssessmentWorkflow({
             <div className="flex items-center justify-between">
               <label className="font-bold text-stone-900 text-xs flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-700" />
-                <span>Additional message for patient (Appears in Patient Swastha Report)</span>
+                <span>{t.additionalPatientMessage || "Additional message for patient (Appears in Patient Swastha Report)"}</span>
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  Patient Handout Note
+                  {t.patientHandoutNote || "Patient Handout Note"}
                 </span>
                 {!isFinalized && (
                   <InlineVoiceDictation
@@ -796,7 +814,7 @@ export function AssessmentWorkflow({
               </div>
             </div>
             <p className="text-[11px] text-stone-500">
-              Doctor/Student words intended directly for the patient. Internal clinical notes are kept strictly confidential and will not appear in the patient-facing report.
+              {t.patientMessageGuidance || "Doctor/Student words intended directly for the patient. Internal clinical notes are kept strictly confidential and will not appear in the patient-facing report."}
             </p>
             <textarea
               disabled={isFinalized}
@@ -815,7 +833,7 @@ export function AssessmentWorkflow({
               className="px-5 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 font-semibold text-xs transition-colors flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
+              <span>{t.btnBack || "Back"}</span>
             </button>
 
             <div className="flex items-center gap-2">
@@ -825,7 +843,7 @@ export function AssessmentWorkflow({
                   className="px-4 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 font-semibold text-xs transition-colors flex items-center gap-1.5"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Draft</span>
+                  <span>{t.saveDraft || "Save Draft"}</span>
                 </button>
               )}
 
@@ -833,7 +851,7 @@ export function AssessmentWorkflow({
                 onClick={() => setCurrentStep(3)}
                 className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors"
               >
-                <span>Next: Clinical Observations & Voice</span>
+                <span>{t.nextNotes || "Next: Clinical Notes & Voice"}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -847,10 +865,14 @@ export function AssessmentWorkflow({
           <div className="border-b border-stone-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-lg font-bold text-stone-900 font-serif-heading">
-                3. Clinical Observations & Voice-to-Text Dictation
+                {t.step3Title || "3. Clinical Observations & Voice-to-Text Dictation"}
               </h3>
               <p className="text-xs text-stone-500 mt-1">
-                Record free-form clinical notes, Ashtavidha examination, and speech-to-text dictation.
+                {activeLang === "kn"
+                  ? "ವೈದ್ಯಕೀಯ ಮುಕ್ತ ಟಿಪ್ಪಣಿಗಳು, ಅಷ್ಟವಿಧ ಪರೀಕ್ಷೆ ಮತ್ತು ಧ್ವನಿ-ಇಂದ-ಪಠ್ಯ ದಾಖಲೆಯನ್ನು ನಮೂದಿಸಿ."
+                  : activeLang === "hi"
+                  ? "स्वतंत्र नैदानिक टिप्पणियां, अष्टविध परीक्षा और ध्वनि-से-पाठ डिक्टेशन दर्ज करें।"
+                  : "Record free-form clinical notes, Ashtavidha examination, and speech-to-text dictation."}
               </p>
             </div>
             <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
@@ -871,7 +893,7 @@ export function AssessmentWorkflow({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="font-semibold text-stone-800 text-xs">
-                Free-Form Clinical Notes (Internal Practitioner Observations)
+                {t.clinicalObservations || "Free-Form Clinical Notes (Internal Practitioner Observations)"}
               </label>
               <div className="flex items-center gap-2">
                 {!isFinalized && (
@@ -887,7 +909,7 @@ export function AssessmentWorkflow({
                   className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-stone-950 shadow-sm transition-colors"
                 >
                   <BrainCircuit className="w-3.5 h-3.5" />
-                  <span>Extract Dosha Cues</span>
+                  <span>{t.nlpExtractBtn || "Extract Dosha Cues"}</span>
                 </button>
               </div>
             </div>
@@ -909,7 +931,7 @@ export function AssessmentWorkflow({
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <h4 className="text-xs font-bold text-stone-800">
-                    NLP Extracted Clinical Signals ({nlpIndicators.length} Cues Detected)
+                    {t.detectedCues || "NLP Extracted Clinical Signals"} ({nlpIndicators.length} {t.detectedCues || "Cues Detected"})
                   </h4>
                 </div>
 
@@ -936,7 +958,7 @@ export function AssessmentWorkflow({
                         : "bg-emerald-50 text-emerald-800 border-emerald-200"
                     }`}
                   >
-                    <strong className="capitalize">{ind.dosha}:</strong>
+                    <strong className="capitalize">{t[ind.dosha] || ind.dosha}:</strong>
                     <span>"{ind.matchedPhrase}"</span>
                     <span className="text-[10px] text-stone-400">({ind.guna})</span>
                   </span>
@@ -948,11 +970,11 @@ export function AssessmentWorkflow({
           {/* Ashtavidha Pariksha */}
           <div className="space-y-3 pt-2">
             <h4 className="font-bold text-stone-800 text-xs">
-              Ashtavidha Pariksha (Classical Eightfold Clinical Examination)
+              {t.ashtavidhaTitle || "Ashtavidha Pariksha (Classical Eightfold Clinical Examination)"}
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
-                <label className="block text-stone-500 text-[11px] mb-1">1. Nadi (Pulse)</label>
+                <label className="block text-stone-500 text-[11px] mb-1">1. {t.nadiLabel || "Nadi (Pulse)"}</label>
                 <input
                   disabled={isFinalized}
                   type="text"
@@ -962,7 +984,7 @@ export function AssessmentWorkflow({
                 />
               </div>
               <div>
-                <label className="block text-stone-500 text-[11px] mb-1">2. Jihva (Tongue)</label>
+                <label className="block text-stone-500 text-[11px] mb-1">2. {t.jihvaLabel || "Jihva (Tongue)"}</label>
                 <input
                   disabled={isFinalized}
                   type="text"
@@ -972,7 +994,7 @@ export function AssessmentWorkflow({
                 />
               </div>
               <div>
-                <label className="block text-stone-500 text-[11px] mb-1">3. Sparsha (Touch)</label>
+                <label className="block text-stone-500 text-[11px] mb-1">3. {t.sparshaLabel || "Sparsha (Touch)"}</label>
                 <input
                   disabled={isFinalized}
                   type="text"
@@ -982,7 +1004,7 @@ export function AssessmentWorkflow({
                 />
               </div>
               <div>
-                <label className="block text-stone-500 text-[11px] mb-1">4. Drik (Eyes/Gaze)</label>
+                <label className="block text-stone-500 text-[11px] mb-1">4. {t.drikLabel || "Drik (Eyes/Gaze)"}</label>
                 <input
                   disabled={isFinalized}
                   type="text"
@@ -1000,14 +1022,14 @@ export function AssessmentWorkflow({
               className="px-5 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 font-semibold text-xs transition-colors flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Back to Questions</span>
+              <span>{t.backToQuestions || "Back to 24 Questions"}</span>
             </button>
 
             <button
               onClick={() => setCurrentStep(4)}
               className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <span>Next: Review & Finalize</span>
+              <span>{t.nextReview || "Next: Review & Finalize"}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -1021,19 +1043,19 @@ export function AssessmentWorkflow({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
-                  Constitutional Synthesis
+                  {t.constitutionalSynthesis || "Constitutional Synthesis"}
                 </span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                   isFinalized ? "bg-amber-100 text-amber-900" : "bg-sky-100 text-sky-900"
                 }`}>
-                  Status: {assessmentStatus}
+                  {t.status || "Status"}: {isFinalized ? (t.finalized || "FINALIZED") : (t.draft || "DRAFT")}
                 </span>
               </div>
               <h3 className="text-xl font-bold text-stone-900 font-serif-heading mt-0.5">
-                Evaluated Constitution: {calcResult.dominantPrakriti}
+                {t.evaluatedConstitution || "Evaluated Constitution"}: {calcResult.dominantPrakriti}
               </h3>
               <p className="text-xs text-stone-500 mt-0.5">
-                Classification: <strong className="text-stone-800">{calcResult.constitutionType}</strong> • {calcResult.classicalTerm}
+                {t.classification || "Classification"}: <strong className="text-stone-800">{calcResult.constitutionType}</strong> • {calcResult.classicalTerm}
               </p>
             </div>
 
@@ -1042,7 +1064,7 @@ export function AssessmentWorkflow({
               className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs flex items-center gap-1.5 transition-colors"
             >
               <Info className="w-4 h-4 text-emerald-700" />
-              <span>Inspect Mathematical Basis</span>
+              <span>{t.inspectMathBasis || "Inspect Mathematical Basis"}</span>
             </button>
           </div>
 
@@ -1051,7 +1073,7 @@ export function AssessmentWorkflow({
             <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-stone-200 flex flex-col items-center">
               <DoshaRadarChart scores={calcResult} size={270} />
               <div className="text-[11px] text-stone-500 text-center mt-2">
-                Equilateral Tri-Dosha Vector Space (Vata + Pitta + Kapha = 100%)
+                {t.vectorSpaceTitle || "Equilateral Tri-Dosha Vector Space (Vata + Pitta + Kapha = 100%)"}
               </div>
             </div>
 
@@ -1059,8 +1081,8 @@ export function AssessmentWorkflow({
               {/* Vata Bar */}
               <div className="bg-sky-50/70 p-3.5 rounded-xl border border-sky-200">
                 <div className="flex justify-between font-bold text-sky-900 mb-1">
-                  <span>Vata (वात): {calcResult.vata}%</span>
-                  <span>Movement & Agility</span>
+                  <span>{t.vata || "Vata"} (वात): {calcResult.vata}%</span>
+                  <span>{t.dominanceMovement || "Movement & Agility"}</span>
                 </div>
                 <div className="w-full h-2.5 bg-sky-200/60 rounded-full overflow-hidden">
                   <div className="h-full bg-sky-500 rounded-full" style={{ width: `${calcResult.vata}%` }} />
@@ -1070,8 +1092,8 @@ export function AssessmentWorkflow({
               {/* Pitta Bar */}
               <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
                 <div className="flex justify-between font-bold text-amber-900 mb-1">
-                  <span>Pitta (पित्त): {calcResult.pitta}%</span>
-                  <span>Metabolism & Tejas</span>
+                  <span>{t.pitta || "Pitta"} (पित्त): {calcResult.pitta}%</span>
+                  <span>{t.dominanceMetabolism || "Metabolism & Tejas"}</span>
                 </div>
                 <div className="w-full h-2.5 bg-amber-200/60 rounded-full overflow-hidden">
                   <div className="h-full bg-amber-500 rounded-full" style={{ width: `${calcResult.pitta}%` }} />
@@ -1081,8 +1103,8 @@ export function AssessmentWorkflow({
               {/* Kapha Bar */}
               <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200">
                 <div className="flex justify-between font-bold text-emerald-900 mb-1">
-                  <span>Kapha (कफ): {calcResult.kapha}%</span>
-                  <span>Structure & Stability</span>
+                  <span>{t.kapha || "Kapha"} (कफ): {calcResult.kapha}%</span>
+                  <span>{t.dominanceStructure || "Structure & Stability"}</span>
                 </div>
                 <div className="w-full h-2.5 bg-emerald-200/60 rounded-full overflow-hidden">
                   <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${calcResult.kapha}%` }} />
@@ -1090,7 +1112,7 @@ export function AssessmentWorkflow({
               </div>
 
               <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-stone-700 leading-relaxed text-[11px]">
-                <strong>Classical Synthesis Rationale:</strong> {calcResult.rationale}
+                <strong>{t.scoringRationale || "Classical Synthesis Rationale"}:</strong> {calcResult.rationale}
               </div>
             </div>
           </div>
@@ -1099,7 +1121,7 @@ export function AssessmentWorkflow({
           <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2 text-xs">
             <h4 className="font-bold text-stone-800 flex items-center gap-1.5">
               <ListChecks className="w-4 h-4 text-emerald-700" />
-              <span>Assessment Completeness Verification</span>
+              <span>{t.completenessChecklist || "Assessment Completeness Verification"}</span>
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div className="flex items-center gap-2">
@@ -1108,7 +1130,7 @@ export function AssessmentWorkflow({
                 }`}>
                   {answeredCount === 24 ? "✓" : "!"}
                 </span>
-                <span>Questions: <strong>{answeredCount} / 24</strong></span>
+                <span>{t.navNewAssessment || "Questions"}: <strong>{answeredCount} / 24</strong></span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white ${
@@ -1116,7 +1138,7 @@ export function AssessmentWorkflow({
                 }`}>
                   {freeTextObs ? "✓" : "—"}
                 </span>
-                <span>Clinical Notes: <strong>{freeTextObs ? "Recorded" : "Optional"}</strong></span>
+                <span>{t.step3Stepper || "Clinical Notes"}: <strong>{freeTextObs ? (t.answered || "Recorded") : "Optional"}</strong></span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">✓</span>
@@ -1128,7 +1150,7 @@ export function AssessmentWorkflow({
                 }`}>
                   {patientMessage ? "✓" : "—"}
                 </span>
-                <span>Patient Message: <strong>{patientMessage ? "Configured" : "None"}</strong></span>
+                <span>{t.patientHandoutNote || "Patient Message"}: <strong>{patientMessage ? (t.answered || "Configured") : "None"}</strong></span>
               </div>
             </div>
           </div>
@@ -1138,7 +1160,7 @@ export function AssessmentWorkflow({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="font-semibold text-stone-800 text-xs">
-                  Doctor Final Review & Approval Note:
+                  {t.doctorFinalNoteLabel || "Doctor Final Review & Approval Note"}:
                 </label>
                 <InlineVoiceDictation
                   value={supervisorNotes}
@@ -1163,7 +1185,7 @@ export function AssessmentWorkflow({
               className="px-5 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Back to Clinical Notes</span>
+              <span>{t.backToNotes || "Back to Clinical Notes"}</span>
             </button>
 
             <div className="flex items-center gap-2">
@@ -1173,7 +1195,7 @@ export function AssessmentWorkflow({
                   className="px-4 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-100 text-stone-700 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Draft</span>
+                  <span>{t.saveDraft || "Save Draft"}</span>
                 </button>
               )}
 
@@ -1187,8 +1209,8 @@ export function AssessmentWorkflow({
                   <Send className="w-4 h-4" />
                   <span>
                     {activeRole === "patient"
-                      ? "Submit to Doctor's Draft & Review Queue"
-                      : "Submit for Supervising Doctor Review"}
+                      ? (t.submitReviewPatient || "Submit to Doctor's Draft & Review Queue")
+                      : (t.submitReviewScholar || "Submit for Supervising Doctor Review")}
                   </span>
                 </button>
               )}
@@ -1201,7 +1223,7 @@ export function AssessmentWorkflow({
                   className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-400" />
-                  <span>Finalize Assessment</span>
+                  <span>{t.finalizeDoctorBtn || "Finalize Assessment"}</span>
                 </button>
               )}
 
@@ -1212,7 +1234,7 @@ export function AssessmentWorkflow({
                   className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Eye className="w-4 h-4 text-amber-400" />
-                  <span>View Finalized Reports</span>
+                  <span>{t.viewFinalizedReports || "View Finalized Reports"}</span>
                 </button>
               )}
             </div>
@@ -1357,18 +1379,18 @@ export function AssessmentWorkflow({
               </div>
               <div>
                 <h3 className="text-base font-bold text-stone-900">
-                  Finalize Assessment Permanently
+                  {t.finalizeModalTitle || "Finalize Assessment Permanently"}
                 </h3>
                 <span className="text-xs text-rose-700 font-semibold">
-                  Irreversible Clinical Action
+                  {t.irreversibleAction || "Irreversible Clinical Action"}
                 </span>
               </div>
             </div>
 
             <div className="p-3.5 bg-rose-50 rounded-xl border border-rose-200 text-xs text-rose-900 leading-relaxed">
-              <strong>"Once finalized, this assessment cannot be modified."</strong>
+              <strong>"{t.finalizeModalWarning || "Once finalized, this assessment cannot be modified."}"</strong>
               <p className="mt-1 text-stone-600">
-                All 24 answers, question observations, patient communication, and constitutional percentages will become strictly immutable in accordance with Ayurvedic clinical audit standards.
+                {t.finalizeModalDesc || "All 24 answers, question observations, patient communication, and constitutional percentages will become strictly immutable in accordance with Ayurvedic clinical audit standards."}
               </p>
             </div>
 
@@ -1378,14 +1400,14 @@ export function AssessmentWorkflow({
                 onClick={() => setShowFinalizeModal(false)}
                 className="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-100 transition-colors"
               >
-                Cancel
+                {t.cancelBtn || "Cancel"}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmFinalize}
                 className="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold shadow-md transition-colors"
               >
-                Finalize Permanently
+                {t.finalizePermanentlyBtn || "Finalize Permanently"}
               </button>
             </div>
           </div>

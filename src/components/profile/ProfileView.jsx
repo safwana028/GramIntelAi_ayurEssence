@@ -130,55 +130,33 @@ export function ProfileView({
         </div>
       </div>
 
-      {/* Quick 1-Click Profile Switcher for Live Evaluation */}
+      {/* Active Session Domain Authorization (Strict Isolation) */}
       <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-2xs space-y-4">
         <div>
-          <h2 className="text-sm font-bold text-stone-900 font-serif-heading">
-            Switch Clinical Profile (Demonstration Mode)
+          <h2 className="text-sm font-bold text-stone-900 font-serif-heading flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+            <span>Active Domain Authorization & Session Status</span>
           </h2>
           <p className="text-xs text-stone-500 mt-0.5">
-            Instantly toggle between Doctor and Student personas to experience role-based clinical authorization.
+            Your clinical permissions are strictly isolated to your authenticated domain.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (onSwitchUser) onSwitchUser(CLINICAL_ACCOUNTS.doctor);
-              onRoleChange("doctor");
-            }}
-            className={`p-4 rounded-2xl border text-left transition-all ${
-              activeRole === "doctor"
-                ? "border-amber-400 bg-amber-50/70 shadow-sm ring-2 ring-amber-400/20"
-                : "border-stone-200 hover:border-stone-300 bg-stone-50/40"
-            }`}
-          >
+        <div className="p-4 rounded-2xl border border-stone-200 bg-stone-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Stethoscope className="w-4 h-4 text-amber-700" />
-              <span className="font-bold text-xs text-stone-900">Dr. K. Raghavendra Rao</span>
+              <span className="font-bold text-stone-900">{clinician.name}</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
+                {activeRole} Active
+              </span>
             </div>
-            <div className="text-[11px] text-stone-500 mt-1">Senior Vaidya (Doctor)</div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (onSwitchUser) onSwitchUser(CLINICAL_ACCOUNTS.student);
-              onRoleChange("student");
-            }}
-            className={`p-4 rounded-2xl border text-left transition-all ${
-              activeRole === "student"
-                ? "border-sky-400 bg-sky-50/70 shadow-sm ring-2 ring-sky-400/20"
-                : "border-stone-200 hover:border-stone-300 bg-stone-50/40"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-sky-700" />
-              <span className="font-bold text-xs text-stone-900">Pooja Hegde</span>
-            </div>
-            <div className="text-[11px] text-stone-500 mt-1">Final Year BAMS Scholar (Student)</div>
-          </button>
+            <p className="text-stone-500 text-[11px]">
+              To switch between Doctor, Student, or Patient workspaces, please log out to verify your credentials.
+            </p>
+          </div>
+          <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl whitespace-nowrap">
+            Domain Isolated ✓
+          </span>
         </div>
       </div>
     </div>
