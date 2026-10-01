@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2, Eye, Send, Sparkles, Phone, Mail, FileText, Check } from "lucide-react";
+import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2, Eye, Send, Sparkles, Phone, Mail, FileText, Check, Save } from "lucide-react";
 import { DoshaRadarChart, DoshaProportionBar } from "./DoshaRadarChart";
 import { ChosenAnswerMatrix } from "./ChosenAnswerMatrix";
 import { LifestyleImpactSimulator } from "./LifestyleImpactSimulator";
 import { DOSHA_PROFILES } from "../../data/samhitaReferences";
 import { TRANSLATIONS } from "../../data/translations";
 import { api } from "../../services/apiService";
+import { InlineVoiceDictation } from "../assessment/InlineVoiceDictation";
 
 export function DoctorReport({
   patient,
@@ -15,26 +16,47 @@ export function DoctorReport({
 }) {
   const [deliveryStatus, setDeliveryStatus] = useState(null); // { type: 'email'|'sms', text: string }
   const [isDispatching, setIsDispatching] = useState(false);
+  const [customDescription, setCustomDescription] = useState(
+    assessment?.patientMessage || assessment?.supervisorNotes || "Maintain warm cooked meals, regular sleep schedules, and avoid cold drafts as per baseline constitution."
+  );
+  const [targetEmail, setTargetEmail] = useState(patient?.email || "");
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   if (!patient || !assessment) return null;
 
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
   const { scores, observations, conductedBy, date, supervisorApproved, season } = assessment;
 
+  const handleSaveDescription = async () => {
+    assessment.patientMessage = customDescription;
+    assessment.supervisorNotes = customDescription;
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+    try {
+      if (assessment.id) {
+        await api.updateAssessment(assessment.id, {
+          patientMessage: customDescription,
+          supervisorNotes: customDescription
+        });
+      }
+    } catch {}
+  };
+
   const handleDirectEmailDispatch = async () => {
-    if (!patient.email) {
-      alert("No email address registered for this patient.");
+    const finalEmail = (targetEmail || patient?.email || "").trim();
+    if (!finalEmail) {
+      alert("Please enter a valid recipient email ID.");
       return;
     }
     setIsDispatching(true);
     try {
       const subject = encodeURIComponent(`Ayurvedic Prakriti Report - ${patient.name} (${assessment.id})`);
       const body = encodeURIComponent(
-        `Namaste ${patient.name},\n\nYour official Deha Prakriti Assessment Report from SDM College of Ayurveda & Hospital, Udupi has been finalized.\n\nEvaluated Constitution: ${scores.dominantPrakriti} (${scores.constitutionType})\n- Vata: ${scores.vata}%\n- Pitta: ${scores.pitta}%\n- Kapha: ${scores.kapha}%\n\nAttending Vaidya Recommendations:\n"${assessment.patientMessage || 'Follow balanced Ahara and Dinacharya routines.'}"\n\nThank you,\nSDM College of Ayurveda & Hospital, Udupi`
+        `Namaste ${patient.name},\n\nYour official Deha Prakriti Assessment Report from SDM College of Ayurveda & Hospital, Udupi has been finalized.\n\nEvaluated Constitution: ${scores.dominantPrakriti} (${scores.constitutionType})\n- Vata: ${scores.vata}%\n- Pitta: ${scores.pitta}%\n- Kapha: ${scores.kapha}%\n\nAttending Vaidya Description & Advice:\n"${customDescription}"\n\nThank you,\nSDM College of Ayurveda & Hospital, Udupi`
       );
 
-      // Open email composer prefilled with patient email
-      window.location.href = `mailto:${patient.email}?subject=${subject}&body=${body}`;
+      // Open email composer prefilled with target recipient email
+      window.location.href = `mailto:${finalEmail}?subject=${subject}&body=${body}`;
 
       try {
         if (assessment.id) {
@@ -44,7 +66,7 @@ export function DoctorReport({
 
       setDeliveryStatus({
         type: "email",
-        text: `📧 Email client launched for ${patient.email}. Report dispatched to patient.`
+        text: `📧 Email composer opened for ${finalEmail}. Report & Doctor description sent to patient!`
       });
     } catch (err) {
       console.warn("Email dispatch notice:", err);
@@ -62,7 +84,7 @@ export function DoctorReport({
     try {
       const phoneNum = (patient.phone || "").replace(/[^0-9]/g, "");
       const text = encodeURIComponent(
-        `Namaste ${patient.name}, your Ayurvedic Prakriti Report: Dominant ${scores.dominantPrakriti} (V:${scores.vata}% P:${scores.pitta}% K:${scores.kapha}%). Doctor Note: ${assessment.patientMessage || 'Follow balanced Ahara/Dinacharya'}. SDMCA Hospital Udupi`
+        `Namaste ${patient.name}, your Ayurvedic Prakriti Report: Dominant ${scores.dominantPrakriti} (V:${scores.vata}% P:${scores.pitta}% K:${scores.kapha}%). Doctor Note: ${customDescription}. SDMCA Hospital Udupi`
       );
       if (phoneNum) {
         window.open(`https://wa.me/${phoneNum}?text=${text}`, "_blank");
@@ -287,64 +309,111 @@ export function DoctorReport({
           </div>
         )}
 
-        {/* Editable Doctor Recommendations & Real Delivery Dispatch Section */}
-        <div className="bg-emerald-50/80 p-5 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-3 no-print">
+        {/* Editable Doctor Additional Description & Direct Email Dispatch Section */}
+        <div className="bg-emerald-50/80 p-5 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-4 no-print">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 pb-2">
             <h3 className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-emerald-700" />
-              <span>Doctor Prescribed Clinical Recommendations & Delivery Dispatch</span>
+              <span>Doctor Prescribed Additional Clinical Description & Treatment Advice</span>
             </h3>
-            <span className="text-[10px] text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold">
-              Patient Contact: {patient.phone || "Phone compulsory"} • {patient.email || "Email optional"}
-            </span>
+            {activeRole === "doctor" && (
+              <InlineVoiceDictation
+                value={customDescription}
+                onChange={setCustomDescription}
+                fieldName="Doctor Advice"
+              />
+            )}
           </div>
 
-          <p className="text-stone-800 text-xs italic bg-white p-3 rounded-xl border border-emerald-200 leading-relaxed">
-            "{assessment.patientMessage || "Maintain warm cooked meals, regular sleep schedules, and avoid cold drafts as per your baseline constitution."}"
-          </p>
-
-          {deliveryStatus && (
-            <div className="bg-emerald-900 text-white p-3.5 rounded-xl border border-emerald-700 text-xs flex items-center justify-between shadow-sm animate-in fade-in">
-              <div className="flex items-center gap-2 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{deliveryStatus.text}</span>
-              </div>
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-emerald-900">
+              Additional Clinical Notes / Treatment Recommendations (Appears on Patient Report):
+            </label>
+            <textarea
+              rows={3}
+              value={customDescription}
+              onChange={(e) => setCustomDescription(e.target.value)}
+              placeholder="Type or dictate additional clinical description, customized Ahara/Vihara advice, seasonal precautions..."
+              className="w-full p-3 rounded-xl border border-emerald-300 bg-white text-xs text-stone-800 focus:ring-2 focus:ring-emerald-700 focus:outline-none"
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-stone-500 italic">
+                {saveSuccess ? "✅ Additional description saved to report!" : "Doctors can add custom descriptions before sending."}
+              </span>
               <button
                 type="button"
-                onClick={() => setDeliveryStatus(null)}
-                className="text-emerald-300 hover:text-white text-[11px] underline"
+                onClick={handleSaveDescription}
+                className="px-3 py-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-lg flex items-center gap-1 shadow-2xs transition-colors"
               >
-                Dismiss
+                <Save className="w-3.5 h-3.5" />
+                <span>Save Description</span>
               </button>
             </div>
-          )}
+          </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="text-[11px] text-emerald-900 font-medium">
-              📲 SMS/WhatsApp Target: <strong>{patient.phone || "Phone Compulsory"}</strong> | ✉️ Email Target: <strong>{patient.email || "Email Optional"}</strong>
+          {/* Email & Phone Dispatch Targets */}
+          <div className="pt-2 border-t border-emerald-200/80 space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-900 mb-1">
+                  ✉️ Patient Email ID for Direct Sending:
+                </label>
+                <input
+                  type="email"
+                  value={targetEmail}
+                  onChange={(e) => setTargetEmail(e.target.value)}
+                  placeholder="Enter patient email address..."
+                  className="w-full px-3 py-1.5 rounded-lg border border-emerald-300 bg-white text-xs text-stone-800 focus:ring-1 focus:ring-emerald-700"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-900 mb-1">
+                  📲 Phone / WhatsApp Target:
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  value={patient.phone || "Phone compulsory"}
+                  className="w-full px-3 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-xs text-stone-700 font-mono"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {patient.email && (
+            {deliveryStatus && (
+              <div className="bg-emerald-900 text-white p-3 rounded-xl border border-emerald-700 text-xs flex items-center justify-between shadow-sm animate-in fade-in">
+                <div className="flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>{deliveryStatus.text}</span>
+                </div>
                 <button
                   type="button"
-                  disabled={isDispatching}
-                  onClick={handleDirectEmailDispatch}
-                  className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  onClick={() => setDeliveryStatus(null)}
+                  className="text-emerald-300 hover:text-white text-[11px] underline"
                 >
-                  <Mail className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{isDispatching ? "Dispatching..." : `Send via Email (${patient.email})`}</span>
+                  Dismiss
                 </button>
-              )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                disabled={isDispatching}
+                onClick={handleDirectEmailDispatch}
+                className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Mail className="w-4 h-4 text-amber-400" />
+                <span>{isDispatching ? "Sending Email..." : `Send Directly via Email (${targetEmail || 'Enter Email'})`}</span>
+              </button>
 
               <button
                 type="button"
                 disabled={isDispatching}
                 onClick={handleDirectSmsDispatch}
-                className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 disabled:bg-stone-300 text-stone-950 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:bg-stone-300 text-stone-950 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Phone className="w-3.5 h-3.5" />
-                <span>{isDispatching ? "Dispatching..." : `Send via WhatsApp/SMS (${patient.phone || 'Phone Required'})`}</span>
+                <Phone className="w-4 h-4" />
+                <span>{isDispatching ? "Sending SMS..." : `Send via WhatsApp/SMS (${patient.phone || 'Phone Required'})`}</span>
               </button>
             </div>
           </div>

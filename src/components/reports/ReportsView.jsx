@@ -150,17 +150,26 @@ export function ReportsView({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredReports.map((report) => {
-            const patient = patients.find((p) => p.id === report.patientId);
+            const patientObj = patients.find((p) => p.id === report.patientId) || {
+              id: report.patientId || `PAT-${report.id}`,
+              name: report.patientName || "Patient",
+              age: report.patientAge || 30,
+              gender: report.patientGender || "Female",
+              city: report.patientCity || "Udupi, Karnataka",
+              phone: report.phone || "",
+              email: report.email || ""
+            };
 
             return (
               <div
                 key={report.id}
-                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-600/50 p-5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                onClick={() => onQuickViewReport(patientObj, report)}
+                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-600/50 p-5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 cursor-pointer group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <h3 className="text-base font-bold text-stone-900 font-serif-heading">
+                      <h3 className="text-base font-bold text-stone-900 group-hover:text-emerald-800 font-serif-heading transition-colors">
                         {report.patientName}
                       </h3>
                       <div className="text-[11px] font-mono text-stone-500">
@@ -226,14 +235,12 @@ export function ReportsView({
                 </div>
 
                 {/* Card Actions */}
-                <div className="pt-3 border-t border-stone-100 flex items-center gap-2">
+                <div className="pt-3 border-t border-stone-100 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     size="sm"
                     icon={Eye}
-                    onClick={() => {
-                      if (patient) onQuickViewReport(patient, report);
-                    }}
+                    onClick={() => onQuickViewReport(patientObj, report)}
                     className="flex-1"
                   >
                     {t.inspectDossier || "View Dossier"}
