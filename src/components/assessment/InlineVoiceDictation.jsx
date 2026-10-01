@@ -26,6 +26,16 @@ export function InlineVoiceDictation({
   const [dictationError, setDictationError] = useState("");
   const [insertMode, setInsertMode] = useState("append"); // 'append' | 'replace'
   const recognitionRef = useRef(null);
+  const latestValueRef = useRef(value);
+  const insertModeRef = useRef(insertMode);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    insertModeRef.current = insertMode;
+  }, [insertMode]);
 
   useEffect(() => {
     const SpeechRecognition =
@@ -102,11 +112,14 @@ export function InlineVoiceDictation({
   const applyTranscribedText = (text) => {
     if (!onChange || !text) return;
 
-    if (insertMode === "append") {
-      const existing = value || "";
+    if (insertModeRef.current === "append") {
+      const existing = latestValueRef.current || "";
       const separator = existing.trim().length > 0 ? " " : "";
-      onChange(existing + separator + text);
+      const updated = existing + separator + text;
+      latestValueRef.current = updated;
+      onChange(updated);
     } else {
+      latestValueRef.current = text;
       onChange(text);
     }
   };

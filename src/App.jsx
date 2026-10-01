@@ -119,7 +119,9 @@ export function App() {
   };
 
   const handleLoginSuccess = (user, newPatientRecord = null) => {
+    let targetPatient = null;
     if (newPatientRecord) {
+      targetPatient = newPatientRecord;
       setPatients((prev) => {
         const existingIdx = prev.findIndex(
           (p) =>
@@ -142,21 +144,46 @@ export function App() {
     if (user?.role) {
       handleRoleChange(user.role);
     }
-    navigateToTab("dashboard");
+
+    if (user?.role === "patient" || targetPatient) {
+      const activePat =
+        targetPatient ||
+        patients.find(
+          (p) =>
+            p.id === user.patientId ||
+            (user.email && p.email?.trim().toLowerCase() === user.email.trim().toLowerCase())
+        ) || {
+          id: user.patientId || user.id || `PAT-${Date.now()}`,
+          name: user.name || "Patient",
+          age: user.age || 30,
+          gender: user.gender || "Female",
+          phone: user.phone || ""
+        };
+      setActivePatientForAssessment(activePat);
+      navigateToTab("assessment");
+    } else {
+      navigateToTab("dashboard");
+    }
   };
 
   const handleUpdatePatientProfile = (updatedData) => {
     const targetId = updatedData.id || currentUser?.patientId || currentUser?.id;
+    let updatedPatientObj = null;
     const updated = patients.map((p) => {
       if (
         p.id === targetId ||
         (updatedData.email && p.email?.trim().toLowerCase() === updatedData.email?.trim().toLowerCase())
       ) {
-        return { ...p, ...updatedData };
+        updatedPatientObj = { ...p, ...updatedData };
+        return updatedPatientObj;
       }
       return p;
     });
     handleSavePatients(updated);
+
+    if (updatedPatientObj) {
+      setActivePatientForAssessment(updatedPatientObj);
+    }
 
     if (activeRole === "patient") {
       const updatedUser = {
@@ -168,12 +195,14 @@ export function App() {
       };
       setCurrentUser(updatedUser);
       saveStoredUser(updatedUser);
+      navigateToTab("assessment");
     }
   };
 
   const handleUpdateUserProfile = (updatedUser) => {
     setCurrentUser(updatedUser);
     saveStoredUser(updatedUser);
+    navigateToTab(activeRole === "patient" ? "assessment" : "dashboard");
   };
 
   const handleSignOut = () => {
@@ -238,9 +267,10 @@ export function App() {
       (p) => p.id === patient.id || (normEmail && p.email?.trim().toLowerCase() === normEmail)
     );
     let updated;
+    let savedRecord = patient;
     if (existsIdx >= 0) {
       const existing = patients[existsIdx];
-      const merged = {
+      savedRecord = {
         ...existing,
         ...patient,
         id: existing.id,
@@ -250,11 +280,13 @@ export function App() {
         ])
       };
       updated = [...patients];
-      updated[existsIdx] = merged;
+      updated[existsIdx] = savedRecord;
     } else {
       updated = [patient, ...patients];
     }
     handleSavePatients(updated);
+    setActivePatientForAssessment(savedRecord);
+    navigateToTab("assessment");
 
     try {
       await api.createPatient(patient);

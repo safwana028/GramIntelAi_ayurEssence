@@ -114,6 +114,53 @@ export function DoctorDashboard({
         </div>
       </div>
 
+      {/* Doctor Clinical Vitals & Samprapti Health Structure Bar */}
+      <div className="bg-[#FAF8F5] border-2 border-emerald-300/80 rounded-3xl p-5 shadow-xs grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-800 text-amber-300 flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
+            🫀
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">Nadi Pariksha Status</span>
+            <span className="text-xs font-extrabold text-stone-900">72 bpm • Sama Nadi</span>
+            <div className="text-[10px] text-emerald-700 font-semibold">Tridoshalaya Equilibrium</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 border-t md:border-t-0 md:border-l border-stone-200 pt-3 md:pt-0 md:pl-4">
+          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
+            🔥
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">Agni & Metabolism</span>
+            <span className="text-xs font-extrabold text-stone-900">Samagni Status</span>
+            <div className="text-[10px] text-amber-700 font-semibold">Balanced Digestivity (Pachana)</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 border-t md:border-t-0 md:border-l border-stone-200 pt-3 md:pt-0 md:pl-4">
+          <div className="w-10 h-10 rounded-2xl bg-sky-700 text-white flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
+            ⚖️
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">Samprapti Risk Meter</span>
+            <span className="text-xs font-extrabold text-stone-900">Low Vikriti Index</span>
+            <div className="text-[10px] text-sky-700 font-semibold">Sama Prakriti Maintenance</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 border-t md:border-t-0 md:border-l border-stone-200 pt-3 md:pt-0 md:pl-4">
+          <div className="w-10 h-10 rounded-2xl bg-purple-800 text-purple-200 flex items-center justify-center shrink-0 shadow-2xs font-bold text-sm">
+            🏛️
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">Clinical Accreditation</span>
+            <span className="text-xs font-extrabold text-stone-900">SDM Ayurveda & AYUSH</span>
+            <div className="text-[10px] text-purple-700 font-semibold">Validated Charaka Vimana Ch.8</div>
+          </div>
+        </div>
+      </div>
+
       {/* Student & Patient Submissions Pending Review Notification Banner */}
       {pendingAssessments.length > 0 && (
         <div className="bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-orange-500/15 border-2 border-amber-500 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
