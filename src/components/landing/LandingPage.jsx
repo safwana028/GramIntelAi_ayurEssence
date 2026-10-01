@@ -20,7 +20,9 @@ import {
 export function LandingPage({
   onSelectRoleAndNavigate,
   onOpenMethodology,
-  onOpenAuth
+  onOpenAuth,
+  currentUser,
+  activeRole = "doctor"
 }) {
   return (
     <div className="space-y-12 pb-16">
@@ -62,7 +64,7 @@ export function LandingPage({
             onClick={onOpenAuth}
             className="text-xs min-h-[38px]"
           >
-            Clinician Sign In
+            {activeRole === "patient" ? "Patient Profile" : "Clinician Profile"}
           </Button>
         </div>
       </div>
@@ -92,35 +94,72 @@ export function LandingPage({
             </p>
           </div>
 
-          {/* Quick Portal Entry CTAs */}
+          {/* Role-Isolated Portal Entry CTAs */}
           <div className="pt-2 flex flex-wrap items-center gap-3">
-            <Button
-              variant="gold"
-              size="lg"
-              onClick={() => onSelectRoleAndNavigate("student", "assessment")}
-              icon={Sparkles}
-              className="min-h-[44px] shadow-lg shadow-amber-950/20"
-            >
-              Start Prakriti Pariksha
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => onSelectRoleAndNavigate("doctor", "dashboard")}
-              icon={Stethoscope}
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
-            >
-              Doctor Portal
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => onSelectRoleAndNavigate("student", "dashboard")}
-              icon={GraduationCap}
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
-            >
-              Scholar Portal
-            </Button>
+            {activeRole === "patient" ? (
+              <>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("patient", "assessment")}
+                  icon={Sparkles}
+                  className="min-h-[44px] shadow-lg shadow-amber-950/20"
+                >
+                  Start Self-Assessment
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("patient", "dashboard")}
+                  icon={ArrowRight}
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
+                >
+                  Return to Patient Dashboard
+                </Button>
+              </>
+            ) : activeRole === "student" ? (
+              <>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("student", "assessment")}
+                  icon={Sparkles}
+                  className="min-h-[44px] shadow-lg shadow-amber-950/20"
+                >
+                  Start Prakriti Pariksha
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("student", "dashboard")}
+                  icon={GraduationCap}
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
+                >
+                  Scholar Dashboard
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("doctor", "dashboard")}
+                  icon={Stethoscope}
+                  className="min-h-[44px] shadow-lg shadow-amber-950/20"
+                >
+                  Clinical Dashboard
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => onSelectRoleAndNavigate("doctor", "assessment")}
+                  icon={Sparkles}
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 min-h-[44px]"
+                >
+                  Assess Prakriti
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Key Assurance Indicators */}

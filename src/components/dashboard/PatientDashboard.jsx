@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Sparkles,
   FileText,
@@ -11,7 +11,12 @@ import {
   HeartHandshake,
   Activity,
   ShieldCheck,
-  BookOpen
+  BookOpen,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  X
 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
@@ -24,6 +29,7 @@ export function PatientDashboard({
   onStartAssessment,
   onQuickViewReport,
   onSignOut,
+  onUpdatePatient,
   activeLang = "en"
 }) {
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
@@ -31,6 +37,47 @@ export function PatientDashboard({
   const latestAssessment = assessments[assessments.length - 1];
   const isPendingReview = latestAssessment && !latestAssessment.supervisorApproved;
   const isFinalized = latestAssessment && latestAssessment.supervisorApproved;
+
+  // Personal details modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState(patient?.name || "");
+  const [editAge, setEditAge] = useState(patient?.age || "");
+  const [editGender, setEditGender] = useState(patient?.gender || "Female");
+  const [editPhone, setEditPhone] = useState(patient?.phone || "");
+  const [editEmail, setEditEmail] = useState(patient?.email || "");
+  const [editCity, setEditCity] = useState(patient?.city || "");
+  const [editDiet, setEditDiet] = useState(patient?.diet || "Vegetarian");
+  const [editComplaint, setEditComplaint] = useState(patient?.primaryComplaint || "");
+
+  const openEditModal = () => {
+    setEditName(patient?.name || "");
+    setEditAge(patient?.age || "");
+    setEditGender(patient?.gender || "Female");
+    setEditPhone(patient?.phone || "");
+    setEditEmail(patient?.email || "");
+    setEditCity(patient?.city || "");
+    setEditDiet(patient?.diet || "Vegetarian");
+    setEditComplaint(patient?.primaryComplaint || "");
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveDetails = (e) => {
+    e.preventDefault();
+    if (onUpdatePatient) {
+      onUpdatePatient({
+        id: patient?.id,
+        name: editName.trim() || patient?.name,
+        age: parseInt(editAge, 10) || patient?.age,
+        gender: editGender,
+        phone: editPhone.trim() || patient?.phone,
+        email: editEmail.trim() || patient?.email,
+        city: editCity.trim() || patient?.city,
+        diet: editDiet,
+        primaryComplaint: editComplaint.trim() || patient?.primaryComplaint
+      });
+    }
+    setIsEditModalOpen(false);
+  };
 
   return (
     <div className="space-y-8 pb-12">
@@ -141,6 +188,32 @@ export function PatientDashboard({
         </div>
       )}
 
+      {/* Patient Personalization & Account Details Banner */}
+      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/90 rounded-3xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-700 text-white flex items-center justify-center shrink-0 font-bold shadow-xs">
+            <User className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-emerald-950 font-serif-heading">
+              {t.personalizeProfileBanner || "Personalize Your Swastha Profile"}
+            </h3>
+            <p className="text-xs text-emerald-800/90 mt-0.5 leading-relaxed">
+              {t.personalizeProfileDesc || "Enter your personal details to create your official Ayurvedic health record."}
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          icon={User}
+          onClick={openEditModal}
+          className="whitespace-nowrap shrink-0"
+        >
+          {t.editPatientProfile || "Enter / Update Patient Details"}
+        </Button>
+      </div>
+
       {/* Main Grid: Patient Profile & Assessment History */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Patient Profile Summary */}
@@ -182,7 +255,7 @@ export function PatientDashboard({
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               <Button
                 variant="primary"
                 size="sm"
@@ -191,6 +264,16 @@ export function PatientDashboard({
                 className="w-full justify-center"
               >
                 {t.startSelfAssessment || "Begin First Assessment"}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                icon={User}
+                onClick={openEditModal}
+                className="w-full justify-center text-xs"
+              >
+                {t.editPatientProfile || "Enter / Update Patient Details"}
               </Button>
             </div>
           </div>
@@ -312,6 +395,188 @@ export function PatientDashboard({
           </div>
         </div>
       </div>
+
+      {/* Patient Details & Account Modal */}
+      {isEditModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-[#FAF8F5] text-stone-900 w-full max-w-lg rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8 animate-in zoom-in-95 duration-150">
+            <div className="p-6 text-white bg-gradient-to-r from-[#143B30] via-[#1E4D3E] to-[#0A241C] relative">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-emerald-300" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                    {t.rolePatient || "Patient Swastha Profile"}
+                  </span>
+                  <h3 className="text-xl font-bold font-serif-heading text-white">
+                    {t.editPatientProfile || "Enter / Update Patient Details"}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveDetails} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  {t.name || "Patient Full Name"} <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="e.g. Sneha Bhat"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.age || "Age"} <span className="text-rose-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    required
+                    value={editAge}
+                    onChange={(e) => setEditAge(e.target.value)}
+                    placeholder="28"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.gender || "Gender"} <span className="text-rose-600">*</span>
+                  </label>
+                  <select
+                    value={editGender}
+                    onChange={(e) => setEditGender(e.target.value)}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white text-stone-800"
+                  >
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.phoneLabel || "Phone Number"}
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="tel"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      placeholder="+91 98765 43210"
+                      className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.contact || "Registered Email"} <span className="text-rose-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder="sneha.bhat@example.com"
+                      className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.cityLabel || "City / Location"}
+                  </label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={editCity}
+                      onChange={(e) => setEditCity(e.target.value)}
+                      placeholder="Udupi, Karnataka"
+                      className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    {t.dietLabel || "Dietary Lifestyle (Ahara)"}
+                  </label>
+                  <select
+                    value={editDiet}
+                    onChange={(e) => setEditDiet(e.target.value)}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white text-stone-800"
+                  >
+                    <option value="Vegetarian">Pure Vegetarian</option>
+                    <option value="Lacto-Vegetarian">Lacto-Vegetarian</option>
+                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  {t.complaintLabel || "Primary Health Concern / Chief Complaint"}
+                </label>
+                <input
+                  type="text"
+                  value={editComplaint}
+                  onChange={(e) => setEditComplaint(e.target.value)}
+                  placeholder="e.g. Constitutional Prakriti Evaluation, sleep issues"
+                  className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2.5 text-xs font-semibold text-stone-600 hover:text-stone-900 rounded-xl"
+                >
+                  {t.cancelBtn || "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm"
+                >
+                  <span>{t.savePatientDetails || "Save Patient Details & Create Account"}</span>
+                  <CheckCircle2 className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

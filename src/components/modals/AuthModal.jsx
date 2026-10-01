@@ -16,15 +16,66 @@ import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 import { Button } from "../ui/Button";
 import { Alert } from "../ui/Alert";
 
-export function AuthModal({ isOpen, onClose, currentUser, onLoginSuccess }) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("doctor");
+export function AuthModal({
+  isOpen,
+  onClose,
+  currentUser,
+  activeRole = "doctor",
+  onLoginSuccess,
+  onUpdateUser,
+  onUpdatePatient
+}) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Doctor fields
+  const [doctorName, setDoctorName] = useState(currentUser?.name || "Dr. K. Raghavendra Rao");
+  const [doctorEmail, setDoctorEmail] = useState(currentUser?.email || "dr.rao@sdm.ac.in");
+  const [doctorTitle, setDoctorTitle] = useState(currentUser?.title || "Senior Vaidya & Professor");
+  const [doctorRegNo, setDoctorRegNo] = useState(currentUser?.regNo || "AYUR-KA-2026-9812");
+  const [doctorInstitution, setDoctorInstitution] = useState(currentUser?.institution || "SDM College of Ayurveda, Udupi");
+
+  // Student fields
+  const [studentName, setStudentName] = useState(currentUser?.name || "Arjun Shenoy");
+  const [studentEmail, setStudentEmail] = useState(currentUser?.email || "arjun.scholar@sdm.ac.in");
+  const [studentInstitution, setStudentInstitution] = useState(currentUser?.institution || "SDM College of Ayurveda, Udupi");
+  const [studentYear, setStudentYear] = useState(currentUser?.year || "Final Year BAMS Resident");
+
+  // Patient fields
+  const [patientName, setPatientName] = useState(currentUser?.name || "Sneha Bhat");
+  const [patientAge, setPatientAge] = useState(currentUser?.age || "28");
+  const [patientGender, setPatientGender] = useState(currentUser?.gender || "Female");
+  const [patientPhone, setPatientPhone] = useState(currentUser?.phone || "+91 98765 43210");
+  const [patientEmail, setPatientEmail] = useState(currentUser?.email || "patient@ayuressence.in");
+  const [patientCity, setPatientCity] = useState(currentUser?.city || "Udupi, Karnataka");
+  const [patientDiet, setPatientDiet] = useState(currentUser?.diet || "Vegetarian");
+  const [patientComplaint, setPatientComplaint] = useState(currentUser?.primaryComplaint || "Constitutional Health & Sleep Optimization");
+
+  useEffect(() => {
+    if (currentUser) {
+      if (activeRole === "doctor") {
+        setDoctorName(currentUser.name || "Dr. K. Raghavendra Rao");
+        setDoctorEmail(currentUser.email || "dr.rao@sdm.ac.in");
+        setDoctorTitle(currentUser.title || "Senior Vaidya & Professor");
+        setDoctorRegNo(currentUser.regNo || "AYUR-KA-2026-9812");
+        setDoctorInstitution(currentUser.institution || "SDM College of Ayurveda, Udupi");
+      } else if (activeRole === "student") {
+        setStudentName(currentUser.name || "Arjun Shenoy");
+        setStudentEmail(currentUser.email || "arjun.scholar@sdm.ac.in");
+        setStudentInstitution(currentUser.institution || "SDM College of Ayurveda, Udupi");
+        setStudentYear(currentUser.year || "Final Year BAMS Resident");
+      } else if (activeRole === "patient") {
+        setPatientName(currentUser.name || "Sneha Bhat");
+        setPatientAge(currentUser.age || "28");
+        setPatientGender(currentUser.gender || "Female");
+        setPatientPhone(currentUser.phone || "+91 98765 43210");
+        setPatientEmail(currentUser.email || "patient@ayuressence.in");
+        setPatientCity(currentUser.city || "Udupi, Karnataka");
+        setPatientDiet(currentUser.diet || "Vegetarian");
+        setPatientComplaint(currentUser.primaryComplaint || "Constitutional Health & Sleep Optimization");
+      }
+    }
+  }, [currentUser, activeRole]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -44,65 +95,63 @@ export function AuthModal({ isOpen, onClose, currentUser, onLoginSuccess }) {
 
   if (!isOpen) return null;
 
-  const handleQuickLogin = async (targetRole) => {
-    setError("");
-    setLoading(true);
-    const account = CLINICAL_ACCOUNTS[targetRole];
-    const passwordMap = {
-      doctor: "Doctor@123",
-      student: "Student@123"
-    };
-
-    try {
-      const res = await api.login(account.email, passwordMap[targetRole]);
-      if (res.ok && res.data?.user) {
-        onLoginSuccess(res.data.user);
-        onClose();
-      } else {
-        // Resilient fallback session if backend is temporarily unreachable
-        onLoginSuccess(account);
-        onClose();
-      }
-    } catch {
-      onLoginSuccess(account);
-      onClose();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
-    try {
-      if (isRegistering) {
-        if (!name.trim()) {
-          setError("Please provide your full clinical name.");
-          setLoading(false);
-          return;
-        }
-        const res = await api.register({ name, email, password, role });
-        if (res.ok && res.data?.user) {
-          onLoginSuccess(res.data.user);
-          onClose();
-        } else {
-          setError(res.data?.message || "Registration failed. Please verify your details.");
-        }
-      } else {
-        const res = await api.login(email, password);
-        if (res.ok && res.data?.user) {
-          onLoginSuccess(res.data.user);
-          onClose();
-        } else {
-          setError(res.data?.message || "Invalid credentials. Please check your email and password.");
-        }
+    if (activeRole === "patient") {
+      const updatedPatient = {
+        id: currentUser?.patientId || currentUser?.id,
+        name: patientName.trim(),
+        age: parseInt(patientAge, 10) || 28,
+        gender: patientGender,
+        phone: patientPhone.trim(),
+        email: patientEmail.trim(),
+        city: patientCity.trim(),
+        diet: patientDiet,
+        primaryComplaint: patientComplaint.trim()
+      };
+      if (onUpdatePatient) {
+        onUpdatePatient(updatedPatient);
       }
-    } catch {
-      setError("Network or server connection failed. Please try again.");
-    } finally {
+      onClose();
       setLoading(false);
+      return;
+    }
+
+    if (activeRole === "doctor") {
+      const updatedDoctor = {
+        ...currentUser,
+        role: "doctor",
+        name: doctorName.trim(),
+        email: doctorEmail.trim(),
+        title: doctorTitle.trim(),
+        regNo: doctorRegNo.trim(),
+        institution: doctorInstitution.trim()
+      };
+      if (onUpdateUser) {
+        onUpdateUser(updatedDoctor);
+      }
+      onClose();
+      setLoading(false);
+      return;
+    }
+
+    if (activeRole === "student") {
+      const updatedStudent = {
+        ...currentUser,
+        role: "student",
+        name: studentName.trim(),
+        email: studentEmail.trim(),
+        institution: studentInstitution.trim(),
+        year: studentYear.trim()
+      };
+      if (onUpdateUser) {
+        onUpdateUser(updatedStudent);
+      }
+      onClose();
+      setLoading(false);
+      return;
     }
   };
 
@@ -116,9 +165,15 @@ export function AuthModal({ isOpen, onClose, currentUser, onLoginSuccess }) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-[#FAF8F5] w-full max-w-md rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8 animate-in zoom-in-95 duration-150">
+      <div className="bg-[#FAF8F5] w-full max-w-lg rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-8 animate-in zoom-in-95 duration-150">
         {/* Header with Logo */}
-        <div className="bg-gradient-to-r from-[#1B4D3E] via-[#245D4B] to-[#12382B] text-white p-6 relative">
+        <div className={`p-6 text-white relative ${
+          activeRole === "doctor"
+            ? "bg-gradient-to-r from-[#1B4D3E] via-[#245D4B] to-[#12382B]"
+            : activeRole === "student"
+            ? "bg-gradient-to-r from-[#1E3A8A] via-[#1E40AF] to-[#0F2D6B]"
+            : "bg-gradient-to-r from-[#143B30] via-[#1E4D3E] to-[#0A241C]"
+        }`}>
           <button
             type="button"
             onClick={onClose}
@@ -129,13 +184,21 @@ export function AuthModal({ isOpen, onClose, currentUser, onLoginSuccess }) {
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <TridoshaLabLogo variant="icon" size="sm" light={true} />
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              {activeRole === "doctor" && <Stethoscope className="w-5 h-5 text-amber-300" />}
+              {activeRole === "student" && <GraduationCap className="w-5 h-5 text-sky-300" />}
+              {activeRole === "patient" && <HeartHandshake className="w-5 h-5 text-emerald-300" />}
+            </div>
             <div>
               <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block">
-                Clinical Access Portal
+                {activeRole === "doctor" && "Doctor Domain Session"}
+                {activeRole === "student" && "Scholar Domain Session"}
+                {activeRole === "patient" && "Patient Swastha Profile"}
               </span>
               <h2 id="auth-modal-title" className="text-xl font-bold font-serif-heading">
-                {isRegistering ? "Create Clinician Account" : "Sign In to TridoshaLab"}
+                {activeRole === "doctor" && "Doctor Clinical Credentials"}
+                {activeRole === "student" && "Ayurveda Scholar Profile"}
+                {activeRole === "patient" && "Patient Swastha Account Details"}
               </h2>
             </div>
           </div>
@@ -144,155 +207,303 @@ export function AuthModal({ isOpen, onClose, currentUser, onLoginSuccess }) {
           </p>
         </div>
 
-        {/* Quick 1-Click Role Presets */}
-        <div className="p-4 border-b border-stone-200 bg-white space-y-2">
-          <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center justify-between">
-            <span>Instant Demo Sign-In</span>
-            <span className="text-stone-400 font-normal">Click to sign in:</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("doctor")}
-              className="p-3 min-h-[50px] rounded-xl border border-amber-300 bg-amber-50/60 hover:bg-amber-100/70 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
-                <Stethoscope className="w-4 h-4 text-amber-700" />
-                <span>Doctor</span>
-              </div>
-              <div className="text-[10px] text-stone-500 mt-0.5 truncate">Dr. Rao (SDM)</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("student")}
-              className="p-3 min-h-[50px] rounded-xl border border-sky-300 bg-sky-50/60 hover:bg-sky-100/70 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
-                <GraduationCap className="w-4 h-4 text-sky-700" />
-                <span>Scholar</span>
-              </div>
-              <div className="text-[10px] text-stone-500 mt-0.5 truncate">BAMS Student</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        {/* DOMAIN ISOLATED FORM */}
+        <form onSubmit={handleSave} className="p-6 space-y-4 text-xs">
           {error && (
             <Alert variant="danger" onClose={() => setError("")}>
               {error}
             </Alert>
           )}
 
-          {isRegistering && (
-            <div>
-              <label htmlFor="auth-name" className="block font-semibold text-stone-700 mb-1">
-                Full Name & Clinical Title <span className="text-rose-600">*</span>
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
+          {/* DOCTOR FIELDS */}
+          {activeRole === "doctor" && (
+            <>
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Doctor Full Name & Title <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={doctorName}
+                    onChange={(e) => setDoctorName(e.target.value)}
+                    placeholder="Dr. K. Raghavendra Rao"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Clinical Email Address <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={doctorEmail}
+                    onChange={(e) => setDoctorEmail(e.target.value)}
+                    placeholder="dr.rao@sdm.ac.in"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Designation / Title
+                  </label>
+                  <input
+                    type="text"
+                    value={doctorTitle}
+                    onChange={(e) => setDoctorTitle(e.target.value)}
+                    placeholder="Senior Vaidya & Professor"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Registration / Seal No
+                  </label>
+                  <input
+                    type="text"
+                    value={doctorRegNo}
+                    onChange={(e) => setDoctorRegNo(e.target.value)}
+                    placeholder="AYUR-KA-2026-9812"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Institution
+                </label>
                 <input
-                  id="auth-name"
                   type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Dr. Ananya Shenoy, BAMS"
-                  className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white"
+                  value={doctorInstitution}
+                  onChange={(e) => setDoctorInstitution(e.target.value)}
+                  placeholder="SDM College of Ayurveda, Udupi"
+                  className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
                 />
               </div>
-            </div>
+            </>
           )}
 
-          <div>
-            <label htmlFor="auth-email" className="block font-semibold text-stone-700 mb-1">
-              Email Address <span className="text-rose-600">*</span>
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
-              <input
-                id="auth-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="doctor@sdm.edu or student@smvitm.ac.in"
-                className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white"
-              />
-            </div>
-          </div>
+          {/* SCHOLAR / STUDENT FIELDS */}
+          {activeRole === "student" && (
+            <>
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Scholar Full Name <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={studentName}
+                    onChange={(e) => setStudentName(e.target.value)}
+                    placeholder="Arjun Shenoy"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-white"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label htmlFor="auth-password" className="block font-semibold text-stone-700 mb-1">
-              Password <span className="text-rose-600">*</span>
-            </label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
-              <input
-                id="auth-password"
-                type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter clinical password"
-                className="w-full pl-9 pr-10 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded p-1"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Academic Email <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={studentEmail}
+                    onChange={(e) => setStudentEmail(e.target.value)}
+                    placeholder="arjun.scholar@sdm.ac.in"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-white"
+                  />
+                </div>
+              </div>
 
-          {isRegistering && (
-            <div>
-              <label htmlFor="auth-role" className="block font-semibold text-stone-700 mb-1">
-                Clinical Role Authorization <span className="text-rose-600">*</span>
-              </label>
-              <select
-                id="auth-role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 bg-white text-stone-800"
-              >
-                <option value="doctor">Ayurvedic Physician / Doctor (Vaidya)</option>
-                <option value="student">BAMS Scholar / Medical Student</option>
-              </select>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    BAMS Academic Year
+                  </label>
+                  <input
+                    type="text"
+                    value={studentYear}
+                    onChange={(e) => setStudentYear(e.target.value)}
+                    placeholder="Final Year BAMS Resident"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    College / University
+                  </label>
+                  <input
+                    type="text"
+                    value={studentInstitution}
+                    onChange={(e) => setStudentInstitution(e.target.value)}
+                    placeholder="SDM College of Ayurveda, Udupi"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-white"
+                  />
+                </div>
+              </div>
+            </>
           )}
 
-          <div className="pt-2">
+          {/* PATIENT FIELDS */}
+          {activeRole === "patient" && (
+            <>
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Patient Full Name <span className="text-rose-600">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={patientName}
+                    onChange={(e) => setPatientName(e.target.value)}
+                    placeholder="e.g. Sneha Bhat"
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Age (Years) <span className="text-rose-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    required
+                    value={patientAge}
+                    onChange={(e) => setPatientAge(e.target.value)}
+                    placeholder="28"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Gender <span className="text-rose-600">*</span>
+                  </label>
+                  <select
+                    value={patientGender}
+                    onChange={(e) => setPatientGender(e.target.value)}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white text-stone-800"
+                  >
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={patientPhone}
+                    onChange={(e) => setPatientPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Registered Email <span className="text-rose-600">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={patientEmail}
+                    onChange={(e) => setPatientEmail(e.target.value)}
+                    placeholder="sneha.bhat@example.com"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    City / Location
+                  </label>
+                  <input
+                    type="text"
+                    value={patientCity}
+                    onChange={(e) => setPatientCity(e.target.value)}
+                    placeholder="Udupi, Karnataka"
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">
+                    Dietary Habits (Ahara)
+                  </label>
+                  <select
+                    value={patientDiet}
+                    onChange={(e) => setPatientDiet(e.target.value)}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white text-stone-800"
+                  >
+                    <option value="Vegetarian">Pure Vegetarian</option>
+                    <option value="Lacto-Vegetarian">Lacto-Vegetarian</option>
+                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-stone-700 mb-1">
+                  Primary Health Concern
+                </label>
+                <input
+                  type="text"
+                  value={patientComplaint}
+                  onChange={(e) => setPatientComplaint(e.target.value)}
+                  placeholder="e.g. Constitutional Prakriti Evaluation, sleep balance"
+                  className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="pt-3 flex items-center justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               variant="primary"
-              size="md"
+              size="sm"
               loading={loading}
               iconRight={ArrowRight}
-              className="w-full min-h-[44px]"
             >
-              {isRegistering ? "Register Account" : "Sign In to Platform"}
+              {activeRole === "patient" && "Save Patient Details & Update Account"}
+              {activeRole === "doctor" && "Save Doctor Credentials"}
+              {activeRole === "student" && "Save Scholar Details"}
             </Button>
-          </div>
-
-          <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegistering(!isRegistering);
-                setError("");
-              }}
-              className="text-xs text-emerald-800 font-semibold hover:underline min-h-[36px] inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded"
-            >
-              {isRegistering
-                ? "Already have an account? Sign in here"
-                : "New clinician or scholar? Create an account"}
-            </button>
           </div>
         </form>
       </div>

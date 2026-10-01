@@ -170,17 +170,17 @@ export function AppShell({
         {/* Brand Header */}
         <div className="p-5 border-b border-emerald-800/60">
           <div
-            onClick={() => onTabChange("landing")}
+            onClick={() => onTabChange("dashboard")}
             className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-xl"
             tabIndex={0}
             role="button"
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onTabChange("landing");
+                onTabChange("dashboard");
               }
             }}
-            title="TridoshaLab Public Overview"
+            title="TridoshaLab Home"
           >
             <TridoshaLabLogo variant="horizontal" size="md" light={true} />
           </div>
@@ -348,17 +348,17 @@ export function AppShell({
         className="no-print lg:hidden sticky top-0 z-40 bg-gradient-to-b from-[#13382D] to-[#0E261E] text-white border-b border-emerald-800/80 px-4 py-3 shadow-md flex items-center justify-between"
       >
         <div
-          onClick={() => onTabChange("landing")}
+          onClick={() => onTabChange("dashboard")}
           className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-lg"
           tabIndex={0}
           role="button"
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              onTabChange("landing");
+              onTabChange("dashboard");
             }
           }}
-          title="TridoshaLab"
+          title="TridoshaLab Home"
         >
           <TridoshaLabLogo variant="horizontal" size="sm" light={true} />
         </div>

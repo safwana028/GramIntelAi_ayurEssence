@@ -118,13 +118,62 @@ export function App() {
     } catch {}
   };
 
-  const handleLoginSuccess = (user) => {
+  const handleLoginSuccess = (user, newPatientRecord = null) => {
+    if (newPatientRecord) {
+      setPatients((prev) => {
+        const existingIdx = prev.findIndex(
+          (p) =>
+            (p.email && p.email.trim().toLowerCase() === newPatientRecord.email?.trim().toLowerCase()) ||
+            p.id === newPatientRecord.id
+        );
+        let updated;
+        if (existingIdx >= 0) {
+          updated = [...prev];
+          updated[existingIdx] = { ...updated[existingIdx], ...newPatientRecord };
+        } else {
+          updated = [newPatientRecord, ...prev];
+        }
+        savePatients(updated);
+        return updated;
+      });
+    }
     setCurrentUser(user);
     saveStoredUser(user);
     if (user?.role) {
       handleRoleChange(user.role);
     }
     navigateToTab("dashboard");
+  };
+
+  const handleUpdatePatientProfile = (updatedData) => {
+    const targetId = updatedData.id || currentUser?.patientId || currentUser?.id;
+    const updated = patients.map((p) => {
+      if (
+        p.id === targetId ||
+        (updatedData.email && p.email?.trim().toLowerCase() === updatedData.email?.trim().toLowerCase())
+      ) {
+        return { ...p, ...updatedData };
+      }
+      return p;
+    });
+    handleSavePatients(updated);
+
+    if (activeRole === "patient") {
+      const updatedUser = {
+        ...currentUser,
+        name: updatedData.name,
+        email: updatedData.email,
+        phone: updatedData.phone,
+        patientId: targetId
+      };
+      setCurrentUser(updatedUser);
+      saveStoredUser(updatedUser);
+    }
+  };
+
+  const handleUpdateUserProfile = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    saveStoredUser(updatedUser);
   };
 
   const handleSignOut = () => {
@@ -482,6 +531,8 @@ export function App() {
               }}
               onOpenMethodology={() => setIsMethodologyOpen(true)}
               onOpenAuth={() => setIsAuthModalOpen(true)}
+              currentUser={currentUser}
+              activeRole={activeRole}
             />
           )}
 
@@ -536,6 +587,7 @@ export function App() {
               }}
               onQuickViewReport={handleQuickViewReport}
               onSignOut={handleSignOut}
+              onUpdatePatient={handleUpdatePatientProfile}
             />
           )}
 
@@ -684,7 +736,10 @@ export function App() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={currentUser}
+        activeRole={activeRole}
         onLoginSuccess={handleLoginSuccess}
+        onUpdateUser={handleUpdateUserProfile}
+        onUpdatePatient={handleUpdatePatientProfile}
       />
     </AppShell>
   );
