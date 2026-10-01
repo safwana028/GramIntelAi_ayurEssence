@@ -12,7 +12,8 @@ import {
   Layers,
   Download,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  LogOut
 } from "lucide-react";
 import { StatCard } from "../ui/StatCard";
 import { Button } from "../ui/Button";
@@ -28,6 +29,7 @@ export function DoctorDashboard({
   onSupervisorApprove,
   onOpenNewPatientModal,
   onExportBackup,
+  onSignOut,
   activeLang = "en"
 }) {
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
@@ -98,10 +100,21 @@ export function DoctorDashboard({
           >
             Add Patient
           </Button>
+          {onSignOut && (
+            <Button
+              variant="outline"
+              size="md"
+              icon={LogOut}
+              onClick={onSignOut}
+              className="bg-rose-950/40 text-rose-200 border-rose-700/60 hover:bg-rose-900/60"
+            >
+              {t.logoutBtn || "Log Out"}
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Student Submissions Pending Review Notification Banner */}
+      {/* Student & Patient Submissions Pending Review Notification Banner */}
       {pendingAssessments.length > 0 && (
         <div className="bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-orange-500/15 border-2 border-amber-500 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
           <div className="flex items-start sm:items-center gap-3">
@@ -111,14 +124,24 @@ export function DoctorDashboard({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm text-stone-900">
-                  {t.studentNotificationTitle || "Student Submissions Awaiting Approval"}
+                  {pendingAssessments[0].conductedBy?.role === "patient"
+                    ? "Patient Self-Assessment Awaiting Verification"
+                    : (t.studentNotificationTitle || "Student Submissions Awaiting Approval")}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-stone-950">
                   {pendingAssessments.length} {t.pendingApproval || "Pending Review"}
                 </span>
               </div>
               <p className="text-xs text-stone-700 mt-0.5">
-                {pendingAssessments[0].conductedBy?.name || "Student Scholar"} {t.studentNotificationDesc || "completed assessment for"} <strong className="text-stone-900">{pendingAssessments[0].patientName}</strong>.
+                {pendingAssessments[0].conductedBy?.role === "patient" ? (
+                  <>
+                    <strong className="text-stone-900">{pendingAssessments[0].patientName}</strong> ({t.submittedByPatient || "Patient Self-Assessment"}) submitted evaluation for your clinical sign-off.
+                  </>
+                ) : (
+                  <>
+                    {pendingAssessments[0].conductedBy?.name || "Student Scholar"} ({t.evaluatedByScholar || "Scholar"}) completed assessment for <strong className="text-stone-900">{pendingAssessments[0].patientName}</strong>.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -182,10 +205,10 @@ export function DoctorDashboard({
               <div>
                 <h2 className="text-base font-bold text-stone-900 font-serif-heading flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600" />
-                  <span>Student Assessments Awaiting Sign-Off</span>
+                  <span>Assessments Awaiting Sign-Off</span>
                 </h2>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  Academic evaluations conducted by BAMS scholars needing senior clinical validation.
+                  Academic evaluations by BAMS scholars and patient self-assessments needing senior clinical validation.
                 </p>
               </div>
 
@@ -228,10 +251,18 @@ export function DoctorDashboard({
                           </span>
                         </div>
                         <div className="text-xs text-stone-600 mt-0.5">
-                          Evaluated by:{" "}
-                          <strong className="text-stone-800">
-                            {asm.conductedBy?.name || "BAMS Scholar"}
-                          </strong>
+                          {asm.conductedBy?.role === "patient" ? (
+                            <span className="inline-flex items-center gap-1 font-semibold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md text-[11px] border border-purple-200">
+                              👤 {t.submittedByPatient || "Patient Self-Assessment"}
+                            </span>
+                          ) : (
+                            <>
+                              Evaluated by:{" "}
+                              <strong className="text-stone-800">
+                                {asm.conductedBy?.name || "BAMS Scholar"}
+                              </strong>
+                            </>
+                          )}
                         </div>
                       </div>
 

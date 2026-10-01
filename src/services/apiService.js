@@ -25,6 +25,14 @@ export const CLINICAL_ACCOUNTS = {
     email: "student@smvitm.ac.in",
     role: "student",
     institution: "SMVITM Bantakal / SDM Ayurveda"
+  },
+  patient: {
+    name: "Rahul Sharma",
+    title: "Registered OPD Patient",
+    email: "rahul.sharma@example.com",
+    role: "patient",
+    patientId: "PAT-UDU-2026-001",
+    institution: "SDM Ayurveda Hospital OPD"
   }
 };
 

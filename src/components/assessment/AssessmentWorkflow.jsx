@@ -37,12 +37,24 @@ export function AssessmentWorkflow({
   // Assessment Context
   const [season, setSeason] = useState(initialData?.season || "Varsha / Sharad (Autumn)");
   const [assessmentType, setAssessmentType] = useState("Baseline Janma Prakriti");
-  const [examinerName, setExaminerName] = useState(
-    initialData?.conductedBy?.name ||
-      (activeRole === "student"
-        ? "Dr. Mahesh Bhat (Final Year BAMS Scholar)"
-        : "Dr. K. Raghavendra Rao, BAMS, MD (Ayu)")
-  );
+  const [examinerName, setExaminerName] = useState(() => {
+    if (initialData?.conductedBy?.name) return initialData.conductedBy.name;
+    if (activeRole === "student") return "Dr. Mahesh Bhat (Final Year BAMS Scholar)";
+    if (activeRole === "patient") return patient?.name ? `${patient.name} (Patient Self-Assessment)` : "Patient Self-Assessment";
+    return "Dr. K. Raghavendra Rao, BAMS, MD (Ayu)";
+  });
+
+  useEffect(() => {
+    if (!initialData?.conductedBy?.name) {
+      if (activeRole === "student") {
+        setExaminerName("Dr. Mahesh Bhat (Final Year BAMS Scholar)");
+      } else if (activeRole === "patient") {
+        setExaminerName(currentPatient?.name ? `${currentPatient.name} (Patient Self-Assessment)` : "Patient Self-Assessment");
+      } else {
+        setExaminerName("Dr. K. Raghavendra Rao, BAMS, MD (Ayu)");
+      }
+    }
+  }, [activeRole, currentPatient?.name, initialData]);
 
   // Assessment State Machine
   const [assessmentStatus, setAssessmentStatus] = useState(
@@ -221,7 +233,7 @@ export function AssessmentWorkflow({
     alert("Draft saved successfully. You can continue editing later.");
   };
 
-  // Submit Assessment (Student action -> placed in Doctor review queue)
+  // Submit Assessment (Student or Patient action -> placed in Doctor review queue as draft)
   const handleSubmitForReview = () => {
     if (answeredCount < STANDARD_QUESTIONS.length) {
       alert(`Please answer all 24 questions before submitting (${answeredCount}/24 completed).`);
@@ -235,11 +247,15 @@ export function AssessmentWorkflow({
       conductedBy: {
         name: examinerName,
         role: activeRole,
-        institution: "SDM College of Ayurveda, Udupi"
+        institution: activeRole === "patient" ? "Patient Self-Assessment" : "SDM College of Ayurveda, Udupi"
       },
       status: "UNDER_REVIEW",
       supervisorApproved: false,
-      supervisorNotes: supervisorNotes || "Submitted by scholar for supervising doctor evaluation.",
+      supervisorNotes:
+        supervisorNotes ||
+        (activeRole === "patient"
+          ? "Submitted by patient for official clinical evaluation."
+          : "Submitted by scholar for supervising doctor evaluation."),
       questionnaireId: "sdm-udupi-standard-24",
       scores: calcResult,
       observations: {
@@ -257,7 +273,11 @@ export function AssessmentWorkflow({
     onSaveAssessment(currentPatient.id, submittedAssessment);
     setCompletionNotice({
       title: t.assessmentCompleted || "Assessment Completed Successfully!",
-      message: `${t.savedInPatientFile || "Saved in patient dossier"}: ${currentPatient.name}. ${t.studentNotificationDesc || "Submitted as draft to Doctor Review Queue for supervisor approval."}`,
+      message: `${t.savedInPatientFile || "Saved in patient dossier"}: ${currentPatient.name}. ${
+        activeRole === "patient"
+          ? "Your self-assessment has been saved to your file and submitted as a draft to the Doctor's Review Queue for official clinical verification."
+          : (t.studentNotificationDesc || "Submitted as draft to Doctor Review Queue for supervisor approval.")
+      }`,
       patientName: currentPatient.name
     });
     setCurrentStep(5);
@@ -421,12 +441,14 @@ export function AssessmentWorkflow({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
             <div>
-              <label className="block font-semibold text-stone-700 mb-1.5">Active Patient *</label>
+              <label className="block font-semibold text-stone-700 mb-1.5">
+                {activeRole === "patient" ? "Patient Profile *" : "Active Patient *"}
+              </label>
               <select
-                disabled={isFinalized}
+                disabled={isFinalized || activeRole === "patient"}
                 value={selectedPatientId}
                 onChange={(e) => setSelectedPatientId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-stone-50/50 font-medium"
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-stone-50/50 font-medium disabled:opacity-80"
               >
                 {allPatients.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -444,6 +466,9 @@ export function AssessmentWorkflow({
                 onChange={(e) => setAssessmentType(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white"
               >
+                {activeRole === "patient" && (
+                  <option value="Patient Self-Assessment">Patient Self-Assessment (Swastha Pariksha)</option>
+                )}
                 <option value="Baseline Janma Prakriti">Baseline Janma Prakriti (Primary Constitution)</option>
                 <option value="Seasonal Constitutional Review">Seasonal Constitutional Review (Ritucharya)</option>
                 <option value="Student Academic Training Case">Student Academic Training Case (Supervised)</option>
@@ -466,13 +491,15 @@ export function AssessmentWorkflow({
             </div>
 
             <div>
-              <label className="block font-semibold text-stone-700 mb-1.5">Examiner Clinician</label>
+              <label className="block font-semibold text-stone-700 mb-1.5">
+                {activeRole === "patient" ? "Submitter (Patient Profile)" : "Examiner Clinician"}
+              </label>
               <input
-                disabled={isFinalized}
+                disabled={isFinalized || activeRole === "patient"}
                 type="text"
                 value={examinerName}
                 onChange={(e) => setExaminerName(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white"
+                className="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white disabled:bg-stone-50"
               />
             </div>
           </div>
@@ -1150,15 +1177,19 @@ export function AssessmentWorkflow({
                 </button>
               )}
 
-              {/* Student Action: Submit for Doctor Review (CANNOT FINALIZE) */}
-              {activeRole === "student" && !isFinalized && (
+              {/* Student / Patient Action: Submit for Doctor Review (CANNOT FINALIZE) */}
+              {(activeRole === "student" || activeRole === "patient") && !isFinalized && (
                 <button
                   onClick={handleSubmitForReview}
                   disabled={answeredCount < 24}
                   className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:bg-stone-300 text-white font-semibold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Submit for Supervising Doctor Review</span>
+                  <span>
+                    {activeRole === "patient"
+                      ? "Submit to Doctor's Draft & Review Queue"
+                      : "Submit for Supervising Doctor Review"}
+                  </span>
                 </button>
               )}
 

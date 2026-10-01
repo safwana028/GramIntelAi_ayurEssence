@@ -101,7 +101,7 @@ export function ReviewQueue({
             {t.reviewQueueTitle || "Clinical Review & Sign-Off Queue"}
           </h1>
           <p className="text-xs text-stone-500 mt-1 max-w-xl">
-            {t.reviewQueueSubtitle || "Evaluate, verify, and digitally endorse constitutional assessments conducted by resident scholars and students."}
+            {t.reviewQueueSubtitle || "Evaluate, verify, and digitally endorse constitutional assessments conducted by resident scholars and patient self-evaluations."}
           </p>
         </div>
 
@@ -258,13 +258,28 @@ export function ReviewQueue({
                   </div>
                 </div>
 
-                {/* Student Evaluator and Notes */}
+                {/* Submitter / Evaluator and Notes */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pt-1 border-t border-stone-100">
-                  <div className="text-stone-600">
-                    Student Evaluator:{" "}
-                    <strong className="text-stone-900">
-                      {item.conductedBy?.name || "BAMS Scholar"}
-                    </strong>
+                  <div className="text-stone-600 flex flex-wrap items-center gap-2">
+                    {item.conductedBy?.role === "patient" ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full text-[11px] border border-purple-200">
+                        👤 Patient Self-Assessment
+                      </span>
+                    ) : item.conductedBy?.role === "student" ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full text-[11px] border border-sky-200">
+                        🎓 Ayurveda Scholar (Student)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-[11px] border border-emerald-200">
+                        👨‍⚕️ Clinician
+                      </span>
+                    )}
+                    <span>
+                      {item.conductedBy?.role === "patient" ? "Submitter:" : "Evaluator:"}{" "}
+                      <strong className="text-stone-900">
+                        {item.conductedBy?.name || (item.conductedBy?.role === "patient" ? item.patientName : "BAMS Scholar")}
+                      </strong>
+                    </span>
                     {item.observations?.freeText && (
                       <span className="text-stone-500 italic ml-2 truncate max-w-xs inline-block align-bottom">
                         "{item.observations.freeText}"

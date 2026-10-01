@@ -3,6 +3,7 @@ import { AppShell } from "./components/layout/AppShell";
 import { LandingPage } from "./components/landing/LandingPage";
 import { DoctorDashboard } from "./components/dashboard/DoctorDashboard";
 import { StudentDashboard } from "./components/dashboard/StudentDashboard";
+import { PatientDashboard } from "./components/dashboard/PatientDashboard";
 import { ReviewQueue } from "./components/review/ReviewQueue";
 import { ReportsView } from "./components/reports/ReportsView";
 import { ProfileView } from "./components/profile/ProfileView";
@@ -51,12 +52,11 @@ export function App() {
   const [patients, setPatients] = useState(getStoredPatients);
   const [questionnaires, setQuestionnaires] = useState(getStoredQuestionnaires);
   const [currentUser, setCurrentUser] = useState(() => {
-    const u = getStoredUser();
-    return u?.role === "patient" ? null : u;
+    return getStoredUser();
   });
   const [activeRole, setActiveRole] = useState(() => {
     const r = getStoredRole();
-    return r === "patient" ? "doctor" : (r || "doctor");
+    return ["doctor", "student", "patient"].includes(r) ? r : "doctor";
   });
   const [activeLang, setActiveLang] = useState(getStoredLanguage);
 
@@ -105,7 +105,7 @@ export function App() {
 
   // Persistence side effects
   const handleRoleChange = (role) => {
-    const validRole = role === "student" ? "student" : "doctor";
+    const validRole = ["student", "patient"].includes(role) ? role : "doctor";
     setActiveRole(validRole);
     saveStoredRole(validRole);
   };
@@ -151,7 +151,7 @@ export function App() {
       }
       // If currently on assessment (or just finished it on step 5), return safely to dashboard/home without leaving website
       if (activeTab === "assessment") {
-        setActiveTab(activeRole === "doctor" ? "dashboard" : "patients");
+        setActiveTab(activeRole === "student" ? "patients" : "dashboard");
         setEditingAssessment(null);
         return;
       }
@@ -159,7 +159,7 @@ export function App() {
         setActiveTab(event.state.tab);
         setActiveDossierView(null);
       } else {
-        setActiveTab(activeRole === "doctor" ? "dashboard" : "patients");
+        setActiveTab(activeRole === "student" ? "patients" : "dashboard");
       }
     };
 
@@ -214,13 +214,18 @@ export function App() {
     }
   };
 
-  // Start assessment from patient card (Doctor or Student only)
+  // Start assessment from patient card (Doctor, Student, or Patient self-assessment)
   const handleStartAssessmentForPatient = (patient, existingAssessment = null) => {
-    if (activeRole === "patient") {
-      alert("Patients are not permitted to access assessment workflows.");
-      return;
-    }
-    setActivePatientForAssessment(patient);
+    const targetPatient =
+      patient ||
+      (activeRole === "patient"
+        ? patients.find(
+            (p) =>
+              p.id === currentUser?.patientId ||
+              p.email?.trim().toLowerCase() === currentUser?.email?.trim().toLowerCase()
+          ) || patients[0]
+        : patients[0]);
+    setActivePatientForAssessment(targetPatient);
     setEditingAssessment(existingAssessment);
     setActiveDossierView(null);
     navigateToTab("assessment");
@@ -493,6 +498,7 @@ export function App() {
               onSupervisorApprove={handleSupervisorApprove}
               onOpenNewPatientModal={() => setIsPatientModalOpen(true)}
               onExportBackup={exportFullDataBackup}
+              onSignOut={handleSignOut}
             />
           )}
 
@@ -507,9 +513,31 @@ export function App() {
               onStartAssessment={handleStartAssessmentForPatient}
               onQuickViewReport={handleQuickViewReport}
               onOpenMethodology={() => setIsMethodologyOpen(true)}
+              onSignOut={handleSignOut}
             />
           )}
 
+          {/* TAB: PATIENT DASHBOARD */}
+          {activeTab === "dashboard" && activeRole === "patient" && (
+            <PatientDashboard
+              patient={
+                patients.find(
+                  (p) =>
+                    p.id === currentUser?.patientId ||
+                    p.email?.trim().toLowerCase() === currentUser?.email?.trim().toLowerCase()
+                ) || patients[0]
+              }
+              activeLang={activeLang}
+              onNavigate={(tab) => {
+                navigateToTab(tab);
+              }}
+              onStartAssessment={(pat) => {
+                handleStartAssessmentForPatient(pat);
+              }}
+              onQuickViewReport={handleQuickViewReport}
+              onSignOut={handleSignOut}
+            />
+          )}
 
           {/* TAB: PATIENTS DIRECTORY */}
           {activeTab === "patients" && activeRole !== "patient" && (
@@ -525,15 +553,34 @@ export function App() {
           )}
 
           {/* TAB: START ASSESSMENT WORKFLOW */}
-          {activeTab === "assessment" && activeRole !== "patient" && (
+          {activeTab === "assessment" && (
             <AssessmentWorkflow
-              patient={activePatientForAssessment || patients[0]}
-              allPatients={patients}
+              patient={
+                activePatientForAssessment ||
+                (activeRole === "patient"
+                  ? patients.find(
+                      (p) =>
+                        p.id === currentUser?.patientId ||
+                        p.email?.trim().toLowerCase() === currentUser?.email?.trim().toLowerCase()
+                    ) || patients[0]
+                  : patients[0])
+              }
+              allPatients={
+                activeRole === "patient"
+                  ? [
+                      patients.find(
+                        (p) =>
+                          p.id === currentUser?.patientId ||
+                          p.email?.trim().toLowerCase() === currentUser?.email?.trim().toLowerCase()
+                      ) || patients[0]
+                    ]
+                  : patients
+              }
               activeRole={activeRole}
               activeLang={activeLang}
               initialData={editingAssessment}
               onCancel={() => {
-                navigateToTab(activeRole === "doctor" ? "dashboard" : "patients");
+                navigateToTab(activeRole === "student" ? "patients" : "dashboard");
                 setEditingAssessment(null);
               }}
               onSaveAssessment={handleSaveAssessment}
@@ -554,9 +601,19 @@ export function App() {
           )}
 
           {/* TAB: REPORTS ARCHIVE */}
-          {activeTab === "reports" && activeRole !== "patient" && (
+          {activeTab === "reports" && (
             <ReportsView
-              patients={patients}
+              patients={
+                activeRole === "patient"
+                  ? [
+                      patients.find(
+                        (p) =>
+                          p.id === currentUser?.patientId ||
+                          p.email?.trim().toLowerCase() === currentUser?.email?.trim().toLowerCase()
+                      ) || patients[0]
+                    ]
+                  : patients
+              }
               activeRole={activeRole}
               activeLang={activeLang}
               onQuickViewReport={handleQuickViewReport}

@@ -10,7 +10,8 @@ import {
   Award,
   Layers,
   Activity,
-  Calendar
+  Calendar,
+  LogOut
 } from "lucide-react";
 import { StatCard } from "../ui/StatCard";
 import { Button } from "../ui/Button";
@@ -24,6 +25,7 @@ export function StudentDashboard({
   onStartAssessment,
   onQuickViewReport,
   onOpenMethodology,
+  onSignOut,
   activeLang = "en"
 }) {
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
@@ -78,6 +80,17 @@ export function StudentDashboard({
           >
             Study Samhita Shlokas
           </Button>
+          {onSignOut && (
+            <Button
+              variant="outline"
+              size="md"
+              icon={LogOut}
+              onClick={onSignOut}
+              className="bg-rose-950/40 text-rose-200 border-rose-700/60 hover:bg-rose-900/60"
+            >
+              {t.logoutBtn || "Log Out"}
+            </Button>
+          )}
         </div>
       </div>
 

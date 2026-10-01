@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Stethoscope,
   GraduationCap,
+  HeartHandshake,
   ArrowRight,
   Globe,
   Sparkles,
@@ -21,6 +22,13 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
     setLoginError("");
 
     const defaultAccount = CLINICAL_ACCOUNTS[role];
+    if (role === "patient") {
+      // Patient portal direct access
+      onSelectPortal(defaultAccount);
+      setLoadingRole(null);
+      return;
+    }
+
     const passwordMap = {
       doctor: "Doctor@123",
       student: "Student@123"
@@ -102,14 +110,14 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
           </p>
         </div>
 
-        {/* Portal Entry Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        {/* Portal Entry Cards: 3 Columns (Doctor, Student, Patient) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* CARD 1: DOCTOR PORTAL */}
-          <div className="relative group bg-gradient-to-b from-[#1E4D3E]/90 to-[#12352A]/90 hover:from-[#245D4B] hover:to-[#173F32] rounded-3xl p-6 sm:p-8 border-2 border-emerald-600/50 hover:border-amber-400 transition-all duration-200 shadow-xl flex flex-col justify-between">
+          <div className="relative group bg-gradient-to-b from-[#1E4D3E]/90 to-[#12352A]/90 hover:from-[#245D4B] hover:to-[#173F32] rounded-3xl p-6 sm:p-7 border-2 border-emerald-600/50 hover:border-amber-400 transition-all duration-200 shadow-xl flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center">
-                  <Stethoscope className="w-8 h-8" />
+                <div className="w-13 h-13 rounded-2xl bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center">
+                  <Stethoscope className="w-7 h-7" />
                 </div>
                 <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-400 text-stone-950 uppercase tracking-wide">
                   {t.roleDoctor || "Doctor (Senior Vaidya)"}
@@ -117,7 +125,7 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold font-serif-heading text-white">
+                <h2 className="text-xl font-bold font-serif-heading text-white">
                   {t.roleDoctor || "Doctor (Senior Vaidya)"}
                 </h2>
                 <span className="text-xs text-amber-300 font-medium block mt-0.5">
@@ -125,45 +133,45 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
                 </span>
               </div>
 
-              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+              <p className="text-xs text-emerald-100/90 leading-relaxed">
                 {t.loginDoctorDesc || "Access Senior Vaidya Dashboard, Review Scholar Drafts & Finalize Records"}
               </p>
 
               <div className="space-y-2 pt-2 border-t border-emerald-800/80 text-xs text-emerald-200">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Review student assessment submissions & sign off</span>
+                  <span>Review student & patient submissions</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Permanent clinical dossier finalization (Audit immutable)</span>
+                  <span>Clinical dossier finalization (Audit locked)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Questionnaire customization & Dinacharya delivery</span>
+                  <span>Dinacharya & Ahara guidance delivery</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 space-y-2">
+            <div className="mt-6 space-y-2">
               <button
                 type="button"
                 disabled={loadingRole !== null}
                 onClick={() => handlePortalEnter("doctor")}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
               >
-                <span>{loadingRole === "doctor" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — ${t.roleDoctor || "Doctor Portal"}`}</span>
+                <span>{loadingRole === "doctor" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Doctor`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* CARD 2: STUDENT SCHOLAR PORTAL */}
-          <div className="relative group bg-gradient-to-b from-[#194034]/90 to-[#0F2D23]/90 hover:from-[#1F4E40] hover:to-[#14392D] rounded-3xl p-6 sm:p-8 border-2 border-sky-600/50 hover:border-sky-400 transition-all duration-200 shadow-xl flex flex-col justify-between">
+          <div className="relative group bg-gradient-to-b from-[#194034]/90 to-[#0F2D23]/90 hover:from-[#1F4E40] hover:to-[#14392D] rounded-3xl p-6 sm:p-7 border-2 border-sky-600/50 hover:border-sky-400 transition-all duration-200 shadow-xl flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-sky-400/20 text-sky-300 border border-sky-400/40 flex items-center justify-center">
-                  <GraduationCap className="w-8 h-8" />
+                <div className="w-13 h-13 rounded-2xl bg-sky-400/20 text-sky-300 border border-sky-400/40 flex items-center justify-center">
+                  <GraduationCap className="w-7 h-7" />
                 </div>
                 <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-400 text-stone-950 uppercase tracking-wide">
                   {t.roleStudent || "Ayurveda Scholar (Student)"}
@@ -171,7 +179,7 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold font-serif-heading text-white">
+                <h2 className="text-xl font-bold font-serif-heading text-white">
                   {t.roleStudent || "Ayurveda Scholar (Student)"}
                 </h2>
                 <span className="text-xs text-sky-300 font-medium block mt-0.5">
@@ -179,7 +187,7 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
                 </span>
               </div>
 
-              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+              <p className="text-xs text-emerald-100/90 leading-relaxed">
                 {t.loginStudentDesc || "Conduct 24-Trait Assessments & Submit Drafts for Supervisor Approval"}
               </p>
 
@@ -190,23 +198,77 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
-                  <span>Multi-trait & dual dosha selection support</span>
+                  <span>Multi-trait & dual dosha selection</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
-                  <span>Direct submission to Doctor Review Queue</span>
+                  <span>Submission to Doctor Review Queue</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 space-y-2">
+            <div className="mt-6 space-y-2">
               <button
                 type="button"
                 disabled={loadingRole !== null}
                 onClick={() => handlePortalEnter("student")}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-stone-950 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-stone-950 font-bold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
               >
-                <span>{loadingRole === "student" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — ${t.roleStudent || "Student Portal"}`}</span>
+                <span>{loadingRole === "student" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Scholar`}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* CARD 3: PATIENT SWASTHA PORTAL */}
+          <div className="relative group bg-gradient-to-b from-[#143B30]/90 to-[#0A241C]/90 hover:from-[#194538] hover:to-[#0D2D23] rounded-3xl p-6 sm:p-7 border-2 border-teal-500/50 hover:border-emerald-400 transition-all duration-200 shadow-xl flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-13 h-13 rounded-2xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 flex items-center justify-center">
+                  <HeartHandshake className="w-7 h-7" />
+                </div>
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-400 text-stone-950 uppercase tracking-wide">
+                  {t.rolePatient || "Patient (Swastha Pariksha)"}
+                </span>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold font-serif-heading text-white">
+                  {t.rolePatient || "Patient (Swastha Pariksha)"}
+                </h2>
+                <span className="text-xs text-emerald-300 font-medium block mt-0.5">
+                  Constitutional Self-Assessment
+                </span>
+              </div>
+
+              <p className="text-xs text-emerald-100/90 leading-relaxed">
+                {t.loginPatientDesc || "Take 24-Trait Self-Assessment & View Doctor-Approved Wellness Plan"}
+              </p>
+
+              <div className="space-y-2 pt-2 border-t border-emerald-800/80 text-xs text-emerald-200">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>24-Question self-evaluation of physical & mental traits</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Directly saved to Doctor draft for clinical sign-off</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>View personalized diet (Ahara) & Dinacharya regimen</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-2">
+              <button
+                type="button"
+                disabled={loadingRole !== null}
+                onClick={() => handlePortalEnter("patient")}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-stone-950 font-bold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <span>{loadingRole === "patient" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Patient`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

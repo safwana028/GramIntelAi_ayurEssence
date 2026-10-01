@@ -272,10 +272,31 @@ export function DoctorReport({
         {/* Clinician Sign-off & Verification Seal */}
         <div className="pt-6 border-t border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[11px] text-stone-500">{t.conductedByLabel || "Conducted By"}:</div>
-            <div className="font-bold text-stone-900 text-xs">{conductedBy?.name}</div>
+            <div className="text-[11px] text-stone-500">
+              {conductedBy?.role === "patient"
+                ? "Self-Assessment Submitter:"
+                : conductedBy?.role === "student"
+                ? "Ayurveda Scholar Evaluator:"
+                : (t.conductedByLabel || "Conducted By") + ":"}
+            </div>
+            <div className="font-bold text-stone-900 text-xs flex items-center gap-1.5">
+              <span>{conductedBy?.name}</span>
+              {conductedBy?.role === "patient" ? (
+                <span className="text-[10px] font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">
+                  👤 Patient Self-Assessment
+                </span>
+              ) : conductedBy?.role === "student" ? (
+                <span className="text-[10px] font-semibold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
+                  🎓 BAMS Scholar
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                  👨‍⚕️ Senior Vaidya
+                </span>
+              )}
+            </div>
             <div className="text-[10px] text-stone-400 capitalize">
-              Role: {conductedBy?.role} • {t.sponsorHeader || "SDM College of Ayurveda, Udupi"}
+              Role: {conductedBy?.role === "patient" ? "Registered Patient (Swastha Pariksha)" : conductedBy?.role} • {t.sponsorHeader || "SDM College of Ayurveda, Udupi"}
             </div>
           </div>
 
@@ -292,8 +313,12 @@ export function DoctorReport({
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-900">
                 <AlertCircle className="w-5 h-5 text-amber-700" />
                 <div className="text-left">
-                  <div className="text-[11px] font-bold">{t.pendingSupervisorReview || "Pending Supervisor Review"}</div>
-                  <div className="text-[10px] text-amber-700">{t.academicStudentWorkflow || "Academic Student Workflow"}</div>
+                  <div className="text-[11px] font-bold">{t.pendingSupervisorReview || "Pending Doctor Sign-Off"}</div>
+                  <div className="text-[10px] text-amber-700">
+                    {conductedBy?.role === "patient"
+                      ? "Patient Self-Assessment Draft"
+                      : (t.academicStudentWorkflow || "Academic Student Workflow")}
+                  </div>
                 </div>
               </div>
             )}

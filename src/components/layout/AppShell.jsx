@@ -13,6 +13,7 @@ import {
   X,
   Stethoscope,
   GraduationCap,
+  HeartHandshake,
   BookOpen,
   Globe,
   LogOut,
@@ -42,8 +43,33 @@ export function AppShell({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
 
-  // Define navigation items per role (Doctor and Student only)
+  // Define navigation items per role (Doctor, Student, Patient)
   const getNavItems = () => {
+    if (activeRole === "patient") {
+      return [
+        {
+          id: "dashboard",
+          label: t.navDashboard || "My Dashboard",
+          icon: LayoutDashboard
+        },
+        {
+          id: "assessment",
+          label: t.startSelfAssessment || "Self-Assessment",
+          icon: Sparkles
+        },
+        {
+          id: "reports",
+          label: t.navReports || "My Reports",
+          icon: FileText
+        },
+        {
+          id: "settings",
+          label: t.navSettings || "Settings",
+          icon: Settings
+        }
+      ];
+    }
+
     if (activeRole === "student") {
       return [
         {
@@ -175,7 +201,7 @@ export function AppShell({
             <span className="text-[9px] text-stone-400 font-normal">Switch Role:</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-1 bg-[#122A22] p-1 rounded-xl border border-emerald-800/80 text-xs">
+          <div className="grid grid-cols-3 gap-1 bg-[#122A22] p-1 rounded-xl border border-emerald-800/80 text-xs">
             <button
               type="button"
               onClick={() => onRoleChange("doctor")}
@@ -202,6 +228,20 @@ export function AppShell({
             >
               <GraduationCap className="w-3.5 h-3.5" />
               <span>Scholar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onRoleChange("patient")}
+              className={`py-1.5 min-h-[36px] rounded-lg font-semibold flex items-center justify-center gap-1 transition-all text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                activeRole === "patient"
+                  ? "bg-emerald-500 text-stone-950 shadow-sm"
+                  : "text-emerald-200 hover:text-white hover:bg-emerald-900/40"
+              }`}
+              title="Patient Swastha View"
+            >
+              <HeartHandshake className="w-3.5 h-3.5" />
+              <span>Patient</span>
             </button>
           </div>
         </div>
@@ -378,7 +418,7 @@ export function AppShell({
               <div className="text-[10px] uppercase font-bold text-emerald-300">
                 Switch Role Mode:
               </div>
-              <div className="grid grid-cols-2 gap-1 bg-[#0E261E] p-1 rounded-xl text-xs">
+              <div className="grid grid-cols-3 gap-1 bg-[#0E261E] p-1 rounded-xl text-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -386,7 +426,7 @@ export function AppShell({
                     setMobileMenuOpen(false);
                   }}
                   className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
-                    activeRole === "doctor" ? "bg-amber-500 text-stone-950" : "text-emerald-200"
+                    activeRole === "doctor" ? "bg-amber-500 text-stone-950 font-bold" : "text-emerald-200"
                   }`}
                 >
                   Doctor
@@ -398,10 +438,22 @@ export function AppShell({
                     setMobileMenuOpen(false);
                   }}
                   className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
-                    activeRole === "student" ? "bg-sky-500 text-white" : "text-emerald-200"
+                    activeRole === "student" ? "bg-sky-500 text-white font-bold" : "text-emerald-200"
                   }`}
                 >
                   Scholar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRoleChange("patient");
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`py-2 min-h-[40px] text-center rounded-lg font-semibold transition-all ${
+                    activeRole === "patient" ? "bg-emerald-500 text-stone-950 font-bold" : "text-emerald-200"
+                  }`}
+                >
+                  Patient
                 </button>
               </div>
             </div>

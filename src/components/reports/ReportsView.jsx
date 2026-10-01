@@ -198,9 +198,20 @@ export function ReportsView({
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-stone-400 text-[11px]">Conducted By:</span>
-                      <span className="font-medium text-stone-700 truncate max-w-[150px]">
-                        {report.conductedBy?.name || "Clinician"}
+                      <span className="text-stone-400 text-[11px]">
+                        {report.conductedBy?.role === "patient" ? "Submitted By:" : "Conducted By:"}
+                      </span>
+                      <span className="font-medium text-stone-700 truncate max-w-[170px] flex items-center gap-1">
+                        {report.conductedBy?.role === "patient" ? (
+                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+                            👤 Patient
+                          </span>
+                        ) : report.conductedBy?.role === "student" ? (
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">
+                            🎓 Scholar
+                          </span>
+                        ) : null}
+                        <span>{report.conductedBy?.name || "Clinician"}</span>
                       </span>
                     </div>
                   </div>
