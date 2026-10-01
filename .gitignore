@@ -8,7 +8,7 @@ coverage/
 *.lcov
 
 # Production build artifacts
-dist/
+# dist/
 dist-ssr/
 build/
 *.local

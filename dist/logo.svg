@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" fill="none">
+  <defs>
+    <linearGradient id="tdl-emerald-full" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D6A4F" />
+      <stop offset="100%" stop-color="#1B4D3E" />
+    </linearGradient>
+    <linearGradient id="tdl-gold-full" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <linearGradient id="tdl-sky-full" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Emblem on left -->
+  <g transform="translate(10, 5)">
+    <circle cx="40" cy="40" r="38" fill="#16382D" stroke="#F59E0B" stroke-width="1.5" />
+    <circle cx="40" cy="40" r="34" fill="#1B4D3E" />
+    <path d="M40 66 C33 55 30 43 40 30 C50 43 47 55 40 66 Z" fill="url(#tdl-emerald-full)" />
+    <path d="M40 30 C27 26 19 35 17 48 C30 50 38 41 40 30 Z" fill="url(#tdl-sky-full)" />
+    <path d="M40 30 C53 26 61 35 63 48 C50 50 42 41 40 30 Z" fill="url(#tdl-gold-full)" />
+    <circle cx="40" cy="39" r="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.2" />
+    <circle cx="40" cy="39" r="2.5" fill="#1B4D3E" />
+    <path d="M40 14 L42 19 L40 22 L38 19 Z" fill="#F59E0B" />
+  </g>
+
+  <!-- Typography on right -->
+  <text x="100" y="46" font-family="'Cinzel', Georgia, serif" font-size="28" font-weight="800" fill="#1B4D3E" letter-spacing="-0.5">Tridosha<tspan fill="#D97706">Lab</tspan></text>
+  <text x="102" y="66" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="10" font-weight="600" fill="#4B5563" letter-spacing="1.5">CLINICAL PRAKRITI INTELLIGENCE</text>
+</svg>

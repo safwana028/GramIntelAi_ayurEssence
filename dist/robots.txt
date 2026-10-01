@@ -1,0 +1,7 @@
+# Robots.txt for TridoshaLab (https://tridoshalab.com)
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://gramintelai-ayuressence.onrender.com/sitemap.xml
+Sitemap: https://tridoshalab.com/sitemap.xml

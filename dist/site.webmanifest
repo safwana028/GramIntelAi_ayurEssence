@@ -1,0 +1,16 @@
+{
+  "name": "TridoshaLab — Clinical Ayurvedic Assessment Platform",
+  "short_name": "TridoshaLab",
+  "description": "Standardized Ayurvedic Deha Prakriti Assessment platform developed with SDM College of Ayurveda, Udupi & SMVITM Bantakal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme_color": "#1B4D3E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
