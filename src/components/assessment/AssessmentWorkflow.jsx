@@ -710,29 +710,25 @@ export function AssessmentWorkflow({
 
                   {/* 3 Classical Options */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {q.options.map((opt) => {
+                    {q.options.map((opt, optIndex) => {
                       const isSelected = selectedOptIds.includes(opt.id) || selectedOptIds.includes(opt.dosha);
-                      const optText = opt.text[activeLang] || opt.text.en;
+                      const rawOptText = opt.text[activeLang] || opt.text.en;
+                      // Mask any explicit Vata / Pitta / Kapha text in option text during quiz taking
+                      const optText = rawOptText
+                        .replace(/\s*\((?:Vata|Pitta|Kapha|V|P|K)\)/gi, "")
+                        .replace(/\s*\[(?:Vata|Pitta|Kapha|V|P|K)\]/gi, "");
 
                       let borderColor = "border-stone-200 hover:border-stone-300";
                       let bgColor = "bg-white hover:bg-stone-50/50";
                       let badgeColor = "bg-stone-100 text-stone-600";
 
                       if (isSelected) {
-                        if (opt.dosha === "vata") {
-                          borderColor = "border-sky-500 ring-2 ring-sky-500/20";
-                          bgColor = "bg-sky-50/60";
-                          badgeColor = "bg-sky-500 text-white";
-                        } else if (opt.dosha === "pitta") {
-                          borderColor = "border-amber-500 ring-2 ring-amber-500/20";
-                          bgColor = "bg-amber-50/60";
-                          badgeColor = "bg-amber-500 text-white";
-                        } else {
-                          borderColor = "border-emerald-500 ring-2 ring-emerald-500/20";
-                          bgColor = "bg-emerald-50/60";
-                          badgeColor = "bg-emerald-600 text-white";
-                        }
+                        borderColor = "border-emerald-600 ring-2 ring-emerald-500/20";
+                        bgColor = "bg-emerald-50/70";
+                        badgeColor = "bg-emerald-700 text-white";
                       }
+
+                      const optionLabel = `Option ${String.fromCharCode(65 + optIndex)}`;
 
                       return (
                         <div
@@ -742,19 +738,19 @@ export function AssessmentWorkflow({
                             isFinalized ? "pointer-events-none opacity-80" : ""
                           }`}
                         >
-                          <p className="text-xs text-stone-700 leading-relaxed">
+                          <p className="text-xs text-stone-700 leading-relaxed font-medium">
                             {optText}
                           </p>
 
                           <div className="flex items-center justify-between mt-3 pt-2 border-t border-stone-100">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${badgeColor}`}>
-                              {t[opt.dosha] || opt.dosha}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${badgeColor}`}>
+                              {optionLabel}
                             </span>
                             <div
                               className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                                 isSelected
-                                    ? "border-emerald-600 bg-emerald-600 text-white"
-                                    : "border-stone-300 bg-white"
+                                  ? "border-emerald-600 bg-emerald-600 text-white"
+                                  : "border-stone-300 bg-white"
                               }`}
                             >
                               {isSelected && <Check className="w-3 h-3" />}

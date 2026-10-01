@@ -1,6 +1,8 @@
-import React from "react";
-import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2, Eye } from "lucide-react";
+import React, { useState } from "react";
+import { ShieldCheck, AlertCircle, Award, BookOpen, Printer, CheckCircle2, Eye, Send, Sparkles, Phone, Mail, FileText, Check } from "lucide-react";
 import { DoshaRadarChart, DoshaProportionBar } from "./DoshaRadarChart";
+import { ChosenAnswerMatrix } from "./ChosenAnswerMatrix";
+import { LifestyleImpactSimulator } from "./LifestyleImpactSimulator";
 import { DOSHA_PROFILES } from "../../data/samhitaReferences";
 import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 import { TRANSLATIONS } from "../../data/translations";
@@ -80,12 +82,12 @@ export function DoctorReport({
         </div>
 
         {/* Primary Constitution Result Card */}
-        <div className="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-[#FAF8F5] p-6 rounded-3xl border-2 border-emerald-300 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
           <div>
-            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
+            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">
               {t.dominantDosha || "Evaluated Constitutional State (Prakriti)"}
             </span>
-            <h2 className="text-2xl font-extrabold text-stone-900 font-serif-heading mt-0.5">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 font-serif-heading">
               {scores.dominantPrakriti}
             </h2>
             <div className="text-xs text-stone-600 mt-1">
@@ -93,18 +95,18 @@ export function DoctorReport({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-center px-3 py-1.5 bg-sky-100/80 rounded-xl border border-sky-300">
-              <span className="block text-[10px] font-bold text-sky-800">{t.vata || "Vata"}</span>
-              <span className="text-base font-extrabold text-sky-900">{scores.vata}%</span>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <div className="text-center px-4 py-3 bg-sky-100/90 rounded-2xl border border-sky-300 shadow-2xs">
+              <span className="block text-xs font-bold text-sky-800 uppercase tracking-wider">{t.vata || "Vata"}</span>
+              <span className="text-5xl sm:text-6xl font-extrabold text-sky-950 tracking-tight">{scores.vata}%</span>
             </div>
-            <div className="text-center px-3 py-1.5 bg-amber-100/80 rounded-xl border border-amber-300">
-              <span className="block text-[10px] font-bold text-amber-800">{t.pitta || "Pitta"}</span>
-              <span className="text-base font-extrabold text-amber-900">{scores.pitta}%</span>
+            <div className="text-center px-4 py-3 bg-amber-100/90 rounded-2xl border border-amber-300 shadow-2xs">
+              <span className="block text-xs font-bold text-amber-800 uppercase tracking-wider">{t.pitta || "Pitta"}</span>
+              <span className="text-5xl sm:text-6xl font-extrabold text-amber-950 tracking-tight">{scores.pitta}%</span>
             </div>
-            <div className="text-center px-3 py-1.5 bg-emerald-100/80 rounded-xl border border-emerald-300">
-              <span className="block text-[10px] font-bold text-emerald-800">{t.kapha || "Kapha"}</span>
-              <span className="text-base font-extrabold text-emerald-900">{scores.kapha}%</span>
+            <div className="text-center px-4 py-3 bg-emerald-100/90 rounded-2xl border border-emerald-300 shadow-2xs">
+              <span className="block text-xs font-bold text-emerald-800 uppercase tracking-wider">{t.kapha || "Kapha"}</span>
+              <span className="text-5xl sm:text-6xl font-extrabold text-emerald-950 tracking-tight">{scores.kapha}%</span>
             </div>
           </div>
         </div>
@@ -157,6 +159,12 @@ export function DoctorReport({
             </div>
           </div>
         </div>
+
+        {/* Chosen Answer Trait Comparison Matrix */}
+        <ChosenAnswerMatrix answers={assessment.answers} scores={scores} activeLang={activeLang} />
+
+        {/* Working Innovation: Interactive Dinacharya & Ahara Simulator */}
+        <LifestyleImpactSimulator baseScores={scores} />
 
         {/* Practitioner Clinical Observations & Ashtavidha */}
         {observations && (
@@ -211,6 +219,38 @@ export function DoctorReport({
             )}
           </div>
         )}
+
+        {/* Editable Doctor Recommendations & Delivery Section */}
+        <div className="bg-emerald-50/80 p-5 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 pb-2">
+            <h3 className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-700" />
+              <span>Doctor Prescribed Clinical Recommendations & Delivery</span>
+            </h3>
+            <span className="text-[10px] text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold">
+              Delivered to Patient: {patient.phone || "No phone"} • {patient.email || "No email"}
+            </span>
+          </div>
+
+          <p className="text-stone-800 text-xs italic bg-white p-3 rounded-xl border border-emerald-200 leading-relaxed">
+            "{assessment.patientMessage || "Maintain warm cooked meals, regular sleep schedules, and avoid cold drafts as per your baseline constitution."}"
+          </p>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div className="text-[11px] text-emerald-900 font-medium">
+              📲 Report notification dispatch destination: <strong>{patient.phone || "Phone Compulsory"}</strong> | ✉️ <strong>{patient.email || "Email Optional"}</strong>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => alert(`Report notification dispatched successfully to patient ${patient.name} via SMS (${patient.phone}) and Email (${patient.email || 'N/A'})!`)}
+              className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5 text-amber-400" />
+              <span>Deliver Report to Patient ({patient.phone})</span>
+            </button>
+          </div>
+        </div>
 
 
         {/* Per-Question Clinical Observation Notes (if recorded) */}

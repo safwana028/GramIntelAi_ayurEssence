@@ -28,27 +28,27 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
   const [detailModalRole, setDetailModalRole] = useState(null);
 
   // Form states for Doctor
-  const [doctorName, setDoctorName] = useState("Dr. K. Raghavendra Rao");
-  const [doctorEmail, setDoctorEmail] = useState("dr.rao@sdm.ac.in");
-  const [doctorTitle, setDoctorTitle] = useState("Senior Vaidya & Professor");
-  const [doctorRegNo, setDoctorRegNo] = useState("AYUR-KA-2026-9812");
-  const [doctorInstitution, setDoctorInstitution] = useState("SDM College of Ayurveda, Udupi");
+  const [doctorName, setDoctorName] = useState("");
+  const [doctorEmail, setDoctorEmail] = useState("");
+  const [doctorTitle, setDoctorTitle] = useState("");
+  const [doctorRegNo, setDoctorRegNo] = useState("");
+  const [doctorInstitution, setDoctorInstitution] = useState("");
 
   // Form states for Student
-  const [studentName, setStudentName] = useState("Arjun Shenoy");
-  const [studentEmail, setStudentEmail] = useState("arjun.scholar@sdm.ac.in");
-  const [studentInstitution, setStudentInstitution] = useState("SDM College of Ayurveda, Udupi");
-  const [studentYear, setStudentYear] = useState("Final Year BAMS Resident");
+  const [studentName, setStudentName] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
+  const [studentInstitution, setStudentInstitution] = useState("");
+  const [studentYear, setStudentYear] = useState("");
 
   // Form states for Patient
-  const [patientName, setPatientName] = useState("Sneha Bhat");
-  const [patientAge, setPatientAge] = useState("28");
+  const [patientName, setPatientName] = useState("");
+  const [patientAge, setPatientAge] = useState("");
   const [patientGender, setPatientGender] = useState("Female");
-  const [patientPhone, setPatientPhone] = useState("+91 98765 43210");
-  const [patientEmail, setPatientEmail] = useState("sneha.bhat@example.com");
-  const [patientCity, setPatientCity] = useState("Udupi, Karnataka");
+  const [patientPhone, setPatientPhone] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
+  const [patientCity, setPatientCity] = useState("");
   const [patientDiet, setPatientDiet] = useState("Vegetarian");
-  const [patientComplaint, setPatientComplaint] = useState("Constitutional Health Evaluation & Sleep Optimization");
+  const [patientComplaint, setPatientComplaint] = useState("");
 
   const handlePortalEnter = async (role) => {
     setLoadingRole(role);
@@ -697,6 +697,7 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
                       <input
                         type="tel"
                         required
+                        autoComplete="off"
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value)}
                         placeholder="+91 98765 43210"
@@ -706,13 +707,13 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
                   </div>
                   <div>
                     <label className="block font-semibold text-stone-700 mb-1">
-                      Registered Email <span className="text-rose-600">*</span>
+                      Email ID (Optional)
                     </label>
                     <div className="relative">
                       <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
-                        required
+                        autoComplete="off"
                         value={patientEmail}
                         onChange={(e) => setPatientEmail(e.target.value)}
                         placeholder="sneha.bhat@example.com"

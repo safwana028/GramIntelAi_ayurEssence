@@ -9,7 +9,8 @@ import {
   GraduationCap,
   ArrowRight,
   Eye,
-  EyeOff
+  EyeOff,
+  HeartHandshake
 } from "lucide-react";
 import { api, CLINICAL_ACCOUNTS } from "../../services/apiService";
 import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
@@ -415,10 +416,12 @@ export function AuthModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-stone-700 mb-1">
-                    Phone Number
+                    Phone Number <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="tel"
+                    required
+                    autoComplete="off"
                     value={patientPhone}
                     onChange={(e) => setPatientPhone(e.target.value)}
                     placeholder="+91 98765 43210"
@@ -427,11 +430,11 @@ export function AuthModal({
                 </div>
                 <div>
                   <label className="block font-semibold text-stone-700 mb-1">
-                    Registered Email <span className="text-rose-600">*</span>
+                    Email ID (Optional)
                   </label>
                   <input
                     type="email"
-                    required
+                    autoComplete="off"
                     value={patientEmail}
                     onChange={(e) => setPatientEmail(e.target.value)}
                     placeholder="sneha.bhat@example.com"

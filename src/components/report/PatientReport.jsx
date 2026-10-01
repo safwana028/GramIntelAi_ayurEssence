@@ -2,6 +2,8 @@ import React from "react";
 import { Sparkles, Sun, Moon, Utensils, Heart, ShieldAlert, Award, Calendar, CheckCircle2 } from "lucide-react";
 import { DOSHA_PROFILES } from "../../data/samhitaReferences";
 import { DoshaProportionBar } from "./DoshaRadarChart";
+import { ChosenAnswerMatrix } from "./ChosenAnswerMatrix";
+import { LifestyleImpactSimulator } from "./LifestyleImpactSimulator";
 import { TRANSLATIONS } from "../../data/translations";
 import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 
@@ -91,16 +93,44 @@ export function PatientReport({
           </div>
         )}
 
-        {/* Visual Balance Bar */}
-        <div className="bg-[#FAF8F5] p-4 rounded-xl border border-stone-200 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-stone-800">
-            <span>{t.constitutionalBalance || "Your Constitutional Balance"}</span>
-            <span className="text-stone-500 font-normal">
-              {t.vata || "Vata"}: {scores.vata}% • {t.pitta || "Pitta"}: {scores.pitta}% • {t.kapha || "Kapha"}: {scores.kapha}%
-            </span>
+        {/* Visual Balance Bar & Prominent Percentages */}
+        <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-3xl border border-stone-200 space-y-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold text-stone-800 uppercase tracking-wider block">
+                {t.constitutionalBalance || "Your Constitutional Balance (Deha Prakriti)"}
+              </span>
+              <span className="text-[11px] text-stone-500">
+                Calculated across 24 classical physical, physiological & psychological traits
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="text-center px-4 py-2.5 bg-sky-100/90 rounded-2xl border border-sky-300">
+                <span className="block text-[10px] font-bold text-sky-800 uppercase tracking-wider">{t.vata || "Vata"}</span>
+                <span className="text-5xl sm:text-6xl font-extrabold text-sky-950 tracking-tight">{scores.vata}%</span>
+              </div>
+              <div className="text-center px-4 py-2.5 bg-amber-100/90 rounded-2xl border border-amber-300">
+                <span className="block text-[10px] font-bold text-amber-800 uppercase tracking-wider">{t.pitta || "Pitta"}</span>
+                <span className="text-5xl sm:text-6xl font-extrabold text-amber-950 tracking-tight">{scores.pitta}%</span>
+              </div>
+              <div className="text-center px-4 py-2.5 bg-emerald-100/90 rounded-2xl border border-emerald-300">
+                <span className="block text-[10px] font-bold text-emerald-800 uppercase tracking-wider">{t.kapha || "Kapha"}</span>
+                <span className="text-5xl sm:text-6xl font-extrabold text-emerald-950 tracking-tight">{scores.kapha}%</span>
+              </div>
+            </div>
           </div>
-          <DoshaProportionBar scores={scores} className="h-3" />
+
+          <DoshaProportionBar scores={scores} className="h-4" />
         </div>
+
+        {/* Chosen Answer Trait Comparison Matrix (if assessment answers available) */}
+        {assessment?.answers && (
+          <ChosenAnswerMatrix answers={assessment.answers} scores={scores} activeLang={activeLang} />
+        )}
+
+        {/* Interactive Dinacharya & Ahara Lifestyle Impact Simulator */}
+        <LifestyleImpactSimulator baseScores={scores} />
 
 
         {/* What This Means For You */}
