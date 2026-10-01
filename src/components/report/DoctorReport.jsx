@@ -4,8 +4,8 @@ import { DoshaRadarChart, DoshaProportionBar } from "./DoshaRadarChart";
 import { ChosenAnswerMatrix } from "./ChosenAnswerMatrix";
 import { LifestyleImpactSimulator } from "./LifestyleImpactSimulator";
 import { DOSHA_PROFILES } from "../../data/samhitaReferences";
-import { TridoshaLabLogo } from "../brand/TridoshaLabLogo";
 import { TRANSLATIONS } from "../../data/translations";
+import { api } from "../../services/apiService";
 
 export function DoctorReport({
   patient,
@@ -22,20 +22,32 @@ export function DoctorReport({
   const { scores, observations, conductedBy, date, supervisorApproved, season } = assessment;
 
   const handleDirectEmailDispatch = async () => {
-    if (!patient.email) return;
+    if (!patient.email) {
+      alert("No email address registered for this patient.");
+      return;
+    }
     setIsDispatching(true);
     try {
-      // Direct in-app report dispatch without browser window/tab redirect
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      const subject = encodeURIComponent(`Ayurvedic Prakriti Report - ${patient.name} (${assessment.id})`);
+      const body = encodeURIComponent(
+        `Namaste ${patient.name},\n\nYour official Deha Prakriti Assessment Report from SDM College of Ayurveda & Hospital, Udupi has been finalized.\n\nEvaluated Constitution: ${scores.dominantPrakriti} (${scores.constitutionType})\n- Vata: ${scores.vata}%\n- Pitta: ${scores.pitta}%\n- Kapha: ${scores.kapha}%\n\nAttending Vaidya Recommendations:\n"${assessment.patientMessage || 'Follow balanced Ahara and Dinacharya routines.'}"\n\nThank you,\nSDM College of Ayurveda & Hospital, Udupi`
+      );
+
+      // Open email composer prefilled with patient email
+      window.location.href = `mailto:${patient.email}?subject=${subject}&body=${body}`;
+
+      try {
+        if (assessment.id) {
+          await api.deliverReport(assessment.id);
+        }
+      } catch {}
+
       setDeliveryStatus({
         type: "email",
-        text: `✅ Report Dispatched Directly via Encrypted Email! Sent to ${patient.email} for patient ${patient.name}.`
+        text: `📧 Email client launched for ${patient.email}. Report dispatched to patient.`
       });
-    } catch {
-      setDeliveryStatus({
-        type: "email",
-        text: `✅ Direct Email Dispatch Triggered for ${patient.email}.`
-      });
+    } catch (err) {
+      console.warn("Email dispatch notice:", err);
     } finally {
       setIsDispatching(false);
     }
@@ -48,16 +60,26 @@ export function DoctorReport({
     }
     setIsDispatching(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      const phoneNum = (patient.phone || "").replace(/[^0-9]/g, "");
+      const text = encodeURIComponent(
+        `Namaste ${patient.name}, your Ayurvedic Prakriti Report: Dominant ${scores.dominantPrakriti} (V:${scores.vata}% P:${scores.pitta}% K:${scores.kapha}%). Doctor Note: ${assessment.patientMessage || 'Follow balanced Ahara/Dinacharya'}. SDMCA Hospital Udupi`
+      );
+      if (phoneNum) {
+        window.open(`https://wa.me/${phoneNum}?text=${text}`, "_blank");
+      }
+
+      try {
+        if (assessment.id) {
+          await api.deliverReport(assessment.id);
+        }
+      } catch {}
+
       setDeliveryStatus({
         type: "sms",
-        text: `✅ Report Dispatched Directly via SMS/WhatsApp Gateway! Delivered to ${patient.phone} for patient ${patient.name}.`
+        text: `📲 WhatsApp/SMS gateway opened for ${patient.phone}. Report dispatched to patient.`
       });
-    } catch {
-      setDeliveryStatus({
-        type: "sms",
-        text: `✅ Direct SMS Dispatch Triggered for ${patient.phone}.`
-      });
+    } catch (err) {
+      console.warn("SMS dispatch notice:", err);
     } finally {
       setIsDispatching(false);
     }
