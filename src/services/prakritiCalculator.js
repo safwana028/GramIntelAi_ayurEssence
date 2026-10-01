@@ -75,29 +75,41 @@ export function calculatePrakriti(
 
   // Process structured questionnaire
   questions.forEach((q) => {
-    const selectedOptionId = answers[q.id];
-    if (!selectedOptionId) return;
+    const selectedOptionVal = answers[q.id];
+    if (!selectedOptionVal) return;
 
-    const opt = q.options?.find((o) => o.id === selectedOptionId);
-    if (!opt) return;
+    const optIds = Array.isArray(selectedOptionVal)
+      ? selectedOptionVal
+      : [selectedOptionVal];
+    if (optIds.length === 0) return;
 
-    answeredCount++;
-    const weight = opt.weight || 1.0;
-    const dim = q.dimension || "Physical";
+    let hasMatchedOption = false;
+    optIds.forEach((optId) => {
+      const opt = q.options?.find((o) => o.id === optId || o.dosha === optId);
+      if (!opt) return;
 
-    if (opt.dosha === "vata") {
-      vataPoints += weight;
-      if (dimensionPoints[dim]) dimensionPoints[dim].vata += weight;
-    } else if (opt.dosha === "pitta") {
-      pittaPoints += weight;
-      if (dimensionPoints[dim]) dimensionPoints[dim].pitta += weight;
-    } else if (opt.dosha === "kapha") {
-      kaphaPoints += weight;
-      if (dimensionPoints[dim]) dimensionPoints[dim].kapha += weight;
-    }
+      hasMatchedOption = true;
+      const weight = opt.weight || 1.0;
+      const dim = q.dimension || "Physical";
 
-    if (dimensionPoints[dim]) {
-      dimensionPoints[dim].total += weight;
+      if (opt.dosha === "vata") {
+        vataPoints += weight;
+        if (dimensionPoints[dim]) dimensionPoints[dim].vata += weight;
+      } else if (opt.dosha === "pitta") {
+        pittaPoints += weight;
+        if (dimensionPoints[dim]) dimensionPoints[dim].pitta += weight;
+      } else if (opt.dosha === "kapha") {
+        kaphaPoints += weight;
+        if (dimensionPoints[dim]) dimensionPoints[dim].kapha += weight;
+      }
+
+      if (dimensionPoints[dim]) {
+        dimensionPoints[dim].total += weight;
+      }
+    });
+
+    if (hasMatchedOption) {
+      answeredCount++;
     }
   });
 

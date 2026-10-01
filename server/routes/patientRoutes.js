@@ -99,13 +99,40 @@ patientRouter.post("/", authenticateToken, requireRole(["doctor", "student"]), (
       });
     }
 
+    const normEmail = email ? email.toLowerCase().trim() : "";
+
+    // Check if a patient with this email already exists to prevent duplicate profiles
+    if (normEmail) {
+      const allPatients = db.getCollection("patients");
+      const existing = allPatients.find(
+        (p) => p.email && p.email.toLowerCase().trim() === normEmail
+      );
+      if (existing) {
+        const updated = db.updateById("patients", existing.id, {
+          name,
+          age: Number(age),
+          gender,
+          phone: phone || existing.phone,
+          city: city || existing.city,
+          occupation: occupation || existing.occupation,
+          dietType: dietType || existing.dietType,
+          primaryComplaint: primaryComplaint || existing.primaryComplaint
+        });
+        return res.status(200).json({
+          success: true,
+          message: "Existing patient profile updated successfully.",
+          data: updated
+        });
+      }
+    }
+
     const newPatient = {
       id: `PAT-UDU-${Date.now().toString().slice(-6)}`,
       name,
       age: Number(age),
       gender,
       phone: phone || "",
-      email: email ? email.toLowerCase() : "",
+      email: normEmail,
       city: city || "Udupi, Karnataka",
       occupation: occupation || "General",
       dietType: dietType || "Vegetarian",

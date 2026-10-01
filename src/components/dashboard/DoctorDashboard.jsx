@@ -18,6 +18,7 @@ import { StatCard } from "../ui/StatCard";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { DoshaProportionBar } from "../report/DoshaRadarChart";
+import { TRANSLATIONS } from "../../data/translations";
 
 export function DoctorDashboard({
   patients,
@@ -26,8 +27,10 @@ export function DoctorDashboard({
   onQuickViewReport,
   onSupervisorApprove,
   onOpenNewPatientModal,
-  onExportBackup
+  onExportBackup,
+  activeLang = "en"
 }) {
+  const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
   // Aggregate Metrics
   const totalPatients = patients.length;
 
@@ -97,6 +100,39 @@ export function DoctorDashboard({
           </Button>
         </div>
       </div>
+
+      {/* Student Submissions Pending Review Notification Banner */}
+      {pendingAssessments.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-orange-500/15 border-2 border-amber-500 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 font-bold shadow-xs">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-sm text-stone-900">
+                  {t.studentNotificationTitle || "Student Submissions Awaiting Approval"}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-stone-950">
+                  {pendingAssessments.length} {t.pendingApproval || "Pending Review"}
+                </span>
+              </div>
+              <p className="text-xs text-stone-700 mt-0.5">
+                {pendingAssessments[0].conductedBy?.name || "Student Scholar"} {t.studentNotificationDesc || "completed assessment for"} <strong className="text-stone-900">{pendingAssessments[0].patientName}</strong>.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={ArrowRight}
+            onClick={() => onNavigate("reviewQueue")}
+            className="whitespace-nowrap bg-emerald-800 hover:bg-emerald-900 text-white shrink-0"
+          >
+            {t.reviewAndSignOff || "Review & Sign Off →"}
+          </Button>
+        </div>
+      )}
 
       {/* KPI Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">

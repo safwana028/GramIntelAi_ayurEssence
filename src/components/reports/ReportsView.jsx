@@ -16,18 +16,22 @@ import {
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { DoshaProportionBar } from "../report/DoshaRadarChart";
+import { TRANSLATIONS } from "../../data/translations";
 
 export function ReportsView({
   patients,
   activeRole,
   onQuickViewReport,
-  onDoctorDeliverReport
+  onDoctorDeliverReport,
+  activeLang = "en"
 }) {
+  const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
   const [searchTerm, setSearchTerm] = useState("");
   const [filterConstitution, setFilterConstitution] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // Aggregate all assessments
+  // Aggregate all assessments with strict deduplication by ID
+  const seenIds = new Set();
   const allReports = patients.flatMap((p) =>
     (p.assessments || []).map((a) => ({
       ...a,
@@ -37,7 +41,12 @@ export function ReportsView({
       patientGender: p.gender,
       patientCity: p.city
     }))
-  );
+  ).filter((rep) => {
+    const key = rep.id || `${rep.patientId}_${rep.date}`;
+    if (seenIds.has(key)) return false;
+    seenIds.add(key);
+    return true;
+  });
 
   const filteredReports = allReports.filter((rep) => {
     const matchesSearch =
@@ -69,16 +78,16 @@ export function ReportsView({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="neutral" size="sm">
-              Clinical Archive
+              {t.clinicalArchive || "Clinical Archive"}
             </Badge>
             <span className="text-xs text-stone-500">•</span>
-            <span className="text-xs text-stone-500 font-medium">Deha Prakriti Pariksha Dossiers</span>
+            <span className="text-xs text-stone-500 font-medium">{t.sponsorHeader || "SDM College of Ayurveda"}</span>
           </div>
           <h1 className="text-2xl font-bold font-serif-heading text-stone-900">
-            Ayurvedic Clinical Reports Repository
+            {t.clinicalReportTitle || "Ayurvedic Clinical Reports Repository"}
           </h1>
           <p className="text-xs text-stone-500 mt-1 max-w-xl">
-            Central repository of constitutional assessments, multi-axial calculations, and patient-delivered Dinacharya guides.
+            {t.clinicalReportSubtitle || "Central repository of constitutional assessments, multi-axial calculations, and patient-delivered Dinacharya guides."}
           </p>
         </div>
 

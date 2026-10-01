@@ -16,13 +16,16 @@ import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { Modal } from "../ui/Modal";
 import { DoshaProportionBar } from "../report/DoshaRadarChart";
+import { TRANSLATIONS } from "../../data/translations";
 
 export function ReviewQueue({
   patients,
   onSupervisorApprove,
   onQuickViewReport,
-  onNavigate
+  onNavigate,
+  activeLang = "en"
 }) {
+  const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("pending"); // "all" | "pending" | "approved"
   const [selectedForApproval, setSelectedForApproval] = useState(null); // { patientId, assessmentId, patientName }
@@ -30,7 +33,8 @@ export function ReviewQueue({
     "Official clinical verification confirmed by Supervising Vaidya."
   );
 
-  // Collate all assessments with patient context
+  // Collate all assessments with patient context, ensuring deduplication by ID
+  const seenIds = new Set();
   const allQueueItems = patients.flatMap((p) =>
     (p.assessments || []).map((a) => ({
       ...a,
@@ -40,7 +44,12 @@ export function ReviewQueue({
       patientGender: p.gender,
       patientCity: p.city
     }))
-  );
+  ).filter((item) => {
+    const key = item.id || `${item.patientId}_${item.date}`;
+    if (seenIds.has(key)) return false;
+    seenIds.add(key);
+    return true;
+  });
 
   const filteredItems = allQueueItems.filter((item) => {
     const matchesSearch =
@@ -83,16 +92,16 @@ export function ReviewQueue({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="warning" size="sm" dot>
-              Supervisor Authorization
+              {t.supervisorAuthorization || "Supervisor Authorization"}
             </Badge>
             <span className="text-xs text-stone-500">•</span>
-            <span className="text-xs text-stone-500 font-medium">SDM College of Ayurveda</span>
+            <span className="text-xs text-stone-500 font-medium">{t.sponsorHeader || "SDM College of Ayurveda, Udupi"}</span>
           </div>
           <h1 className="text-2xl font-bold font-serif-heading text-stone-900">
-            Clinical Review & Sign-Off Queue
+            {t.reviewQueueTitle || "Clinical Review & Sign-Off Queue"}
           </h1>
           <p className="text-xs text-stone-500 mt-1 max-w-xl">
-            Evaluate, verify, and digitally endorse constitutional assessments conducted by resident scholars and students.
+            {t.reviewQueueSubtitle || "Evaluate, verify, and digitally endorse constitutional assessments conducted by resident scholars and students."}
           </p>
         </div>
 
@@ -102,7 +111,7 @@ export function ReviewQueue({
               {pendingCount}
             </span>
             <span className="text-[10px] font-semibold text-amber-800 uppercase tracking-wider">
-              Pending Sign-Off
+              {t.pendingApproval || "Pending Sign-Off"}
             </span>
           </div>
         </div>
@@ -272,7 +281,7 @@ export function ReviewQueue({
                         if (patient) onQuickViewReport(patient, item);
                       }}
                     >
-                      Inspect Dossier
+                      {t.viewDoctorDossier || "Inspect Dossier"}
                     </Button>
 
                     {isPending && (
@@ -284,7 +293,7 @@ export function ReviewQueue({
                           handleOpenApproveModal(item.patientId, item.id, item.patientName)
                         }
                       >
-                        Sign Off & Approve
+                        {t.reviewAndSignOff || "Sign Off & Approve"}
                       </Button>
                     )}
                   </div>

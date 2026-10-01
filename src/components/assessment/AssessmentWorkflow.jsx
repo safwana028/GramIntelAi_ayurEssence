@@ -81,10 +81,11 @@ export function AssessmentWorkflow({
   // Delivery state
   const [reportDelivered, setReportDelivered] = useState(initialData?.reportDelivered || false);
 
-  // Modals
+  // Modals & Notices
   const [showInspector, setShowInspector] = useState(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
   const [reportViewMode, setReportViewMode] = useState(activeRole === "patient" ? "patient" : "doctor");
+  const [completionNotice, setCompletionNotice] = useState(null);
 
   // Dynamic Calculation Result (Guaranteed V+P+K = 100)
   const [calcResult, setCalcResult] = useState(
@@ -104,13 +105,30 @@ export function AssessmentWorkflow({
     }
   }, [answers, nlpIndicators, includeNlpInCalculation, isFinalized]);
 
-  // Answer handler
+  // Answer handler - Supports single or multi/dual dosha selection
   const handleSelectAnswer = (questionId, optionId) => {
     if (isFinalized) return;
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionId
-    }));
+    setAnswers((prev) => {
+      const current = prev[questionId];
+      if (!current) {
+        return { ...prev, [questionId]: [optionId] };
+      }
+      const arr = Array.isArray(current) ? current : [current];
+      if (arr.includes(optionId)) {
+        // Toggle off if already selected
+        const nextArr = arr.filter((id) => id !== optionId);
+        return {
+          ...prev,
+          [questionId]: nextArr.length === 1 ? nextArr[0] : (nextArr.length > 0 ? nextArr : undefined)
+        };
+      } else {
+        // Multi-option selection: add to array
+        return {
+          ...prev,
+          [questionId]: [...arr, optionId]
+        };
+      }
+    });
   };
 
   // Per-Question note handler
@@ -203,7 +221,7 @@ export function AssessmentWorkflow({
     alert("Draft saved successfully. You can continue editing later.");
   };
 
-  // Submit Assessment (Student action)
+  // Submit Assessment (Student action -> placed in Doctor review queue)
   const handleSubmitForReview = () => {
     if (answeredCount < STANDARD_QUESTIONS.length) {
       alert(`Please answer all 24 questions before submitting (${answeredCount}/24 completed).`);
@@ -219,9 +237,9 @@ export function AssessmentWorkflow({
         role: activeRole,
         institution: "SDM College of Ayurveda, Udupi"
       },
-      status: "SUBMITTED",
+      status: "UNDER_REVIEW",
       supervisorApproved: false,
-      supervisorNotes: supervisorNotes || "Submitted for Supervising Doctor evaluation.",
+      supervisorNotes: supervisorNotes || "Submitted by scholar for supervising doctor evaluation.",
       questionnaireId: "sdm-udupi-standard-24",
       scores: calcResult,
       observations: {
@@ -235,8 +253,13 @@ export function AssessmentWorkflow({
       reportDelivered: false
     };
 
-    setAssessmentStatus("SUBMITTED");
+    setAssessmentStatus("UNDER_REVIEW");
     onSaveAssessment(currentPatient.id, submittedAssessment);
+    setCompletionNotice({
+      title: t.assessmentCompleted || "Assessment Completed Successfully!",
+      message: `${t.savedInPatientFile || "Saved in patient dossier"}: ${currentPatient.name}. ${t.studentNotificationDesc || "Submitted as draft to Doctor Review Queue for supervisor approval."}`,
+      patientName: currentPatient.name
+    });
     setCurrentStep(5);
   };
 
@@ -280,6 +303,11 @@ export function AssessmentWorkflow({
     setAssessmentStatus("FINALIZED");
     setShowFinalizeModal(false);
     onSaveAssessment(currentPatient.id, finalizedAssessment);
+    setCompletionNotice({
+      title: t.assessmentCompleted || "Assessment Completed Successfully!",
+      message: `${t.savedInPatientFile || "Saved in patient dossier"}: ${currentPatient.name}. Constitutional assessment finalized and recorded.`,
+      patientName: currentPatient.name
+    });
     setCurrentStep(5);
   };
 
@@ -296,9 +324,15 @@ export function AssessmentWorkflow({
     alert("Patient Report finalized for handout! The physician can now provide the physical report to the patient.");
   };
 
-  const answeredCount = Object.keys(answers).filter((k) => Boolean(answers[k])).length;
+  const answeredCount = STANDARD_QUESTIONS.filter((q) => {
+    const a = answers[q.id];
+    return Array.isArray(a) ? a.length > 0 : Boolean(a);
+  }).length;
   const progressPercent = Math.round((answeredCount / STANDARD_QUESTIONS.length) * 100);
-  const unansweredQuestions = STANDARD_QUESTIONS.filter((q) => !answers[q.id]);
+  const unansweredQuestions = STANDARD_QUESTIONS.filter((q) => {
+    const a = answers[q.id];
+    return Array.isArray(a) ? a.length === 0 : !a;
+  });
 
   return (
     <div className="space-y-6">
@@ -546,6 +580,17 @@ export function AssessmentWorkflow({
               threshold={80}
             />
 
+            {/* Multi-Dosha / Dual Trait Notice Banner */}
+            <div className="bg-sky-50/70 border border-sky-200/80 px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sky-900 font-medium">
+                <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
+                <span>{t.dualTraitNotice || "Dual / Mixed Traits Allowed (Select 1 or more options if mixed traits are observed)"}</span>
+              </div>
+              <span className="text-[10px] text-sky-700 bg-white px-2 py-0.5 rounded-md border border-sky-200 uppercase font-bold">
+                Charaka Vimana 8
+              </span>
+            </div>
+
             {/* Unanswered Questions Alert if incomplete */}
             {answeredCount < 24 && (
               <div className="bg-amber-50/60 border border-amber-200/80 px-3 py-2 rounded-xl text-xs flex items-center justify-between gap-2">
@@ -568,8 +613,14 @@ export function AssessmentWorkflow({
             {STANDARD_QUESTIONS.filter(
               (q) => activeCategory === "All" || q.dimension === activeCategory
             ).map((q, idx) => {
-              const selectedOptId = answers[q.id];
-              const isAnswered = Boolean(selectedOptId);
+              const currentAnswer = answers[q.id];
+              const selectedOptIds = Array.isArray(currentAnswer)
+                ? currentAnswer
+                : currentAnswer
+                ? [currentAnswer]
+                : [];
+              const isAnswered = selectedOptIds.length > 0;
+              const isMultiSelected = selectedOptIds.length > 1;
               const questionNum = q.order || STANDARD_QUESTIONS.findIndex((item) => item.id === q.id) + 1;
               const questionText = q.question[activeLang] || q.question.en;
               const currentNote = questionNotes[q.id] || "";
@@ -585,7 +636,7 @@ export function AssessmentWorkflow({
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
                           Question {questionNum} of 24
                         </span>
@@ -595,6 +646,12 @@ export function AssessmentWorkflow({
                         <span className="text-[11px] font-serif text-emerald-800 italic">
                           {q.sanskritTrait}
                         </span>
+                        {isMultiSelected && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-600" />
+                            <span>{t.dualTraitSelected || "Dual / Mixed Traits Selected"} ({selectedOptIds.length})</span>
+                          </span>
+                        )}
                       </div>
                       <h4 className="text-sm font-bold text-stone-900 tracking-tight">
                         {questionNum}. {questionText}
@@ -609,7 +666,7 @@ export function AssessmentWorkflow({
                   {/* 3 Classical Options */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {q.options.map((opt) => {
-                      const isSelected = selectedOptId === opt.id;
+                      const isSelected = selectedOptIds.includes(opt.id) || selectedOptIds.includes(opt.dosha);
                       const optText = opt.text[activeLang] || opt.text.en;
 
                       let borderColor = "border-stone-200 hover:border-stone-300";
@@ -1135,6 +1192,33 @@ export function AssessmentWorkflow({
       {/* STEP 5: FINAL REPORTS */}
       {currentStep === 5 && (
         <div className="space-y-4">
+          {/* Assessment Completed Confirmation Banner */}
+          {completionNotice && (
+            <div className="no-print bg-emerald-50 border-2 border-emerald-500 p-4 sm:p-5 rounded-2xl flex items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-950">
+                    {completionNotice.title}
+                  </h4>
+                  <p className="text-xs text-emerald-800 mt-0.5">
+                    {completionNotice.message}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCompletionNotice(null)}
+                className="text-emerald-700 hover:text-emerald-900 font-bold text-xs p-1"
+                aria-label="Dismiss notice"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* Report Switcher Header */}
           <div className="no-print bg-white p-3 rounded-2xl shadow-sm border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -1165,14 +1249,23 @@ export function AssessmentWorkflow({
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Back to Home / Dashboard Button */}
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+              >
+                <span>{t.btnReturnHome || "← Return to Dashboard / Home"}</span>
+              </button>
+
               {!reportDelivered && activeRole === "doctor" && isFinalized && (
                 <button
                   onClick={handleDeliverReport}
                   className="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-colors"
                 >
                   <Share2 className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Generate Handout for Patient</span>
+                  <span>{t.btnDeliverReport || "Generate Handout for Patient"}</span>
                 </button>
               )}
 
@@ -1180,14 +1273,7 @@ export function AssessmentWorkflow({
                 onClick={() => window.print()}
                 className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow transition-colors"
               >
-                <span>Print / Save PDF</span>
-              </button>
-
-              <button
-                onClick={onCancel}
-                className="px-4 py-1.5 rounded-lg border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-100 transition-colors"
-              >
-                Exit to Directory
+                <span>{t.printReport || "Print / Save PDF"}</span>
               </button>
             </div>
           </div>
@@ -1211,6 +1297,7 @@ export function AssessmentWorkflow({
                 reportDelivered
               }}
               activeRole={activeRole}
+              activeLang={activeLang}
             />
           ) : (
             <PatientReport

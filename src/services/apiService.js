@@ -53,7 +53,7 @@ export function getStoredUser() {
     const raw = localStorage.getItem(USER_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return CLINICAL_ACCOUNTS.doctor;
+  return null;
 }
 
 export function saveStoredUser(user) {

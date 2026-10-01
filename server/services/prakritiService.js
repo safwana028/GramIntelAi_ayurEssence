@@ -78,46 +78,51 @@ export function calculatePrakritiScore(rawAnswers = {}, questions = [], observat
 
   // Process answers
   Object.keys(answers).forEach((qId) => {
-    const answerVal = answers[qId];
-    if (!answerVal) return;
+    const rawVal = answers[qId];
+    if (!rawVal) return;
+
+    const valArray = Array.isArray(rawVal) ? rawVal : [rawVal];
+    if (valArray.length === 0) return;
 
     answeredCount++;
     const q = questionMap.get(qId);
-    let opt = null;
     let dim = q?.dimension || "Physical";
 
-    if (q && q.options) {
-      opt = q.options.find((o) => o.id === answerVal || o.dosha === answerVal);
-    }
+    valArray.forEach((answerVal) => {
+      let opt = null;
+      if (q && q.options) {
+        opt = q.options.find((o) => o.id === answerVal || o.dosha === answerVal);
+      }
 
-    if (opt) {
-      const weight = opt.weight || 1.0;
-      if (opt.dosha === "vata") {
-        vataPoints += weight;
-        if (dimensionPoints[dim]) dimensionPoints[dim].vata += weight;
-      } else if (opt.dosha === "pitta") {
-        pittaPoints += weight;
-        if (dimensionPoints[dim]) dimensionPoints[dim].pitta += weight;
-      } else if (opt.dosha === "kapha") {
-        kaphaPoints += weight;
-        if (dimensionPoints[dim]) dimensionPoints[dim].kapha += weight;
+      if (opt) {
+        const weight = opt.weight || 1.0;
+        if (opt.dosha === "vata") {
+          vataPoints += weight;
+          if (dimensionPoints[dim]) dimensionPoints[dim].vata += weight;
+        } else if (opt.dosha === "pitta") {
+          pittaPoints += weight;
+          if (dimensionPoints[dim]) dimensionPoints[dim].pitta += weight;
+        } else if (opt.dosha === "kapha") {
+          kaphaPoints += weight;
+          if (dimensionPoints[dim]) dimensionPoints[dim].kapha += weight;
+        }
+        if (dimensionPoints[dim]) dimensionPoints[dim].total += weight;
+      } else {
+        // Fallback: direct option code or string inspection ('v', 'p', 'k', 'vata', etc.)
+        const lower = String(answerVal).toLowerCase();
+        if (lower === "v" || lower.startsWith("vat")) {
+          vataPoints += 1.0;
+          if (dimensionPoints[dim]) dimensionPoints[dim].vata += 1.0;
+        } else if (lower === "p" || lower.startsWith("pit")) {
+          pittaPoints += 1.0;
+          if (dimensionPoints[dim]) dimensionPoints[dim].pitta += 1.0;
+        } else if (lower === "k" || lower.startsWith("kaph")) {
+          kaphaPoints += 1.0;
+          if (dimensionPoints[dim]) dimensionPoints[dim].kapha += 1.0;
+        }
+        if (dimensionPoints[dim]) dimensionPoints[dim].total += 1.0;
       }
-      if (dimensionPoints[dim]) dimensionPoints[dim].total += weight;
-    } else {
-      // Fallback: direct option code or string inspection ('v', 'p', 'k', 'vata', etc.)
-      const lower = String(answerVal).toLowerCase();
-      if (lower === "v" || lower.startsWith("vat")) {
-        vataPoints += 1.0;
-        if (dimensionPoints[dim]) dimensionPoints[dim].vata += 1.0;
-      } else if (lower === "p" || lower.startsWith("pit")) {
-        pittaPoints += 1.0;
-        if (dimensionPoints[dim]) dimensionPoints[dim].pitta += 1.0;
-      } else if (lower === "k" || lower.startsWith("kaph")) {
-        kaphaPoints += 1.0;
-        if (dimensionPoints[dim]) dimensionPoints[dim].kapha += 1.0;
-      }
-      if (dimensionPoints[dim]) dimensionPoints[dim].total += 1.0;
-    }
+    });
   });
 
   // Observation modifiers

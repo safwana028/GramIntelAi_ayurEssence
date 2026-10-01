@@ -38,29 +38,29 @@ export function PatientReport({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-400 text-stone-900 inline-block">
-                  Verified Swastha Health & Wellness Report
+                  {t.patientFriendlyReportTitle || "Verified Swastha Health & Wellness Report"}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-800 text-emerald-200 border border-emerald-700">
-                  Official Clinical Delivery
+                  {t.officialDelivery || "Official Clinical Delivery"}
                 </span>
               </div>
               <h1 className="text-2xl font-bold font-serif-heading text-white">
-                Namaste, {patient.name}
+                {t.namaste || "Namaste"}, {patient.name}
               </h1>
               <p className="text-xs text-emerald-100 mt-1">
-                SDM College of Ayurveda & Hospital, Udupi • Swastha Pariksha Center
+                {t.patientFriendlyReportSubtitle || "SDM College of Ayurveda & Hospital, Udupi • Swastha Pariksha Center"}
               </p>
               <div className="flex items-center gap-3 text-[11px] text-emerald-200/90 mt-2">
-                <span>Date: <strong>{assessmentDate}</strong></span>
+                <span>{t.date || "Date"}: <strong>{assessmentDate}</strong></span>
                 <span>•</span>
-                <span>Attending Vaidya: <strong>{attendingDoctor}</strong></span>
+                <span>{t.conductedByLabel || "Attending Vaidya"}: <strong>{attendingDoctor}</strong></span>
               </div>
             </div>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 text-center">
             <span className="text-[11px] text-emerald-200 block uppercase tracking-wide">
-              Your Constitution (Prakriti)
+              {t.yourConstitution || "Your Constitution (Prakriti)"}
             </span>
             <div className="text-xl font-extrabold text-amber-300 font-serif-heading">
               {scores.dominantPrakriti}
@@ -79,7 +79,7 @@ export function PatientReport({
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-700" />
-                <span>Personalized Advice from your Attending Vaidya</span>
+                <span>{t.personalAdviceVaidya || "Personalized Advice from your Attending Vaidya"}</span>
               </span>
               <span className="text-[11px] font-semibold text-emerald-900 bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs">
                 {attendingDoctor}
@@ -94,9 +94,9 @@ export function PatientReport({
         {/* Visual Balance Bar */}
         <div className="bg-[#FAF8F5] p-4 rounded-xl border border-stone-200 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-stone-800">
-            <span>Your Constitutional Balance</span>
+            <span>{t.constitutionalBalance || "Your Constitutional Balance"}</span>
             <span className="text-stone-500 font-normal">
-              Vata: {scores.vata}% • Pitta: {scores.pitta}% • Kapha: {scores.kapha}%
+              {t.vata || "Vata"}: {scores.vata}% • {t.pitta || "Pitta"}: {scores.pitta}% • {t.kapha || "Kapha"}: {scores.kapha}%
             </span>
           </div>
           <DoshaProportionBar scores={scores} className="h-3" />
@@ -108,7 +108,7 @@ export function PatientReport({
           <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-200 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
               <Sparkles className="w-4 h-4 text-emerald-700" />
-              <span>Natural Strengths & Talents</span>
+              <span>{t.naturalStrengths || "Natural Strengths & Talents"}</span>
             </div>
             <p className="text-xs text-stone-700 leading-relaxed">
               {primaryProfile.strengths}
@@ -118,7 +118,7 @@ export function PatientReport({
           <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-200 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
               <Heart className="w-4 h-4 text-amber-700" />
-              <span>Areas of Natural Sensitivity</span>
+              <span>{t.naturalSensitivity || "Areas of Natural Sensitivity"}</span>
             </div>
             <p className="text-xs text-stone-700 leading-relaxed">
               {primaryProfile.vulnerabilities}
@@ -130,17 +130,17 @@ export function PatientReport({
         <div className="bg-white p-5 rounded-xl border border-stone-200 space-y-3">
           <h3 className="text-sm font-bold text-stone-900 font-serif-heading flex items-center gap-2">
             <Utensils className="w-4 h-4 text-emerald-600" />
-            <span>Classical Ayurvedic Diet Guidelines (Ahara Vidhi)</span>
+            <span>{t.dietGuidelines || "Classical Ayurvedic Diet Guidelines (Ahara Vidhi)"}</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
-              <span className="font-bold text-emerald-900 block mb-1">Foods to Favor:</span>
+              <span className="font-bold text-emerald-900 block mb-1">{t.foodsToFavor || "Foods to Favor"}:</span>
               <p className="text-stone-700 text-[11px] leading-relaxed">
                 {primaryProfile.dietRecommendations?.favor || "Warm, freshly prepared, wholesome cooked meals with healthy fats (pure cow ghee, cold-pressed sesame oil) and digestive spices (ginger, cumin, cardamom)."}
               </p>
             </div>
             <div className="p-3 bg-rose-50/60 rounded-lg border border-rose-200">
-              <span className="font-bold text-rose-900 block mb-1">Foods to Moderate:</span>
+              <span className="font-bold text-rose-900 block mb-1">{t.foodsToModerate || "Foods to Moderate"}:</span>
               <p className="text-stone-700 text-[11px] leading-relaxed">
                 {primaryProfile.dietRecommendations?.avoid || "Excessively cold beverages, stale or microwaved foods, dry crackers, raw leafy greens in excess, and skipping meals."}
               </p>
@@ -176,7 +176,7 @@ export function PatientReport({
         <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 text-amber-900 flex items-start gap-3">
           <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-bold text-xs">Important Health & Ethics Notice</h4>
+            <h4 className="font-bold text-xs">{t.officialAyurvedicDisclaimer || "Important Health & Ethics Notice"}</h4>
             <p className="text-[11px] text-amber-800/90 leading-relaxed">
               {t.ethicalDisclaimerDetailed}
             </p>

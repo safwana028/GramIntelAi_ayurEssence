@@ -19,7 +19,8 @@ import {
   ChevronRight,
   ExternalLink,
   Layers,
-  Award
+  Award,
+  Bell
 } from "lucide-react";
 import { Badge } from "../ui/Badge";
 import { TRANSLATIONS } from "../../data/translations";
@@ -35,6 +36,7 @@ export function AppShell({
   currentUser,
   onOpenAuthModal,
   onOpenMethodology,
+  onSignOut,
   pendingReviewCount = 0
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,32 +48,32 @@ export function AppShell({
       return [
         {
           id: "dashboard",
-          label: "Dashboard",
+          label: t.navDashboard || "Dashboard",
           icon: LayoutDashboard
         },
         {
           id: "patients",
-          label: "Patients Directory",
+          label: t.navPatients || "Patients Directory",
           icon: Users
         },
         {
           id: "assessment",
-          label: "New Assessment",
+          label: t.navNewAssessment || "New Assessment",
           icon: Sparkles
         },
         {
           id: "reports",
-          label: "Reports Archive",
+          label: t.navReports || "Reports Archive",
           icon: FileText
         },
         {
           id: "profile",
-          label: "Scholar Profile",
+          label: t.navProfile || "Scholar Profile",
           icon: User
         },
         {
           id: "settings",
-          label: "Settings",
+          label: t.navSettings || "Settings",
           icon: Settings
         }
       ];
@@ -81,43 +83,43 @@ export function AppShell({
     return [
       {
         id: "dashboard",
-        label: "Clinical Dashboard",
+        label: t.navDashboard || "Clinical Dashboard",
         icon: LayoutDashboard
       },
       {
         id: "patients",
-        label: "Patients Directory",
+        label: t.navPatients || "Patients Directory",
         icon: Users
       },
       {
         id: "assessment",
-        label: "Assess Prakriti",
+        label: t.navNewAssessment || "Assess Prakriti",
         icon: Sparkles
       },
       {
         id: "reviewQueue",
-        label: "Review Queue",
+        label: t.navReviewQueue || "Review Queue",
         icon: ClipboardCheck,
         badge: pendingReviewCount > 0 ? pendingReviewCount : null
       },
       {
         id: "reports",
-        label: "Reports Archive",
+        label: t.navReports || "Reports Archive",
         icon: FileText
       },
       {
         id: "builder",
-        label: "Questionnaire Builder",
+        label: t.navQuestionnaireBuilder || "Questionnaire Builder",
         icon: Layers
       },
       {
         id: "profile",
-        label: "Clinician Profile",
+        label: t.navProfile || "Clinician Profile",
         icon: User
       },
       {
         id: "settings",
-        label: "Settings",
+        label: t.navSettings || "Settings",
         icon: Settings
       }
     ];
@@ -471,60 +473,91 @@ export function AppShell({
       {/* ======================================================== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Notification / Language Bar */}
-        <div className="no-print bg-[#FAF8F5] border-b border-stone-200/80 px-4 sm:px-8 py-2 text-xs flex flex-wrap items-center justify-between gap-2">
+        <div className="no-print bg-[#FAF8F5] border-b border-stone-200/80 px-4 sm:px-8 py-2 text-xs flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-stone-500 text-[11px]">
             <span className="font-semibold text-emerald-900 uppercase tracking-wide">
               TridoshaLab • Academic Calibration
             </span>
             <span>•</span>
-            <span>SDM College of Ayurveda, Udupi & SMVITM Bantakal</span>
+            <span className="hidden sm:inline">SDM College of Ayurveda, Udupi & SMVITM Bantakal</span>
           </div>
 
-          {/* Trilingual Language Selector */}
-          <div
-            role="group"
-            aria-label="Language selection"
-            className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200 text-xs"
-          >
-            <Globe className="w-3.5 h-3.5 text-stone-400 ml-1.5 mr-0.5" aria-hidden="true" />
+          <div className="flex items-center gap-3">
+            {/* Real-time Notification Bell for Doctor / Scholar */}
             <button
               type="button"
-              onClick={() => onLangChange("en")}
-              aria-pressed={activeLang === "en"}
-              className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
-                activeLang === "en"
-                  ? "bg-white text-emerald-900 shadow-2xs font-bold"
-                  : "text-stone-600 hover:text-stone-900"
-              }`}
+              onClick={() => onTabChange("reviewQueue")}
+              className="relative p-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              title={pendingReviewCount > 0 ? `${pendingReviewCount} assessments awaiting doctor review` : t.noNotifications || "No pending notifications"}
+              aria-label="Pending reviews notification"
             >
-              EN
+              <Bell className="w-4 h-4 text-emerald-900" />
+              {pendingReviewCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-stone-950 font-bold text-[10px] rounded-full flex items-center justify-center shadow-xs">
+                  {pendingReviewCount}
+                </span>
+              )}
             </button>
-            <button
-              type="button"
-              onClick={() => onLangChange("kn")}
-              aria-pressed={activeLang === "kn"}
-              className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all font-kannada ${
-                activeLang === "kn"
-                  ? "bg-white text-emerald-900 shadow-2xs font-bold"
-                  : "text-stone-600 hover:text-stone-900"
-              }`}
-              title="ಕನ್ನಡ (Kannada)"
+
+            {/* Trilingual Language Selector */}
+            <div
+              role="group"
+              aria-label="Language selection"
+              className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200 text-xs"
             >
-              ಕನ್ನಡ
-            </button>
-            <button
-              type="button"
-              onClick={() => onLangChange("hi")}
-              aria-pressed={activeLang === "hi"}
-              className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
-                activeLang === "hi"
-                  ? "bg-white text-emerald-900 shadow-2xs font-bold"
-                  : "text-stone-600 hover:text-stone-900"
-              }`}
-              title="हिंदी (Hindi)"
-            >
-              हिंदी
-            </button>
+              <Globe className="w-3.5 h-3.5 text-stone-400 ml-1.5 mr-0.5" aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => onLangChange("en")}
+                aria-pressed={activeLang === "en"}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeLang === "en"
+                    ? "bg-white text-emerald-900 shadow-2xs font-bold"
+                    : "text-stone-600 hover:text-stone-900"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => onLangChange("kn")}
+                aria-pressed={activeLang === "kn"}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all font-kannada ${
+                  activeLang === "kn"
+                    ? "bg-white text-emerald-900 shadow-2xs font-bold"
+                    : "text-stone-600 hover:text-stone-900"
+                }`}
+                title="ಕನ್ನಡ (Kannada)"
+              >
+                ಕನ್ನಡ
+              </button>
+              <button
+                type="button"
+                onClick={() => onLangChange("hi")}
+                aria-pressed={activeLang === "hi"}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeLang === "hi"
+                    ? "bg-white text-emerald-900 shadow-2xs font-bold"
+                    : "text-stone-600 hover:text-stone-900"
+                }`}
+                title="हिंदी (Hindi)"
+              >
+                हिंदी
+              </button>
+            </div>
+
+            {/* Sign Out / Switch Portal Button */}
+            {onSignOut && (
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="px-2.5 py-1 text-[11px] font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
+                title="Sign out and return to portal selection"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>{t.signOut || "Sign Out"}</span>
+              </button>
+            )}
           </div>
         </div>
 

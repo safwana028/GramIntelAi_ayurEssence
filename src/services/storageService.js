@@ -14,23 +14,87 @@ const STORAGE_KEYS = {
   LANGUAGE: "ayuressence_lang_v2"
 };
 
+export function deduplicateAssessments(assessments) {
+  if (!Array.isArray(assessments)) return [];
+  const map = new Map();
+  for (const a of assessments) {
+    if (!a) continue;
+    const key = a.id || `${a.date}_${a.conductedBy?.name || ""}`;
+    if (map.has(key)) {
+      // Merge/update assessment with latest data
+      const existing = map.get(key);
+      map.set(key, { ...existing, ...a });
+    } else {
+      map.set(key, a);
+    }
+  }
+  return Array.from(map.values());
+}
+
+export function deduplicatePatients(patientList) {
+  if (!Array.isArray(patientList)) return [];
+  const emailMap = new Map();
+  const idMap = new Map();
+  const result = [];
+
+  for (const p of patientList) {
+    if (!p) continue;
+    const normEmail = p.email ? p.email.trim().toLowerCase() : null;
+    let target = null;
+
+    if (normEmail && emailMap.has(normEmail)) {
+      target = emailMap.get(normEmail);
+    } else if (p.id && idMap.has(p.id)) {
+      target = idMap.get(p.id);
+    }
+
+    if (target) {
+      // Merge fields, updating existing record
+      const mergedAssessments = deduplicateAssessments([
+        ...(target.assessments || []),
+        ...(p.assessments || [])
+      ]);
+      Object.assign(target, {
+        ...p,
+        id: target.id || p.id,
+        baselinePrakriti: p.baselinePrakriti || target.baselinePrakriti,
+        assessments: mergedAssessments
+      });
+    } else {
+      const copy = {
+        ...p,
+        assessments: deduplicateAssessments(p.assessments || [])
+      };
+      if (normEmail) emailMap.set(normEmail, copy);
+      if (p.id) idMap.set(p.id, copy);
+      result.push(copy);
+    }
+  }
+  return result;
+}
+
 export function getStoredPatients() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PATIENTS);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return deduplicatePatients(parsed);
+      }
     }
   } catch (err) {
     console.error("Error reading stored patients:", err);
   }
   // Initialize with samples
-  savePatients(SAMPLE_PATIENTS);
-  return SAMPLE_PATIENTS;
+  const initial = deduplicatePatients(SAMPLE_PATIENTS);
+  savePatients(initial);
+  return initial;
 }
 
 export function savePatients(patients) {
   try {
-    localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
+    const deduplicated = deduplicatePatients(patients);
+    localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(deduplicated));
   } catch (err) {
     console.error("Error saving patients:", err);
   }

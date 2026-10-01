@@ -16,14 +16,17 @@ import { StatCard } from "../ui/StatCard";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { DoshaProportionBar } from "../report/DoshaRadarChart";
+import { TRANSLATIONS } from "../../data/translations";
 
 export function StudentDashboard({
   patients,
   onNavigate,
   onStartAssessment,
   onQuickViewReport,
-  onOpenMethodology
+  onOpenMethodology,
+  activeLang = "en"
 }) {
+  const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
   // Extract all student assessments
   const allAssessments = patients.flatMap((p) =>
     (p.assessments || []).map((a) => ({

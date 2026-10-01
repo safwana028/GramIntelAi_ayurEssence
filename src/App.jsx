@@ -14,6 +14,7 @@ import { AssessmentWorkflow } from "./components/assessment/AssessmentWorkflow";
 import { QuestionnaireManager } from "./components/questionnaire-builder/QuestionnaireManager";
 import { MethodologyModal } from "./components/modals/MethodologyModal";
 import { AuthModal } from "./components/modals/AuthModal";
+import { LoginGate } from "./components/auth/LoginGate";
 import { DoctorReport } from "./components/report/DoctorReport";
 import { PatientReport } from "./components/report/PatientReport";
 import { Button } from "./components/ui/Button";
@@ -21,6 +22,7 @@ import { Badge } from "./components/ui/Badge";
 import {
   getStoredPatients,
   savePatients,
+  deduplicateAssessments,
   getStoredQuestionnaires,
   saveQuestionnaires,
   getStoredRole,
@@ -108,13 +110,62 @@ export function App() {
     saveStoredRole(validRole);
   };
 
+  const navigateToTab = (tab) => {
+    setActiveTab(tab);
+    setActiveDossierView(null);
+    try {
+      window.history.pushState({ tab }, "", `#${tab}`);
+    } catch {}
+  };
+
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     saveStoredUser(user);
-    if (user.role) {
+    if (user?.role) {
       handleRoleChange(user.role);
     }
+    navigateToTab("dashboard");
   };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    saveStoredUser(null);
+    api.logout();
+    setActiveTab("dashboard");
+    setActiveDossierView(null);
+  };
+
+  // Browser Navigation & SPA Back Button management
+  useEffect(() => {
+    if (!window.history.state) {
+      try {
+        window.history.replaceState({ tab: activeTab, isRoot: true }, "", window.location.pathname);
+      } catch {}
+    }
+
+    const handlePopState = (event) => {
+      // If currently viewing dossier overlay, close it
+      if (activeDossierView) {
+        setActiveDossierView(null);
+        return;
+      }
+      // If currently on assessment (or just finished it on step 5), return safely to dashboard/home without leaving website
+      if (activeTab === "assessment") {
+        setActiveTab(activeRole === "doctor" ? "dashboard" : "patients");
+        setEditingAssessment(null);
+        return;
+      }
+      if (event.state?.tab) {
+        setActiveTab(event.state.tab);
+        setActiveDossierView(null);
+      } else {
+        setActiveTab(activeRole === "doctor" ? "dashboard" : "patients");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [activeTab, activeDossierView, activeRole]);
 
   const handleLangChange = (lang) => {
     setActiveLang(lang);
@@ -131,12 +182,26 @@ export function App() {
     saveQuestionnaires(updatedList);
   };
 
-  // Add / edit patient
+  // Add / edit patient with strict email deduplication
   const handleSavePatientModal = async (patient) => {
-    const exists = patients.some((p) => p.id === patient.id);
+    const normEmail = patient.email ? patient.email.trim().toLowerCase() : null;
+    const existsIdx = patients.findIndex(
+      (p) => p.id === patient.id || (normEmail && p.email?.trim().toLowerCase() === normEmail)
+    );
     let updated;
-    if (exists) {
-      updated = patients.map((p) => (p.id === patient.id ? patient : p));
+    if (existsIdx >= 0) {
+      const existing = patients[existsIdx];
+      const merged = {
+        ...existing,
+        ...patient,
+        id: existing.id,
+        assessments: deduplicateAssessments([
+          ...(existing.assessments || []),
+          ...(patient.assessments || [])
+        ])
+      };
+      updated = [...patients];
+      updated[existsIdx] = merged;
     } else {
       updated = [patient, ...patients];
     }
@@ -158,14 +223,14 @@ export function App() {
     setActivePatientForAssessment(patient);
     setEditingAssessment(existingAssessment);
     setActiveDossierView(null);
-    setActiveTab("assessment");
+    navigateToTab("assessment");
   };
 
   // View history
   const handleViewPatientHistory = (patient) => {
     setActivePatientForHistory(patient);
     setActiveDossierView(null);
-    setActiveTab("history");
+    navigateToTab("history");
   };
 
   // Quick view report
@@ -178,12 +243,14 @@ export function App() {
     const updated = patients.map((pat) => {
       if (pat.id === patientId) {
         const existingAssessments = pat.assessments || [];
-        const index = existingAssessments.findIndex((a) => a.id === newAssessment.id);
+        const index = existingAssessments.findIndex(
+          (a) => a.id === newAssessment.id || (a.date === newAssessment.date && a.conductedBy?.name === newAssessment.conductedBy?.name)
+        );
         let updatedAssessments;
 
         if (index >= 0) {
           updatedAssessments = [...existingAssessments];
-          updatedAssessments[index] = newAssessment;
+          updatedAssessments[index] = { ...existingAssessments[index], ...newAssessment };
         } else {
           updatedAssessments = [...existingAssessments, newAssessment];
         }
@@ -191,7 +258,7 @@ export function App() {
         return {
           ...pat,
           baselinePrakriti: newAssessment.scores?.dominantPrakriti || pat.baselinePrakriti,
-          assessments: updatedAssessments
+          assessments: deduplicateAssessments(updatedAssessments)
         };
       }
       return pat;
@@ -314,6 +381,17 @@ export function App() {
     alert("Report delivered! Patient record has been updated with delivery confirmation.");
   };
 
+  // Open with Doctor and Student login portal first if no user session is active
+  if (!currentUser) {
+    return (
+      <LoginGate
+        onSelectPortal={handleLoginSuccess}
+        activeLang={activeLang}
+        onLangChange={handleLangChange}
+      />
+    );
+  }
+
   return (
     <AppShell
       activeRole={activeRole}
@@ -321,13 +399,11 @@ export function App() {
       activeLang={activeLang}
       onLangChange={handleLangChange}
       activeTab={activeTab}
-      onTabChange={(tab) => {
-        setActiveTab(tab);
-        setActiveDossierView(null);
-      }}
+      onTabChange={navigateToTab}
       currentUser={currentUser}
       onOpenAuthModal={() => setIsAuthModalOpen(true)}
       onOpenMethodology={() => setIsMethodologyOpen(true)}
+      onSignOut={handleSignOut}
       pendingReviewCount={pendingReviewCount}
     >
       {/* Quick View Dossier Overlay (if viewing saved report) */}
@@ -386,6 +462,7 @@ export function App() {
               patient={activeDossierView.patient}
               assessment={activeDossierView.assessment}
               activeRole={activeRole}
+              activeLang={activeLang}
             />
           )}
         </div>
@@ -407,9 +484,9 @@ export function App() {
           {activeTab === "dashboard" && activeRole === "doctor" && (
             <DoctorDashboard
               patients={patients}
+              activeLang={activeLang}
               onNavigate={(tab) => {
-                setActiveTab(tab);
-                setActiveDossierView(null);
+                navigateToTab(tab);
               }}
               onStartAssessment={handleStartAssessmentForPatient}
               onQuickViewReport={handleQuickViewReport}
@@ -423,9 +500,9 @@ export function App() {
           {activeTab === "dashboard" && activeRole === "student" && (
             <StudentDashboard
               patients={patients}
+              activeLang={activeLang}
               onNavigate={(tab) => {
-                setActiveTab(tab);
-                setActiveDossierView(null);
+                navigateToTab(tab);
               }}
               onStartAssessment={handleStartAssessmentForPatient}
               onQuickViewReport={handleQuickViewReport}
@@ -456,7 +533,7 @@ export function App() {
               activeLang={activeLang}
               initialData={editingAssessment}
               onCancel={() => {
-                setActiveTab(activeRole === "doctor" ? "dashboard" : "patients");
+                navigateToTab(activeRole === "doctor" ? "dashboard" : "patients");
                 setEditingAssessment(null);
               }}
               onSaveAssessment={handleSaveAssessment}
@@ -467,11 +544,11 @@ export function App() {
           {activeTab === "reviewQueue" && activeRole === "doctor" && (
             <ReviewQueue
               patients={patients}
+              activeLang={activeLang}
               onSupervisorApprove={handleSupervisorApprove}
               onQuickViewReport={handleQuickViewReport}
               onNavigate={(tab) => {
-                setActiveTab(tab);
-                setActiveDossierView(null);
+                navigateToTab(tab);
               }}
             />
           )}
@@ -481,6 +558,7 @@ export function App() {
             <ReportsView
               patients={patients}
               activeRole={activeRole}
+              activeLang={activeLang}
               onQuickViewReport={handleQuickViewReport}
               onDoctorDeliverReport={handleDoctorDeliverReport}
             />
@@ -491,7 +569,8 @@ export function App() {
             <PatientHistoryView
               patient={activePatientForHistory || patients[0]}
               activeRole={activeRole}
-              onBack={() => setActiveTab("patients")}
+              activeLang={activeLang}
+              onBack={() => navigateToTab("patients")}
               onViewReport={handleQuickViewReport}
               onSupervisorApprove={handleSupervisorApprove}
             />

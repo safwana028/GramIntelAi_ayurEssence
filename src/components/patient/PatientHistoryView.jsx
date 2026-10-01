@@ -13,15 +13,26 @@ import { DoshaRadarChart, DoshaProportionBar } from "../report/DoshaRadarChart";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { EmptyState } from "../ui/EmptyState";
+import { TRANSLATIONS } from "../../data/translations";
 
 export function PatientHistoryView({
   patient,
   activeRole,
   onBack,
   onViewReport,
-  onSupervisorApprove
+  onSupervisorApprove,
+  activeLang = "en"
 }) {
-  const assessments = patient?.assessments || [];
+  const t = TRANSLATIONS[activeLang] || TRANSLATIONS.en;
+  const rawAssessments = patient?.assessments || [];
+  // Ensure no duplicate reports in history
+  const seenKeys = new Set();
+  const assessments = rawAssessments.filter((a) => {
+    const key = a.id || `${a.date}-${a.conductedBy?.name}`;
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
   const [selectedIdxA, setSelectedIdxA] = useState(0);
 
   if (!patient) return null;
