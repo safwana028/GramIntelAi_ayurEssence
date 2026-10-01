@@ -4,8 +4,10 @@ import { QuestionEditorModal } from "./QuestionEditorModal";
 
 export function QuestionnaireManager({
   questionnaires,
-  onSaveQuestionnaires
+  onSaveQuestionnaires,
+  activeRole = "doctor"
 }) {
+  const isDoctor = activeRole === "doctor";
   const [activeQIndex, setActiveQIndex] = useState(0);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -111,29 +113,35 @@ export function QuestionnaireManager({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors border border-stone-300">
-            <Upload className="w-4 h-4 text-emerald-700" />
-            <span>Import JSON</span>
-            <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
-          </label>
+        {isDoctor ? (
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors border border-stone-300">
+              <Upload className="w-4 h-4 text-emerald-700" />
+              <span>Import JSON</span>
+              <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
+            </label>
 
-          <button
-            onClick={handleExportJson}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors border border-stone-300"
-          >
-            <Download className="w-4 h-4 text-emerald-700" />
-            <span>Export JSON</span>
-          </button>
+            <button
+              onClick={handleExportJson}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition-colors border border-stone-300"
+            >
+              <Download className="w-4 h-4 text-emerald-700" />
+              <span>Export JSON</span>
+            </button>
 
-          <button
-            onClick={handleAddQuestion}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Question</span>
-          </button>
-        </div>
+            <button
+              onClick={handleAddQuestion}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Question</span>
+            </button>
+          </div>
+        ) : (
+          <div className="px-3 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold">
+            🔒 Questionnaire Editing Restricted to Senior Vaidya (Doctor Role)
+          </div>
+        )}
       </div>
 
       {/* Active Questionnaire Metadata Card */}
@@ -198,22 +206,24 @@ export function QuestionnaireManager({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                  <button
-                    onClick={() => handleEditQuestion(q)}
-                    className="p-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 transition-colors"
-                    title="Edit question"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteQuestion(q.id)}
-                    className="p-1.5 rounded-lg border border-rose-300 text-rose-600 hover:bg-rose-50 transition-colors"
-                    title="Delete question"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {isDoctor && (
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                    <button
+                      onClick={() => handleEditQuestion(q)}
+                      className="p-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 transition-colors"
+                      title="Edit question"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteQuestion(q.id)}
+                      className="p-1.5 rounded-lg border border-rose-300 text-rose-600 hover:bg-rose-50 transition-colors"
+                      title="Delete question"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

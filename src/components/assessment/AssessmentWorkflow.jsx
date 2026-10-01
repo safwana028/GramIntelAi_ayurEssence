@@ -509,41 +509,6 @@ export function AssessmentWorkflow({
             </div>
           </div>
 
-          {/* Quick Demo Presets */}
-          {!isFinalized && (
-            <div className="bg-amber-50/70 border border-amber-200 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-1.5 font-bold text-amber-900 text-xs">
-                  <Wand2 className="w-4 h-4 text-amber-600" />
-                  <span>{t.quickFillDemo || "Evaluation Demo Presets (Populates all 24 questions & notes)"}</span>
-                </div>
-                <p className="text-[11px] text-amber-800/80 mt-0.5">
-                  {activeLang === "kn"
-                    ? "ವೇಗದ ಪರೀಕ್ಷೆಗಾಗಿ ಎಲ್ಲಾ ೨೪ ಪ್ರಶ್ನೆಗಳನ್ನು ಕ್ಲಿನಿಕಲ್ ಅವಲೋಕನಗಳೊಂದಿಗೆ ಭರ್ತಿ ಮಾಡುತ್ತದೆ."
-                    : activeLang === "hi"
-                    ? "त्वरित परीक्षण हेतु सभी 24 प्रश्नों को यथार्थवादी अवलोकनों के साथ भरता है।"
-                    : "Fills all 24 questionnaire questions with realistic clinical observations for fast testing."}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleAutoFillDemo("vata-pitta")}
-                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
-                >
-                  Vata-Pitta Preset
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAutoFillDemo("pitta-kapha")}
-                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
-                >
-                  Pitta-Kapha Preset
-                </button>
-              </div>
-            </div>
-          )}
-
           <div className="pt-4 border-t border-stone-100 flex justify-end">
             <button
               type="button"
@@ -560,8 +525,8 @@ export function AssessmentWorkflow({
       {/* STEP 2: 24-QUESTION ASSESSMENT */}
       {currentStep === 2 && (
         <div className="space-y-5 max-w-5xl mx-auto">
-          {/* Top Control Bar with 24 Questions Progress & Adaptive Indicator */}
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 space-y-3 sticky top-16 z-30">
+          {/* Top Static Control Bar with 24 Questions Progress & Filter Pills */}
+          <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 space-y-3 mb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               {/* Category Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto text-xs">

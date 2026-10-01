@@ -245,22 +245,19 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
             </div>
 
             <div className="mt-6 space-y-2.5">
-              <button
-                type="button"
-                disabled={loadingRole !== null}
-                onClick={() => handlePortalEnter("doctor")}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <span>{loadingRole === "doctor" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Doctor`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="p-2.5 bg-amber-950/60 rounded-xl border border-amber-500/30 text-[11px] text-amber-200 font-mono">
+                <span className="text-amber-400 font-bold block text-[10px] uppercase font-sans mb-0.5">Vaidya Credentials:</span>
+                dr.rao@sdm.ac.in | Doctor@123
+              </div>
 
               <button
                 type="button"
                 onClick={() => setDetailModalRole("doctor")}
-                className="w-full py-2.5 px-3 rounded-xl border border-amber-400/50 bg-amber-950/40 hover:bg-amber-900/60 text-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <span>{t.enterDoctorDetails || "Enter Doctor Details & Sign In"}</span>
+                <Stethoscope className="w-4 h-4" />
+                <span>Doctor Login & Authenticate</span>
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </button>
             </div>
           </div>
@@ -307,22 +304,19 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
             </div>
 
             <div className="mt-6 space-y-2.5">
-              <button
-                type="button"
-                disabled={loadingRole !== null}
-                onClick={() => handlePortalEnter("student")}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <span>{loadingRole === "student" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Scholar`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="p-2.5 bg-sky-950/60 rounded-xl border border-sky-500/30 text-[11px] text-sky-200 font-mono">
+                <span className="text-sky-400 font-bold block text-[10px] uppercase font-sans mb-0.5">Scholar Credentials:</span>
+                arjun.scholar@sdm.ac.in | Student@123
+              </div>
 
               <button
                 type="button"
                 onClick={() => setDetailModalRole("student")}
-                className="w-full py-2.5 px-3 rounded-xl border border-sky-400/50 bg-sky-950/40 hover:bg-sky-900/60 text-sky-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <span>{t.enterStudentDetails || "Enter Scholar Details & Sign In"}</span>
+                <GraduationCap className="w-4 h-4" />
+                <span>Scholar Login & Authenticate</span>
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </button>
             </div>
           </div>
@@ -369,22 +363,19 @@ export function LoginGate({ onSelectPortal, activeLang = "en", onLangChange }) {
             </div>
 
             <div className="mt-6 space-y-2.5">
-              <button
-                type="button"
-                disabled={loadingRole !== null}
-                onClick={() => handlePortalEnter("patient")}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <span>{loadingRole === "patient" ? "Connecting..." : `${t.quickLogin || "Quick Access"} — Patient`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="p-2.5 bg-emerald-950/60 rounded-xl border border-emerald-500/30 text-[11px] text-emerald-200">
+                <span className="text-emerald-400 font-bold block text-[10px] uppercase font-sans mb-0.5">Patient Swastha Registration:</span>
+                Compulsory Phone Number & Full Name
+              </div>
 
               <button
                 type="button"
                 onClick={() => setDetailModalRole("patient")}
-                className="w-full py-2.5 px-3 rounded-xl border border-emerald-400/50 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-stone-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <span>{t.enterPatientDetails || "Enter Patient Details & Create Account"}</span>
+                <User className="w-4 h-4" />
+                <span>Patient Registration & Sign In</span>
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </button>
             </div>
           </div>

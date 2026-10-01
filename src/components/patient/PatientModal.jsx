@@ -113,10 +113,12 @@ export function PatientModal({ isOpen, onClose, onSave, patientToEdit = null }) 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-stone-700 mb-1">
-                Phone Number
+                Phone Number <span className="text-rose-600">*</span>
               </label>
               <input
                 type="tel"
+                required
+                autoComplete="off"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+91 98450 XXXXX"
@@ -126,10 +128,11 @@ export function PatientModal({ isOpen, onClose, onSave, patientToEdit = null }) 
 
             <div>
               <label className="block font-semibold text-stone-700 mb-1">
-                Email Address
+                Email ID (Optional)
               </label>
               <input
                 type="email"
+                autoComplete="off"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="patient@example.com"

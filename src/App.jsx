@@ -686,10 +686,11 @@ export function App() {
           )}
 
           {/* TAB: QUESTIONNAIRE BUILDER (Doctor only) */}
-          {activeTab === "builder" && activeRole === "doctor" && (
+          {activeTab === "builder" && (
             <QuestionnaireManager
               questionnaires={questionnaires}
               onSaveQuestionnaires={handleSaveQuestionnaires}
+              activeRole={activeRole}
             />
           )}
 

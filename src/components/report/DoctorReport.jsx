@@ -220,15 +220,15 @@ export function DoctorReport({
           </div>
         )}
 
-        {/* Editable Doctor Recommendations & Delivery Section */}
-        <div className="bg-emerald-50/80 p-5 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-3">
+        {/* Editable Doctor Recommendations & Real Delivery Dispatch Section */}
+        <div className="bg-emerald-50/80 p-5 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-3 no-print">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 pb-2">
             <h3 className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-emerald-700" />
-              <span>Doctor Prescribed Clinical Recommendations & Delivery</span>
+              <span>Doctor Prescribed Clinical Recommendations & Delivery Dispatch</span>
             </h3>
             <span className="text-[10px] text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold">
-              Delivered to Patient: {patient.phone || "No phone"} • {patient.email || "No email"}
+              Patient Contact: {patient.phone || "Phone compulsory"} • {patient.email || "Email optional"}
             </span>
           </div>
 
@@ -238,17 +238,46 @@ export function DoctorReport({
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="text-[11px] text-emerald-900 font-medium">
-              📲 Report notification dispatch destination: <strong>{patient.phone || "Phone Compulsory"}</strong> | ✉️ <strong>{patient.email || "Email Optional"}</strong>
+              📲 SMS/WhatsApp Target: <strong>{patient.phone || "Phone Compulsory"}</strong> | ✉️ Email Target: <strong>{patient.email || "Email Optional"}</strong>
             </div>
 
-            <button
-              type="button"
-              onClick={() => alert(`Report notification dispatched successfully to patient ${patient.name} via SMS (${patient.phone}) and Email (${patient.email || 'N/A'})!`)}
-              className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5 text-amber-400" />
-              <span>Deliver Report to Patient ({patient.phone})</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {patient.email && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const subject = encodeURIComponent(`Ayurvedic Prakriti Report - ${patient.name} (${assessment.id})`);
+                    const body = encodeURIComponent(
+                      `Namaste ${patient.name},\n\nYour official Deha Prakriti Assessment Report from SDM College of Ayurveda & Hospital, Udupi has been finalized.\n\nEvaluated Constitution: ${scores.dominantPrakriti} (${scores.constitutionType})\n- Vata: ${scores.vata}%\n- Pitta: ${scores.pitta}%\n- Kapha: ${scores.kapha}%\n\nAttending Vaidya Recommendations:\n"${assessment.patientMessage || 'Follow balanced Ahara and Dinacharya routines.'}"\n\nThank you,\nSDM College of Ayurveda & Hospital, Udupi`
+                    );
+                    window.open(`mailto:${patient.email}?subject=${subject}&body=${body}`, '_blank');
+                  }}
+                  className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Mail className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Send via Email ({patient.email})</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  const phoneNum = (patient.phone || "").replace(/[^0-9]/g, "");
+                  const text = encodeURIComponent(
+                    `Namaste ${patient.name}, your Ayurvedic Prakriti Report: Dominant ${scores.dominantPrakriti} (V:${scores.vata}% P:${scores.pitta}% K:${scores.kapha}%). Doctor Note: ${assessment.patientMessage || 'Follow balanced Ahara/Dinacharya'}. SDMCA Hospital Udupi`
+                  );
+                  if (phoneNum) {
+                    window.open(`https://wa.me/${phoneNum}?text=${text}`, '_blank');
+                  } else {
+                    alert("Please provide a valid phone number for SMS/WhatsApp delivery.");
+                  }
+                }}
+                className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Send via WhatsApp/SMS ({patient.phone || 'Phone Required'})</span>
+              </button>
+            </div>
           </div>
         </div>
 
